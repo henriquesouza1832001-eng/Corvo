@@ -92,3 +92,27 @@ describe("teto de escrita do CORVO", () => {
 		expect(await r.json()).toMatchObject({ pressure: "economy", limit: 10000 });
 	});
 });
+
+describe("limpeza", () => {
+	const auth = { Authorization: "Bearer segredo-de-teste" };
+	it("exige token e pedido válido", async () => {
+		const t = setup();
+		expect((await t.raw("/api/corvo/purge", { method: "POST", body: JSON.stringify({ all: true }) })).status).toBe(401);
+		expect((await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: "{}" })).status).toBe(400);
+	});
+
+	it("apaga tudo ou só o que passou do prazo, sem tocar nas previsões", async () => {
+		const t = setup();
+		const post = (body: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: auth, body: JSON.stringify(body) });
+		const old = new Date(Date.now() - 40 * 86_400_000).toISOString();
+		await post({ news: [news("novo"), news("velho", { published_at: old })], stats: [stats], forecasts: [fc()] });
+		const r1 = (await (await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ older_than_days: 30 }) })).json()) as any;
+		expect(r1.deleted.news).toBe(1);
+		expect(((await (await t.get("/api/corvo/feed")).json()) as any).news).toHaveLength(1);
+		await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ all: true }) });
+		const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
+		expect(feed.news).toHaveLength(0);
+		expect(feed.stats).toHaveLength(0);
+		expect(feed.forecasts).toHaveLength(1);
+	});
+});

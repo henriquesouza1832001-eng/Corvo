@@ -35,5 +35,5 @@ def fetch_feed(feed: dict, fetcher: Callable[[str], bytes] = http_fetch, now: Ca
             continue
         dt = _parse_date(raw.get("date"))
         ts = min(dt.timestamp(), t_now) if dt else t_now  # data futura em feed mal configurado nunca vale; sem data = agora
-        out.append(NewsItem(feed["id"], link, title, ts, clean_text(raw.get("summary"), 500) or "", float(feed.get("reliability", 0.5))))
+        out.append(NewsItem(feed["id"], link, title, ts, clean_text(raw.get("summary"), 500) or "", float(feed.get("reliability", 0.5)), float(feed.get("max_age_h", 24)) * 3600))
     return out

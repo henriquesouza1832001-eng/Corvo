@@ -15,28 +15,37 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 # O CORVO só grava o que PODE MEXER EM MERCADO (cripto, ações, câmbio, juros, commodities) ou em risco geopolítico/físico que chega a
 # mercado. Pesos são hipóteses a medir (ver docs/corvo/CODEX_BRIEF_COLETA.md). Notícia que não casa nenhum tema é descartada.
+# Regra de escrita: termos ESPECÍFICOS. Palavra solta ("gold", "war", "fed", "troops") traz muito falso positivo.
 _R = re.IGNORECASE
 TOPICS: dict[str, tuple[float, re.Pattern[str]]] = {
-    # decisões e dados que movem o preço de tudo
-    "banco_central": (1.0, re.compile(r"\b(fed|fomc|federal reserve|ecb|boj|bank of (japan|england|canada)|pboc|copom|banco central|rate (cut|hike|decision)|interest rates?|juros|powell|lagarde|treasury yields?|bond yields?)\b", _R)),
-    "dados_macro": (0.9, re.compile(r"\b(inflation|cpi|ppi|pce|gdp|payrolls?|nonfarm|unemployment|jobless|retail sales|pmi|recession|infla[cç][aã]o|pib|desemprego|recess[aã]o)\b", _R)),
-    "comercio": (0.9, re.compile(r"\b(tariffs?|sanctions?|embargo|export ban|export controls?|trade (war|deal|talks)|san[cç][aã]o|san[cç][oõ]es|tarifas?)\b", _R)),
-    "energia": (0.9, re.compile(r"\b(oil|crude|brent|wti|opec|natural gas|lng|pipeline|refinery|tankers?|cargo vessel|shipping lanes?|gold|copper|lithium|wheat|strait of hormuz|petr[oó]leo|g[aá]s natural|ouro|cobre)\b", _R)),
-    "geopolitica": (0.85, re.compile(r"\b(war|invasion|airstrikes?|missiles?|drones?|blasts?|explosions? heard|shelling|offensive|troops|warships?|naval|houthis?|red sea|gulf of oman|taiwan strait|south china sea|ceasefire|blockade|nuclear|coup|guerra|cessar-fogo|bloqueio|golpe)\b", _R)),
-    "catastrofe": (0.9, re.compile(r"\b(earthquake|tsunami|hurricane|typhoon|cyclone|terremoto|furac[aã]o|tufão)\b", _R)),
+    # política monetária (não "Fed aprova aplicação de banco": isso é rotina e vai para o ruído)
+    "banco_central": (1.0, re.compile(r"\b(fomc|federal open market committee|rate (cuts?|hikes?|decisions?|rises?|increase[ds]?|maintained|held)|bank rate|interest rates?|monetary policy|policy rate|key rates?|discount rate|quantitative (easing|tightening)|dot plot|treasury yields?|bond yields?|yield curve|powell|lagarde|ueda|bailey|boj|pboc|copom|selic|juros|pol[ií]tica monet[aá]ria)\b", _R)),
+    "dados_macro": (0.9, re.compile(r"\b(inflation|cpi|ppi|pce|gdp|payrolls?|nonfarm|unemployment|jobless|retail sales|pmi|recession|wage (growth|tracker)|professional forecasters|bank lending survey|jobs (report|data|added)|added [\d,]+ jobs|job (gains|losses|growth)|infla[cç][aã]o|pib|desemprego|recess[aã]o)\b", _R)),
+    "comercio": (0.9, re.compile(r"\b(tariffs?|sanctions?|embargo|export (ban|controls?)|trade (war|deal|talks|surplus|deficit)|san[cç][aã]o|san[cç][oõ]es|tarifas?)\b", _R)),
+    # commodity só com contexto de preço/oferta (senão "gold" é karatê e "oil" é ONG)
+    "energia": (0.9, re.compile(r"\b(oil (price|prices|output|production|supply|exports?|market|cuts?)|crude( oil)?|brent|wti|opec\+?|natural gas|lng|gold (price|prices|rally|record|futures|reserves)|copper (price|prices)|lithium (price|prices)|wheat (price|prices|exports?)|strait of hormuz|pipelines?|refiner(y|ies)|tankers?|cargo vessel|shipping lanes?|petr[oó]leo|g[aá]s natural)\b", _R)),
+    "geopolitica": (0.75, re.compile(r"\b(war|guerra|invasion|air ?strikes?|missiles?|drone (attacks?|strikes?)|drones? (hit|struck|strike|attack)|(struck|hit|targeted) by (a |\d+ )?drones?|russian drones|blasts? (heard|hit|rock)|explosions? heard|shelling|naval blockade|blockade|bloqueio|houthis?|red sea|gulf of oman|taiwan strait|south china sea|ceasefire|cessar-fogo|troops? (to )?(deploy\w*|enter|cross|mass\w*|withdraw\w*)|nuclear (deal|talks|programme|program|test|weapons?|inspections?)|coup|golpe)\b", _R)),
+    "conflito_chave": (0.95, re.compile(
+        r"(?=.*\b(iran|hormuz|persian gulf|gulf of oman|saudi|russia|russian|ukraine|kyiv|taiwan|south china sea|red sea|houthis?|israel|gaza|north korea)\b)"
+        r"(?=.*\b(war|air ?strikes?|strikes?|missiles?|drones?|blockade|attacks?|escalat\w*|ceasefire|nuclear|troops|shelling|explosions?|blasts? (heard|hit|rock))\b)", _R | re.S)),
+    "catastrofe": (0.9, re.compile(r"\b(earthquake|tsunami|hurricane|typhoon|cyclone|terremoto|furac[aã]o|tuf[aã]o)\b", _R)),
     "infraestrutura": (0.85, re.compile(
-        r"\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|inc[eê]ndio|explos[aã]o|apag[aã]o)\b.{0,70}\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|nationwide|semiconductors?|mines?|terminals?|airports?|exchanges?|banks?|data cent(er|re)s?|refinaria|usina|porto|oleoduto|bolsa)\b"
-        r"|\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|semiconductors?|mines?|terminals?|airports?|data cent(er|re)s?|refinaria|usina|porto|oleoduto)\b.{0,70}\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|shut ?down|inc[eê]ndio|explos[aã]o|apag[aã]o)\b", _R | re.S)),
-    "cripto": (0.85, re.compile(r"\b(bitcoin etf|spot etf|crypto (hack|exploit|regulation|ban)|exchange (hack|insolvency|halts?)|stablecoin|depeg|halving|sec (sues|approves|charges)|cftc|binance|coinbase|tether|exploit|rug ?pull)\b", _R)),
-    "empresas": (0.8, re.compile(r"\b(bankruptcy|chapter 11|default(s|ed)?|bank run|bailout|merger|acquisition|takeover|earnings|guidance|downgrade|credit rating|moody'?s|fitch|delist(ing|ed)?|ipo|fal[eê]ncia|recupera[cç][aã]o judicial)\b", _R)),
-    "politica": (0.7, re.compile(r"\b(government (collapses?|falls)|prime minister (resigns?|ousted)|impeach(ment|ed)?|snap election|state of emergency|martial law|elei[cç][aã]o antecipada|impeachment)\b", _R)),
-    "mercado": (0.7, re.compile(r"\b(s&p ?500|nasdaq|dow jones|stocks? (plunge|tumble|surge|rally)|market (crash|rout|selloff)|flash crash|circuit breaker|dxy|dollar index|volatility index|vix|queda das bolsas|bolsa despenca)\b", _R)),
+        r"\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|inc[eê]ndio|explos[aã]o|apag[aã]o)\b.{0,70}\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|energy network|nationwide|semiconductors?|mines?|terminals?|airports?|exchanges?|data cent(er|re)s?|refinaria|usina|porto|oleoduto)\b"
+        r"|\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|energy network|power network|semiconductors?|mines?|terminals?|airports?|data cent(er|re)s?|refinaria|usina|porto|oleoduto)\b.{0,70}\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|shut ?down|strikes?|damaged?|inc[eê]ndio|explos[aã]o|apag[aã]o)\b", _R | re.S)),
+    "cripto": (0.85, re.compile(r"\b(bitcoin etfs?|ether etfs?|spot etfs?|etf (flows?|outflows?|inflows?)|crypto (hack|exploit|regulation|ban|exchange)s?|exchange (hack|insolvency|halts?)|stablecoin|depeg|halving|sec (sues|approves|charges)|cftc|ofac|binance|coinbase|tether|mexc|exploit|rug ?pull|liquidat(ed|ions?))\b", _R)),
+    "empresas": (0.8, re.compile(r"\b(bankruptcy|chapter 11|default(s|ed)?|bank (run|runs|collapse|failure|lockout)|banking (crisis|scandal)|bailout|merger|acquisition|takeover|earnings|guidance|downgrade|credit rating|moody'?s|fitch|delist(ing|ed)?|ipo|buybacks?|fal[eê]ncia|recupera[cç][aã]o judicial)\b", _R)),
+    "politica": (0.7, re.compile(r"\b(government (collapses?|falls)|prime minister (resigns?|ousted)|impeach(ment|ed)?|snap election|state of emergency|martial law|elei[cç][aã]o antecipada)\b", _R)),
+    "mercado": (0.75, re.compile(r"\b(s&p ?500|nasdaq|dow jones|dxy|dollar index|vix|circuit breakers?|(stocks?|shares|equities|markets?|wall street) (rout|slump|swoons?|plunges?|tumbles?|sinks?|slides?|surges?|rall(y|ies)|climbs?)|(trillions?|billions?) wiped|wiped (off|from)|market (crash|rout|selloff|sell-off|value)|flash crash|queda das bolsas|bolsa despenca)\b", _R)),
 }
-# Ruído: o que parece notícia, mas não muda preço de nada.
+# Ruído: o que parece notícia, mas não muda preço de nada (esporte, celebridade, opinião, rotina de órgão regulador, ajuda humanitária).
 _NOISE = re.compile(
     r"\b(sponsored|advertorial|giveaway|horoscope|celebrity|publieditorial|opinion|editorial|podcast|newsletter|quiz|recipe|lifestyle|"
     r"fashion|travel guide|gossip|football|soccer|cricket|nba|nfl|olympics|oscars|grammys|world cup|price prediction|price analysis|"
-    r"how to|what is|explained|live blog|obituary|review:)\b",
+    r"how to|what is|explained|live blog|obituary|review:|"
+    r"enforcement actions?|approval of application|survey of consumer finances|banknotes?|office space|appointment of|"
+    r"minutes of the (?!federal open market).{0,60}(committee|group|forum|taskforce)|industry forum|green notice|statistical notice|market notice|"
+    r"questionnaire|transcript|remit for|dates for|blood bank|karate|funeral|war crimes|humanitarian|refugees?|undocumented|"
+    r"war (secretary|department|room|memorial)|children|women and girls|rights chief|peacekeeping|aid teams|nuclear waste|schools?)\b",
     _R,
 )
 _TRACKING = {"utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid", "ref", "cmpid"}
@@ -64,6 +73,7 @@ class NewsItem:
     published_at: float  # epoch s
     text: str = ""
     source_reliability: float = 0.5  # 0-1, nota inicial a ser medida pelo histórico
+    max_age_s: float | None = None  # janela de frescor desta fonte (oficial vale por mais tempo); None = padrão do portão
 
 
 @dataclass(frozen=True)
@@ -76,7 +86,7 @@ class Verdict:
 
 @dataclass
 class GateConfig:
-    max_age_s: float = 6 * 3600
+    max_age_s: float = 24 * 3600  # padrão para imprensa; fontes oficiais usam janela própria (catálogo)
     per_source_per_hour: int = 30
     near_dup_jaccard: float = 0.7
     dedup_window: int = 5000
@@ -152,16 +162,17 @@ class IntakeGate:
         now = self._clock()
         if not item.title.strip() or not item.url:
             return Verdict(Decision.DROP, "malformed")
-        if now - item.published_at > self.cfg.max_age_s:
-            return Verdict(Decision.DROP, "stale")
+        # Relevância ANTES da idade: "stale" passa a contar só notícia que importava e ficou velha (informação útil para ajustar a janela).
+        rel, topics = score(item)
+        if rel < self.cfg.buffer_min[pressure]:
+            return Verdict(Decision.DROP, "irrelevant" if rel == 0 else "below_threshold", rel, topics)
+        if now - item.published_at > (item.max_age_s or self.cfg.max_age_s):
+            return Verdict(Decision.DROP, "stale", rel, topics)
         key, toks = canonical_url(item.url), _tokens(item.title)
         if key in self._seen_url:
             return Verdict(Decision.DROP, "duplicate_url")
         if self._near_dup(toks):
             return Verdict(Decision.DROP, "near_duplicate")
-        rel, topics = score(item)
-        if rel < self.cfg.buffer_min[pressure]:
-            return Verdict(Decision.DROP, "irrelevant" if rel == 0 else "below_threshold", rel, topics)
         # a cota só é gasta por item que seria admitido, para lixo não consumir a vez de notícia boa
         if not self._within_quota(item.source_id, now):
             return Verdict(Decision.DROP, "source_quota", rel, topics)

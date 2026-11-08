@@ -200,3 +200,23 @@ corvo.get("/pressure", async (c) => {
 	const limit = dailyLimit(c.env);
 	return c.json({ pressure: modeFor(used, limit), used, limit });
 });
+
+/**
+ * Limpeza manual (Bearer INGEST_TOKEN). `{"all": true}` apaga notícias e estatísticas (recomeçar do zero depois de mudar o filtro);
+ * `{"older_than_days": N}` apaga só o que passou do prazo. Nunca mexe no orçamento do dia nem nas previsões.
+ */
+corvo.post("/purge", async (c) => {
+	if (!engineAuthorized(c.req.header("Authorization"), c.env.INGEST_TOKEN)) return c.json({ error: "unauthorized" }, 401);
+	const body = z.object({ all: z.boolean().optional(), older_than_days: z.number().int().min(0).max(3650).optional() }).safeParse(await c.req.json().catch(() => null));
+	if (!body.success || (!body.data.all && body.data.older_than_days === undefined)) return c.json({ error: "invalid_request", detail: 'use {"all": true} ou {"older_than_days": N}' }, 400);
+	const db = c.env.DB;
+	const stmts = body.data.all
+		? [db.prepare("DELETE FROM corvo_news"), db.prepare("DELETE FROM corvo_gate_stats")]
+		: (() => {
+				const cut = new Date(Date.now() - (body.data.older_than_days as number) * 86_400_000).toISOString();
+				return [db.prepare("DELETE FROM corvo_news WHERE published_at < ?1").bind(cut), db.prepare("DELETE FROM corvo_gate_stats WHERE bucket < ?1").bind(cut)];
+			})();
+	const results = await db.batch(stmts);
+	await c.env.KV?.delete(FEED_KEY);
+	return c.json({ ok: true, deleted: { news: results[0].meta?.changes ?? 0, stats: results[1].meta?.changes ?? 0 } });
+});
