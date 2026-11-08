@@ -33,6 +33,7 @@
 
 | 4 | 2026-11-08 | T2: BUFFER cutoff normal 0.50 to candidate 0.45 (simulation; not applied) | fit: recall_keep 0.176 to 0.471; keep_stored 0.375 to 0.533; drop_stored 0.125 to 0.133 | sealed: recall_keep 0 to 0.571; keep_stored 0 to 0.571; drop_stored 0 to 0; 63 items, only 7 keep | 484/692 | not promoted: sealed set unstable and fit worsened drop_stored; collect another sealed set | — |
 | 5 | 2026-11-08 | T12/M6: operational learning protocol (temporal walk-forward, BH q=0.05, n>=30 independent events) | 6 synthetic scenarios rerun; no real forecast outcomes | n/a (no real outcomes) | n/a | protocol clarified; M3 retained, no empirical M4 claim | — |
+| 6 | 2026-11-08 | T0: read-only structural audit of local corpus | 906 rows, 904 unique URLs, 2 duplicate rows, 23 sources; current-title gate accepts 86 (7 HOT) | existing fit labels only: recall_keep 0.540; keep_stored 0.607; drop_stored 0.049 | 486/702 | partial: no production/remote DB read; no sealed titles opened | — |
 
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
@@ -40,6 +41,7 @@
 | Hora | Rodada | Fazendo agora | Corpus (itens únicos) | Freio de banco |
 |---|---|---|---|---|
 | 2026-11-08 11:13 | continuous collection + T2 proof; 0.45 cutoff not applied | 1,185 unique items (scratch corpus) | green: 484/day; 692 at 5x |
+| 2026-11-08 11:53 | collection cycle 7 + local T0 audit; M6 safeguards recorded | 1,229 unique items (scratch corpus); 904 official local URLs | green: scratch 484/day; 692 at 5x; official local 486/day; 702 at 5x |
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
