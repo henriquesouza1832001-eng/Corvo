@@ -1,6 +1,6 @@
 # FORECAST V2: briefing de engenharia (do dono, 2026-10-03)
 
-> Resumo fiel do prompt "PULSO — FORECAST V2 ENGINEERING". **Responsável: Claude A (`claude-motor`)**, dona do `forecast_v2.py` e dos módulos de inteligência. **Codex mede e tenta quebrar. Claude B (`claude-hen`) entrega a plataforma** (armazenamento, versões, rotas, pipeline). O relatório vivo é `docs/engineering/FORECAST_V2_ENGINEERING.md` (Claude A cria e mantém).
+> Resumo fiel do prompt "CORVO — FORECAST V2 ENGINEERING". **Responsável: Claude A (`claude-motor`)**, dona do `forecast_v2.py` e dos módulos de inteligência. **Codex mede e tenta quebrar. Claude B (`claude-hen`) entrega a plataforma** (armazenamento, versões, rotas, pipeline). O relatório vivo é `docs/engineering/FORECAST_V2_ENGINEERING.md` (Claude A cria e mantém).
 
 ## Regras de ouro
 - **Codex mede, Claude implementa, Codex tenta quebrar de novo.** Nenhuma feature entra porque "parece fazer sentido": entra porque há hipótese testável.

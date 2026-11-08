@@ -1,4 +1,4 @@
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { ago, brTime, CATEGORY_PT, evtId } from "../../lib/format";
 import { LevelTag } from "../ui/LevelTag";
 
@@ -22,7 +22,7 @@ export function UfPanel({
 	onClose,
 }: {
 	uf: string;
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	onSelect: (id: string) => void;
 	onClose: () => void;
 }) {

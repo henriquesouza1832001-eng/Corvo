@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { BR_STATES } from "../../assets/br-states";
 import { bbox, projector } from "./projection";
 
@@ -71,7 +71,7 @@ export function BrazilMap({
 	onSelect,
 	onStateSelect,
 }: {
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	selectedId: string | null;
 	onSelect: (id: string) => void;
 	onStateSelect: (uf: string) => void;
@@ -96,7 +96,7 @@ export function BrazilMap({
 	const bb = useMemo(() => bbox(BR_STATES), []);
 
 	const perState = useMemo(() => {
-		const m = new Map<string, { count: number; level: number; pulse: number; worst: PulsoEvent }>();
+		const m = new Map<string, { count: number; level: number; pulse: number; worst: CorvoEvent }>();
 		for (const e of events) {
 			if (!e.state) continue;
 			const cur = m.get(e.state);
@@ -525,7 +525,7 @@ export function BrazilMap({
 					y,
 					title: e.title,
 					lines: [
-						`N${e.alert_level} · PULSO ${e.pulse} · ${e.signal_count} SINAIS · ${e.source_count} FONTES`,
+						`N${e.alert_level} · CORVO ${e.pulse} · ${e.signal_count} SINAIS · ${e.source_count} FONTES`,
 						`${[e.city, e.state].filter(Boolean).join("/") ?? ""} · CONF ${e.confidence}%`,
 					],
 				});
@@ -553,7 +553,7 @@ export function BrazilMap({
 						x,
 						y,
 						title: info
-							? `${UF_NAME[st.uf] ?? st.uf} · ${info.count} EVENTO(S) · PULSO ${info.pulse}`
+							? `${UF_NAME[st.uf] ?? st.uf} · ${info.count} EVENTO(S) · CORVO ${info.pulse}`
 							: `${UF_NAME[st.uf] ?? st.uf} · SEM EVENTOS ATIVOS`,
 						lines: evsIn.length ? evsIn : undefined,
 					});

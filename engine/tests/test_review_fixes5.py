@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import DEFAULT_SOURCES, chunks, health_due, is_due, select_health
+from corvo_engine.pipeline import DEFAULT_SOURCES, chunks, health_due, is_due, select_health
 
 T0 = datetime(2026, 10, 3, 0, 0, tzinfo=timezone.utc)
 
@@ -64,7 +64,7 @@ def test_signals_beyond_the_per_part_cap_of_a_single_event_are_still_sent():
 
 # ---- 3) conteúdo de fonte metrics_only fora do log mesmo na rodada em que ela não está na vez ------------------------------------
 def test_metrics_only_content_stays_out_of_the_log_even_when_that_source_is_not_due(tmp_path, monkeypatch, capsys):
-    from pulso_engine import client, pipeline
+    from corvo_engine import client, pipeline
     cfg = tmp_path / "s.json"
 
     def src(i, display):

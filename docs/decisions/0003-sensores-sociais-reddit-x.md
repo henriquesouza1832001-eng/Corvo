@@ -9,6 +9,6 @@
 4. Evento só com fontes sociais fica `DETECTED` (nunca `CONFIRMED`), e a confiança tem teto 40 (SCORING.md).
 5. Cadência por `interval_s` sem estado: o agendador roda a cada 5 min e a fonte só roda na sua janela de relógio (`pipeline.is_due`). No X, a busca pede só o intervalo desde a janela anterior (`start_time`), para não pagar duas vezes pelo mesmo post.
 6. `429` → `RATE_LIMITED`, `401/403` → `AUTH_ERROR`; nada de nova tentativa no mesmo ciclo.
-7. Piloto via `pulso_engine.pipeline --source <id>` (aceita fonte desativada, recusa `--push`).
+7. Piloto via `corvo_engine.pipeline --source <id>` (aceita fonte desativada, recusa `--push`).
 
 **Consequências.** Ligar uma fonte social é decisão de conformidade e custo, não de código: preencher a ficha em `docs/sources/SOURCES.md`, revisar, rodar ≥ 48 h em piloto e só então `enabled: true`. Atrasos do agendador podem pular uma janela (aceitável; lacunas são registradas, não preenchidas). As consultas iniciais são termos institucionais em português, sem nomes de políticos nem comunidades de viés declarado, para não enviesar a amostra; ajustes passam por revisão.

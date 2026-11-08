@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "pulso-web",
+	"name": "corvo-web",
 	"compatibility_date": "2025-10-08",
 	"preview_urls": false,
 	// SPA estática servida pela rede da Cloudflare. Só chama a API pública; nenhum segredo aqui.

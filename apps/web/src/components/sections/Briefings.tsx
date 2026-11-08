@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { ago, CATEGORY_PT } from "../../lib/format";
 import { EventPeek } from "../events/EventPeek";
 import { LevelTag } from "../ui/LevelTag";
@@ -15,7 +15,7 @@ export function Briefings({
 	pageSize = 3,
 	minLevel = 1,
 }: {
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	/** "ver dossiê completo" dentro do briefing aberto */
 	onDossier: (id: string) => void;
 	pageSize?: number;

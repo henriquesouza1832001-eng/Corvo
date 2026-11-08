@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.official.infodengue import CAPITALS, InfoDengueAdapter
+from corvo_engine.collectors.official.infodengue import CAPITALS, InfoDengueAdapter
 
 NOW = datetime(2026, 10, 3, 4, 0, tzinfo=timezone.utc)
 SRC = {"id": "infodengue-capitais", "adapter": "infodengue", "source_class": "OFFICIAL", "url": "https://info.dengue.mat.br/api/alertcity"}

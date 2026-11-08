@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Forecast } from "@pulso/shared";
+import type { Forecast } from "@corvo/shared";
 import type { AppEnv } from "../env";
 import { cacheControl } from "../lib/cache";
 

@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.intelligence.event_escalation import build_history, p_escalation
-from pulso_engine.intelligence.event_fingerprint import fingerprint, same_story
-from pulso_engine.intelligence.sensor_reliability import NEUTRAL, summarize, weight_for
-from pulso_engine.models import Signal
+from corvo_engine.intelligence.event_escalation import build_history, p_escalation
+from corvo_engine.intelligence.event_fingerprint import fingerprint, same_story
+from corvo_engine.intelligence.sensor_reliability import NEUTRAL, summarize, weight_for
+from corvo_engine.models import Signal
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 

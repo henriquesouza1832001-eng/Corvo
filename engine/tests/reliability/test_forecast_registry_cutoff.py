@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.validation.forecast_registry import build_entry, verify
+from corvo_engine.validation.forecast_registry import build_entry, verify
 
 
 FORECAST = {"forecast_id": "fc-cutoff", "probability": 0.62, "method": "m", "method_version": "1", "scope": "BR", "threshold": 50.0}

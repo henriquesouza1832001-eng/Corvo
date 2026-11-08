@@ -1,9 +1,9 @@
-# Passo a passo: entrando no backend do PULSO
+# Passo a passo: entrando no backend do CORVO
 
 Este guia é para quem vai ajudar no backend. Você pode seguir sozinha ou usando um agente (Codex, Claude etc.); nesse caso, mande o agente ler também [OVERVIEW_PARA_AGENTES.md](OVERVIEW_PARA_AGENTES.md).
 
-## 0. O que é o PULSO, em 1 minuto
-Uma plataforma que coleta **sinais públicos** (hoje, notícias por RSS; depois fontes oficiais e redes sociais), agrupa em **eventos**, mede **severidade**, **confiança** e **Pulso Score**, e quer **antecipar** acontecimentos como previsões probabilísticas honestas (no espírito do "Pizza Index"). Um sinal fraco nunca vira fato; toda previsão é uma probabilidade com evidências.
+## 0. O que é o CORVO, em 1 minuto
+Uma plataforma que coleta **sinais públicos** (hoje, notícias por RSS; depois fontes oficiais e redes sociais), agrupa em **eventos**, mede **severidade**, **confiança** e **Corvo Score**, e quer **antecipar** acontecimentos como previsões probabilísticas honestas (no espírito do "sinal indireto"). Um sinal fraco nunca vira fato; toda previsão é uma probabilidade com evidências.
 
 Três peças: **Engine** em Python (`engine/`), **Worker** da Cloudflare (`apps/worker`, a API) e **Web** em React (`apps/web`, feita por outra pessoa).
 
@@ -18,7 +18,7 @@ Os arquivos de cada um são separados de propósito para não haver conflito.
 
 ## 2. Preparar o ambiente (≈ 1 hora)
 **Peça ao Henrique, por canal seguro (nunca por chat público/PR):**
-- convite como colaboradora no GitHub (repositório `henriquesouza1832001-eng/Pulso`);
+- convite como colaboradora no GitHub (repositório `henriquesouza1832001-eng/Corvo`);
 - qual das branches `thig`, `art` ou `isar` é a sua;
 - (só se for mexer em deploy) acesso à conta Cloudflare. Para as tarefas 1 a 4 você **não** precisa de segredos de produção.
 
@@ -26,8 +26,8 @@ Os arquivos de cada um são separados de propósito para não haver conflito.
 
 **Preparar o código (PowerShell):**
 ```
-git clone https://github.com/henriquesouza1832001-eng/Pulso.git
-cd Pulso
+git clone https://github.com/henriquesouza1832001-eng/Corvo.git
+cd Corvo
 git checkout <sua-branch>          # thig, art ou isar
 git pull origin main               # traz o que há de mais novo
 npm install
@@ -44,7 +44,7 @@ npm run db:seed                    # dados FICTÍCIOS, só para desenvolvimento
 copy apps\worker\.dev.vars.example apps\worker\.dev.vars
 npm run dev:worker                 # API em http://localhost:8787
 ```
-Em outro terminal: `cd engine` e `py -m pulso_engine.pipeline` (rodada simulada, não envia nada). Para ver eventos reais no seu banco local: `$env:PULSO_API_URL="http://localhost:8787"; $env:PULSO_INGEST_TOKEN="<o valor do seu .dev.vars>"; py -m pulso_engine.pipeline --push`.
+Em outro terminal: `cd engine` e `py -m corvo_engine.pipeline` (rodada simulada, não envia nada). Para ver eventos reais no seu banco local: `$env:CORVO_API_URL="http://localhost:8787"; $env:CORVO_INGEST_TOKEN="<o valor do seu .dev.vars>"; py -m corvo_engine.pipeline --push`.
 
 **Armadilhas conhecidas (Windows):** use `py`, não `python`; se o `npm run dev:worker` ficar mudo, há um servidor antigo preso na porta (feche pelo Gerenciador de Tarefas ou use outra porta com `--port`); nunca rode o seed em produção.
 
@@ -61,7 +61,7 @@ Em outro terminal: `cd engine` e `py -m pulso_engine.pipeline` (rodada simulada,
 - Não faça push direto na `main`. Não faça merge sozinha: o Henrique revisa e faz o merge.
 - PR pequeno, uma coisa por vez, com testes. O CI (typecheck e testes) precisa estar verde.
 - Mensagem de commit: `tipo: descrição` (`feat`, `fix`, `docs`, `test`, `refactor`), nunca `update` ou `teste`.
-- Mudou contrato de API (`packages/shared/src/contracts.ts`, `engine/pulso_engine/models.py`, `docs/api/API.md`)? **Avise antes** o Henrique e a pessoa do front.
+- Mudou contrato de API (`packages/shared/src/contracts.ts`, `engine/corvo_engine/models.py`, `docs/api/API.md`)? **Avise antes** o Henrique e a pessoa do front.
 - Fonte externa nova: só depois de ler API/termos/limites e seguir o checklist do protocolo de coleta. Sem contornar login, limites ou termos.
 - No fim de cada PR, atualize `docs/BACKEND_STATUS.md` (estado e registro de mudanças).
 
@@ -74,19 +74,19 @@ Faça uma mudança mínima (por exemplo, corrigir um erro de digitação em um d
 
 ### E2 · Qualidade da classificação e da geolocalização
 Hoje a classificação por palavras-chave erra: um boletim de vídeos foi classificado como política; a mesma história virou dois eventos; só capitais e estados são reconhecidos.
-- Amplie o gazetteer em `engine/pulso_engine/processing/geo.py` (mais municípios) sem criar ambiguidades (ex.: "Natal" festa x cidade).
-- Ajuste as famílias em `engine/pulso_engine/processing/keywords.json` e reduza falsos positivos.
+- Amplie o gazetteer em `engine/corvo_engine/processing/geo.py` (mais municípios) sem criar ambiguidades (ex.: "Natal" festa x cidade).
+- Ajuste as famílias em `engine/corvo_engine/processing/keywords.json` e reduza falsos positivos.
 - Para cada ajuste, escreva um teste com um exemplo real em `engine/tests/`.
 **Aceite:** testes novos cobrindo os casos ruins; `py -m pytest` verde; nenhum teste antigo quebrado.
 
 ### E3 · Coletores de fontes oficiais (um por PR)
 Fontes: INMET (alertas), Defesa Civil, PRF, IBGE, Banco Central.
 1. **Antes de codar:** leia a API e os termos da fonte; preencha o checklist de `docs/COLLECTION_PROTOCOL.md` §4 e a ficha em `docs/sources/SOURCES.md`.
-2. Crie `engine/pulso_engine/collectors/official/<fonte>.py` com a mesma interface do `RssAdapter` (veja `collectors/news/rss.py`): construtor `(source, keywords, fetcher, now)` e `run() -> list[Signal]`.
-3. Registre com **uma linha** em `engine/pulso_engine/collectors/registry.py`.
+2. Crie `engine/corvo_engine/collectors/official/<fonte>.py` com a mesma interface do `RssAdapter` (veja `collectors/news/rss.py`): construtor `(source, keywords, fetcher, now)` e `run() -> list[Signal]`.
+3. Registre com **uma linha** em `engine/corvo_engine/collectors/registry.py`.
 4. Adicione a fonte em `engine/config/sources.json` com todos os campos do protocolo (`terms_url`, `access`, `interval_s` etc.). O `config.py` recusa fonte incompleta.
 5. Teste **sem rede**, com uma resposta gravada da fonte.
-**Aceite:** testes verdes; fonte aparece em `py -m pulso_engine.pipeline` com status ONLINE; ficha preenchida; fonte da classe `OFFICIAL`.
+**Aceite:** testes verdes; fonte aparece em `py -m corvo_engine.pipeline` com status ONLINE; ficha preenchida; fonte da classe `OFFICIAL`.
 
 ### E4 · Busca e linha do tempo na API
 Crie `apps/worker/src/routes/search.ts` (`GET /api/search?q=`) e `timeline.ts` (`GET /api/timeline`), registre em `apps/worker/src/index.ts`, seguindo o padrão de `routes/events.ts` (validação com zod, `Cache-Control`, erros `{ "error": ... }`). Documente em `docs/api/API.md`. Avise a pessoa do front.

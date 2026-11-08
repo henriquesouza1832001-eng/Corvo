@@ -25,7 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "engine" / "data" / "br_municipalities.json"
-UA = "pulso-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Pulso)"
+UA = "corvo-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
 BASE = "https://servicodados.ibge.gov.br/api"
 UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 # Apelidos usados na imprensa e SEM ambiguidade (apelido ambíguo, como "Rio", não entra aqui).

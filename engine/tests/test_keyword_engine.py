@@ -1,6 +1,6 @@
 import json
 
-from pulso_engine.processing.keyword_engine import KeywordEngine
+from corvo_engine.processing.keyword_engine import KeywordEngine
 
 
 def test_classifies_ignoring_case_and_accents():

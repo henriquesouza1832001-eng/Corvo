@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "pulso-api",
+	"name": "corvo-api",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-10-08",
 	"compatibility_flags": ["nodejs_compat"],
@@ -8,23 +8,16 @@
 	"preview_urls": false,
 	"vars": {
 		// Origens permitidas no CORS (separadas por vírgula). Não é segredo.
-		"ALLOWED_ORIGINS": "http://localhost:5173,https://pulso-web.henriquesouza.workers.dev",
+		"ALLOWED_ORIGINS": "http://localhost:5173,https://corvo-web.henriquesouza.workers.dev",
 		// Repositório cujo workflow "collect.yml" o Cron Trigger aciona. Não é segredo.
-		"GITHUB_REPO": "henriquesouza1832001-eng/Pulso",
-		// Banco ativo: "turso" usa o Turso (lib/turso.ts, segredos TURSO_URL/TURSO_TOKEN); qualquer outro valor usa o D1.
-		// Ligado em 2026-10-03: o D1 estourou o limite diário de escrita (ADR 0008). Para voltar ao D1, apague esta linha.
-		"DB_BACKEND": "turso"
+		"GITHUB_REPO": "henriquesouza1832001-eng/Corvo",
+		// Banco: Turso (segredos TURSO_URL e TURSO_TOKEN). O KV abaixo é só cache do feed (60 s), não guarda dado de verdade.
+		"DB_BACKEND": "turso",
+		// Teto diário de linhas (Turso grátis: ~10 mi/mês). Ajuste depois de ver o consumo real.
+		"DAILY_WRITE_LIMIT": "300000"
 	},
-	// A cada 5 min a Cloudflare aciona a coleta (mais pontual que o agendador do GitHub).
-	"triggers": { "crons": ["*/5 * * * *"] },
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "pulso",
-			"database_id": "c0added6-9187-434a-a1d0-559857107e1b",
-			"migrations_dir": "../../database/migrations"
-		}
-	]
-	// Segredos (via `wrangler secret put`, nunca no Git): INGEST_TOKEN, GH_DISPATCH_TOKEN
-	// Futuro: kv_namespaces (cache), queues, r2_buckets, durable_objects.
+	// Sem Cron: a coleta roda no Oracle (docs/corvo/ARQUITETURA.md).
+	"triggers": { "crons": [] },
+	"kv_namespaces": [{ "binding": "KV", "id": "9547445c745042fca6f71aa758f4629a" }],
+	// Segredos (via `wrangler secret put`, nunca no Git): INGEST_TOKEN (o Oracle usa este para empurrar dados), ADMIN_TOKEN
 }

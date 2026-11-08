@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from pulso_engine.compliance import (build_report, compliance_status, evidence_ok, render_markdown, unsupported_approvals,
+from corvo_engine.compliance import (build_report, compliance_status, evidence_ok, render_markdown, unsupported_approvals,
                                      worksheet_rows)
-from pulso_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, validate_source
+from corvo_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, validate_source
 
 BASE = {"id": "x", "name": "X", "domain": "x.com.br", "adapter": "rss", "source_class": "NEWS_REGIONAL", "url": "https://x.com.br/rss",
         "enabled": True, "access": "public_feed", "terms_url": "PENDENTE", "interval_s": 300, "retention_days": 90, "display": "headline_link",

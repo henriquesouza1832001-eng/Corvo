@@ -1,5 +1,5 @@
 {
-  "_nota": "Catálogo de TIPOS de evento e seus precursores. As relações `raises` e `lead_hours` são HIPÓTESES editoriais a validar com dados reais (docs/architecture/PREDICTION.md): entram nas previsões como EVIDÊNCIA (\"por que esta previsão?\") e NÃO alteram a probabilidade até um backtest real provar ganho. O indicador do PULSO mostra só o momento atual; nada daqui é exibido como previsão nele.",
+  "_nota": "Catálogo de TIPOS de evento e seus precursores. As relações `raises` e `lead_hours` são HIPÓTESES editoriais a validar com dados reais (docs/architecture/PREDICTION.md): entram nas previsões como EVIDÊNCIA (\"por que esta previsão?\") e NÃO alteram a probabilidade até um backtest real provar ganho. O indicador do CORVO mostra só o momento atual; nada daqui é exibido como previsão nele.",
   "types": [
     {"id": "chuva_extrema", "name": "Chuva forte, temporal ou alagamento", "category": "WEATHER", "raises": ["TRAFFIC", "INFRASTRUCTURE", "HEALTH"], "lead_hours": [1, 12],
      "terms": ["chuva forte", "temporal", "alagamento", "enchente", "inundacao", "ciclone", "tempestade", "deslizamento", "granizo", "alerta de chuva", "aviso de tempestade", "ressaca"]},

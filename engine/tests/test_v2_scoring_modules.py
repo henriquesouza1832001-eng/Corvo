@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.intelligence.anomaly_v2 import anomaly_v2, robust_baseline, robust_z
-from pulso_engine.models import Signal
-from pulso_engine.quality import duplication_probability, geo_quality, signal_quality
-from pulso_engine.scoring.confidence_v2 import confidence_v2
-from pulso_engine.scoring.national_pulse import national_pulse_v2
-from pulso_engine.scoring.severity_v2 import severity_v2
-from pulso_engine.baseline import INSUFFICIENT, SeasonalBaseline
+from corvo_engine.intelligence.anomaly_v2 import anomaly_v2, robust_baseline, robust_z
+from corvo_engine.models import Signal
+from corvo_engine.quality import duplication_probability, geo_quality, signal_quality
+from corvo_engine.scoring.confidence_v2 import confidence_v2
+from corvo_engine.scoring.national_pulse import national_pulse_v2
+from corvo_engine.scoring.severity_v2 import severity_v2
+from corvo_engine.baseline import INSUFFICIENT, SeasonalBaseline
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 
@@ -78,7 +78,7 @@ def test_official_emergency_sets_official_severity():
     assert severity_v2([])["score"] == 0
 
 
-# --- Pulso nacional V2 ---
+# --- Corvo nacional V2 ---
 def ev(pulse, state, cat="WEATHER"):
     return {"pulse": pulse, "state": state, "category": cat, "alert_level": 3}
 

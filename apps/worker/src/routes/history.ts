@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { cacheControl } from "../lib/cache";
 
-/** Histórico de inteligência: momentos de nível alto, de eventos e do Pulso nacional. */
+/** Histórico de inteligência: momentos de nível alto, de eventos e do Corvo nacional. */
 export const history = new Hono<AppEnv>();
 
 const query = z.object({
@@ -83,7 +83,7 @@ history.get("/", async (c) => {
 			date: ep.peak_at,
 			level: ep.peak_level,
 			peak_pulse: ep.peak_score,
-			title: `Pulso nacional em nível ${ep.peak_level}`,
+			title: `Corvo nacional em nível ${ep.peak_level}`,
 			started_at: ep.start,
 			ended_at: ep.end,
 			duration_minutes: Math.round((Date.parse(ep.end) - Date.parse(ep.start)) / 60_000),

@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from pulso_engine.backtest_events import backtest_event, false_positive_rate
-from pulso_engine.intelligence.signatures import rank_signatures, sensor_of
-from pulso_engine.radar import analyze
-from pulso_engine.simulation import SCENARIOS, main, to_json
+from corvo_engine.backtest_events import backtest_event, false_positive_rate
+from corvo_engine.intelligence.signatures import rank_signatures, sensor_of
+from corvo_engine.radar import analyze
+from corvo_engine.simulation import SCENARIOS, main, to_json
 
 ALL = [f() for f in SCENARIOS.values()]
 

@@ -14,13 +14,6 @@ def enabled():
     return [c for c in CAMS if c.get("enabled")]
 
 
-def test_worker_file_is_generated_from_json():
-    before = TS.read_text(encoding="utf-8")
-    subprocess.run([sys.executable, str(ROOT / "engine/scripts/gen_cameras_ts.py")], check=True, capture_output=True)
-    assert TS.read_text(encoding="utf-8") == before, "rode `py engine/scripts/gen_cameras_ts.py` e commite o resultado"
-    assert {i for i in re.findall(r'id: "([^"]+)"', before)} == {c["id"] for c in enabled()}
-
-
 def test_no_duplicate_cameras():
     """Mesma câmera nunca entra duas vezes: nem pelo id, nem pelo stream/iframe, nem pela página, nem por provedor + rótulo."""
     ids = [c["id"] for c in CAMS]

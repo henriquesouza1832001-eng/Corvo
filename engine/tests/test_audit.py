@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pulso_engine.audit import audit, render
+from corvo_engine.audit import audit, render
 
 NOW = datetime(2026, 10, 3, 3, 0, tzinfo=timezone.utc)
 

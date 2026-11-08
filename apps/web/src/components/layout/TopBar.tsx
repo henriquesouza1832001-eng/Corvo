@@ -14,7 +14,7 @@ export function TopBar({
 	apiOnline: boolean;
 	demo: boolean;
 	sourcesCount: number;
-	alertsCount: number | null;
+	alertsCount: number;
 	score: number | null;
 	level: number;
 }) {
@@ -25,12 +25,12 @@ export function TopBar({
 					<span className="mark" aria-hidden>
 						▁▂▄▂▁
 					</span>
-					<b>PULSO</b>
+					<b>CORVO</b>
 					<span className="sub">BRASIL EM TEMPO REAL</span>
 				</a>
 
 				<a href="#topo" className={`pulsechip n${level}`}>
-					PULSO {score ?? "--"} · N{level}
+					CORVO {score ?? "--"} · N{level}
 				</a>
 
 				<span className="counter">
@@ -46,7 +46,7 @@ export function TopBar({
 				</div>
 
 				<div className="right">
-					{alertsCount != null && alertsCount > 0 && (
+					{alertsCount > 0 && (
 						<a href="#feed" className="alertchip">
 							{alertsCount} ALERTAS
 						</a>

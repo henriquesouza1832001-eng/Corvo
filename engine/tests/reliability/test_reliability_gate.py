@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pulso_engine.validation.reliability_gate import ReliabilityGate, ReliabilityMetrics
+from corvo_engine.validation.reliability_gate import ReliabilityGate, ReliabilityMetrics
 
 
 def metrics(samples=500, brier=0.2, fpr=0.1, recall=0.75, calibration=0.08):

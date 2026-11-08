@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.forecast import (
+from corvo_engine.forecast import (
     MIN_PAIRS, brier, make_nowcasts, pair_deltas, prob_at_least, resolve_due, wilson,
 )
 
@@ -13,13 +13,13 @@ def iso(dt):
 
 
 def series(scores, step_min=5, end=NOW):
-    """Pontos do Pulso a cada `step_min`, terminando em `end` (último = scores[-1])."""
+    """Pontos do Corvo a cada `step_min`, terminando em `end` (último = scores[-1])."""
     n = len(scores)
     return [{"timestamp": iso(end - timedelta(minutes=step_min * (n - 1 - i))), "score": s} for i, s in enumerate(scores)]
 
 
 def wave(n=80):
-    """Pulso oscilando de forma regular entre 30 e 50, com variações de 60 min não triviais."""
+    """Corvo oscilando de forma regular entre 30 e 50, com variações de 60 min não triviais."""
     return [40 + round(10 * math.sin(i / 3)) for i in range(n)]
 
 
@@ -96,7 +96,7 @@ def test_open_forecast_from_db_with_json_evidence_string_is_accepted():
 
 def test_pipeline_emits_forecasts_only_with_history():
     from tests.test_pipeline import rss, src
-    from pulso_engine.pipeline import run_once
+    from corvo_engine.pipeline import run_once
 
     feeds = {"https://a.com/rss": rss(("Temporal causa alagamento em Belo Horizonte", "https://a.com/1", 5))}
     no_hist = run_once([src("a")], lambda u: feeds[u], NOW)

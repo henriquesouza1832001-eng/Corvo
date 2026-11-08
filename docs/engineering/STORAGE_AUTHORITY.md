@@ -6,7 +6,7 @@ O Worker escolhe o backend por requisição. Com `DB_BACKEND=turso`, `TURSO_URL`
 
 | Dado | Autoridade atual | Retenção / comportamento | Lacuna de confiabilidade |
 |---|---|---|---|
-| Eventos, sinais, fontes, Pulso e previsões | backend ativo do Worker (Turso quando configurado; D1 como fallback de código) | sinais/séries/observações: 90 dias; previsões pela tabela | não existe teste integrado Turso-vs-D1 nesta campanha |
+| Eventos, sinais, fontes, Corvo e previsões | backend ativo do Worker (Turso quando configurado; D1 como fallback de código) | sinais/séries/observações: 90 dias; previsões pela tabela | não existe teste integrado Turso-vs-D1 nesta campanha |
 | `forecast_registry`, `shadow_results`, `driver_registry` | migrations `database/pending/0008–0010` | registry/shadow: 180 dias | migrations não estão na pasta de deploy D1; aplicação real em Turso não foi comprovada localmente |
 | Artefatos de validação | repositório Git | imutáveis por commit | não são dados de produção nem substituem trilha no banco |
 
@@ -37,6 +37,6 @@ Matriz por tipo de dado (backend ativo = Turso; D1 = reserva de código):
 
 | Dado | Autoritativo | Escrita | Leitura | Se a escrita falha |
 |---|---|---|---|---|
-| eventos, sinais, fontes, Pulso, séries, previsões | banco ativo | `/api/ingest`, 1 transação por lote, upsert condicional | rotas `/api/*` | `500` + `request_id`; nada parcial; o Engine reenvia o mesmo lote |
+| eventos, sinais, fontes, Corvo, séries, previsões | banco ativo | `/api/ingest`, 1 transação por lote, upsert condicional | rotas `/api/*` | `500` + `request_id`; nada parcial; o Engine reenvia o mesmo lote |
 | `forecast_registry`, `shadow_results`, `driver_registry`, `calibrators`, `investigations`, `signal_observations` | banco ativo (migrations em `database/pending/`) | idem, no mesmo lote; descartados pelo governador em `economy`/`critical` | `/api/admin/*` | idem; em `economy` a observabilidade científica é suprimida de propósito |
 | artefatos de validação | Git | commit | arquivos | n/a |

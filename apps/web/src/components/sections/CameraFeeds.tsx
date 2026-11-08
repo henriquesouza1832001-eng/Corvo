@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CameraFeed } from "@pulso/shared";
+import type { CameraFeed } from "@corvo/shared";
 import { fold } from "../../lib/text";
 import { Pager } from "../ui/Pager";
 
@@ -213,7 +213,7 @@ export function CameraFeeds({
 }
 
 /**
- * Câmera REAL de um provedor. O PULSO é só o placeholder: a prévia vem do player do próprio provedor (iframe ou HLS,
+ * Câmera REAL de um provedor. O CORVO é só o placeholder: a prévia vem do player do próprio provedor (iframe ou HLS,
  * nunca retransmitida por nós) e o clique leva à página de origem.
  *
  * Contra o "piscar": o cartão é memoizado (o App re-renderiza a cada 10 s e o catálogo é rebaixado a cada 10 min sem mudar);

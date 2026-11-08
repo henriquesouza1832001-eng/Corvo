@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.source_freshness import (EMPTY, FRESH, QUIET, STALE, UNKNOWN, SourceReading, assess, coverage, freshness_percentiles,
+from corvo_engine.source_freshness import (EMPTY, FRESH, QUIET, STALE, UNKNOWN, SourceReading, assess, coverage, freshness_percentiles,
                                            next_state_transition, stale_after_min)
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)

@@ -11,9 +11,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
-from pulso_engine import safe_http
-from pulso_engine.collectors.news.rss import http_fetch
-from pulso_engine.safe_http import UnsafeURLError, is_public_ip
+from corvo_engine import safe_http
+from corvo_engine.collectors.news.rss import http_fetch
+from corvo_engine.safe_http import UnsafeURLError, is_public_ip
 
 PRIVATE = ["10.0.0.1", "10.255.255.255", "172.16.0.1", "172.31.255.255", "192.168.1.1", "127.0.0.1", "127.1.2.3", "0.0.0.0", "169.254.169.254",
            "169.254.0.1", "100.64.0.1", "192.0.2.1", "198.18.0.1", "224.0.0.1", "255.255.255.255", "::1", "::", "fe80::1", "fe80::1%eth0",
@@ -63,8 +63,8 @@ def local():
 
 @pytest.fixture(autouse=True)
 def _production_like(monkeypatch):
-    monkeypatch.delenv("PULSO_ALLOW_PRIVATE_FETCH", raising=False)  # como em produção: loopback NÃO é permitido
-    monkeypatch.setenv("PULSO_API_URL", "https://pulso-api.example.workers.dev")
+    monkeypatch.delenv("CORVO_ALLOW_PRIVATE_FETCH", raising=False)  # como em produção: loopback NÃO é permitido
+    monkeypatch.setenv("CORVO_API_URL", "https://corvo-api.example.workers.dev")
 
 
 def test_direct_loopback_url_is_blocked_before_any_byte_is_read(local):
@@ -100,14 +100,14 @@ def test_nothing_is_sent_to_a_blocked_destination_not_even_a_connection_attempt(
 
 def test_redirect_to_the_cloud_metadata_endpoint_is_blocked(monkeypatch, local):
     # a 1ª perna (o servidor) é liberada de propósito para provar que é a 2ª (metadata) que o guard barra
-    monkeypatch.setenv("PULSO_API_URL", local)  # o servidor local passa a ser o "host permitido" (como o Worker em desenvolvimento)
+    monkeypatch.setenv("CORVO_API_URL", local)  # o servidor local passa a ser o "host permitido" (como o Worker em desenvolvimento)
     with pytest.raises((UnsafeURLError, urllib.error.URLError)):
         http_fetch(f"{local}/to/http://169.254.169.254/latest/meta-data/")
 
 
 @pytest.mark.parametrize("target", ["file:///etc/passwd", "file:///C:/Windows/win.ini", "ftp://example.com/x", "gopher://example.com/", "data:text/plain,oi"])
 def test_redirect_to_non_http_schemes_is_refused_never_read(monkeypatch, local, target):
-    monkeypatch.setenv("PULSO_API_URL", local)
+    monkeypatch.setenv("CORVO_API_URL", local)
     with pytest.raises((UnsafeURLError, urllib.error.URLError)):
         http_fetch(f"{local}/to/{target.replace(':', '%3A', 1)}")
 
@@ -118,14 +118,14 @@ def test_the_opener_has_no_file_ftp_or_data_handlers():
 
 
 def test_the_worker_host_itself_is_allowed_so_local_development_keeps_working(monkeypatch, local):
-    monkeypatch.setenv("PULSO_API_URL", local)
+    monkeypatch.setenv("CORVO_API_URL", local)
     assert http_fetch(f"{local}/ok").startswith(b"<rss>")
 
 
 def test_explicit_test_override_allows_loopback_and_only_when_set(monkeypatch, local):
-    monkeypatch.setenv("PULSO_ALLOW_PRIVATE_FETCH", "1")
+    monkeypatch.setenv("CORVO_ALLOW_PRIVATE_FETCH", "1")
     assert http_fetch(f"{local}/ok").startswith(b"<rss>")
-    monkeypatch.setenv("PULSO_ALLOW_PRIVATE_FETCH", "0")
+    monkeypatch.setenv("CORVO_ALLOW_PRIVATE_FETCH", "0")
     with pytest.raises(UnsafeURLError):
         http_fetch(f"{local}/ok")
 
@@ -133,7 +133,7 @@ def test_explicit_test_override_allows_loopback_and_only_when_set(monkeypatch, l
 def test_a_blocked_source_degrades_to_offline_and_never_breaks_the_cycle(local):
     from datetime import datetime, timezone
 
-    from pulso_engine.pipeline import run_once
+    from corvo_engine.pipeline import run_once
 
     src = {"id": "sequestrada", "name": "s", "domain": "s.com", "adapter": "rss", "source_class": "NEWS_HIGH", "url": f"{local}/ok", "state": None, "enabled": True}
     b = run_once([src], now=datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc))

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import chunks, run_once, signal_from_row
+from corvo_engine.pipeline import chunks, run_once, signal_from_row
 from tests.test_pipeline import rss, src
 
 T0 = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)

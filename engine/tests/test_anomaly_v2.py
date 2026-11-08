@@ -1,5 +1,5 @@
-from pulso_engine.anomaly import NO_BASELINE, percentile_rank, window_anomaly
-from pulso_engine.baseline import INSUFFICIENT, Baseline, SeasonalBaseline
+from corvo_engine.anomaly import NO_BASELINE, percentile_rank, window_anomaly
+from corvo_engine.baseline import INSUFFICIENT, Baseline, SeasonalBaseline
 
 
 def test_insufficient_baseline_never_anomaly():

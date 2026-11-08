@@ -2,8 +2,8 @@
 import json
 from datetime import datetime, timezone
 
-from pulso_engine.investigations_io import investigation_dict, investigation_from_row
-from pulso_engine.research.sentinel import Investigation
+from corvo_engine.investigations_io import investigation_dict, investigation_from_row
+from corvo_engine.research.sentinel import Investigation
 
 T = datetime(2026, 10, 3, 15, 0, tzinfo=timezone.utc)
 

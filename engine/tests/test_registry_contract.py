@@ -1,5 +1,5 @@
 """Todo adaptador registrado precisa funcionar do jeito que o pipeline o constrói (fetcher ou None)."""
-from pulso_engine.collectors.registry import ADAPTERS, URL_FETCH_ADAPTERS, build_adapter
+from corvo_engine.collectors.registry import ADAPTERS, URL_FETCH_ADAPTERS, build_adapter
 
 
 def test_every_adapter_that_receives_the_url_fetcher_is_registered():

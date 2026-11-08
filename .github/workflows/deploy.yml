@@ -55,7 +55,7 @@ jobs:
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::Secret CLOUDFLARE_API_TOKEN não configurado"; exit 1; fi
       - name: Migrations do D1 (versionadas em database/migrations)
         working-directory: apps/worker
-        run: npx wrangler d1 migrations apply pulso --remote
+        run: npx wrangler d1 migrations apply corvo --remote
       - name: Deploy do Worker (API)
         working-directory: apps/worker
         run: npx wrangler deploy
@@ -64,5 +64,5 @@ jobs:
         run: npm run deploy
       - name: Verificar produção
         run: |
-          curl -fsS https://pulso-api.henriquesouza.workers.dev/api/health
-          curl -fsS -o /dev/null https://pulso-web.henriquesouza.workers.dev/
+          curl -fsS https://corvo-api.henriquesouza.workers.dev/api/health
+          curl -fsS -o /dev/null https://corvo-web.henriquesouza.workers.dev/

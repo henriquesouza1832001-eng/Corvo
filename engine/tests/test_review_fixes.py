@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine import client, pipeline
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import chunks, geo_source_ids, regeolocate, select_sources
+from corvo_engine import client, pipeline
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import chunks, geo_source_ids, regeolocate, select_sources
 
 NOW = datetime(2026, 10, 3, 12, 17, tzinfo=timezone.utc)  # minuto 17: ciclo comum (fora do horário de revisão)
 
@@ -105,7 +105,7 @@ def test_strict_reads_raise_on_unavailable_or_auth_but_soft_reads_return_empty(m
     monkeypatch.setattr(client.urllib.request, "urlopen", fail(401))
     with pytest.raises(client.WorkerAuthError):
         client.fetch_event_digest(base_url="https://w", token="t", strict=True)
-    monkeypatch.delenv("PULSO_INGEST_TOKEN", raising=False)
+    monkeypatch.delenv("CORVO_INGEST_TOKEN", raising=False)
     with pytest.raises(client.WorkerAuthError):
         client.fetch_signals(base_url="https://w", strict=True)
 

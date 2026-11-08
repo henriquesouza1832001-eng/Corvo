@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from pulso_engine.validation.replay import ReplayClock, ReplayDataset, ReplayItem, ReplayRunner
-from pulso_engine.validation.scenarios import normal_weekday
+from corvo_engine.validation.replay import ReplayClock, ReplayDataset, ReplayItem, ReplayRunner
+from corvo_engine.validation.scenarios import normal_weekday
 
 
 UTC = timezone.utc

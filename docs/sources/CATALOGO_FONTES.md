@@ -1,6 +1,6 @@
 # Catálogo de fontes
 
-> Gerado de `engine/config/sources.json` por `py -m pulso_engine.catalog_doc`. **Não edite à mão**: mude a configuração e gere de novo. Fichas detalhadas (termos, limites, retenção) estão em `SOURCES.md`.
+> Gerado de `engine/config/sources.json` por `py -m corvo_engine.catalog_doc`. **Não edite à mão**: mude a configuração e gere de novo. Fichas detalhadas (termos, limites, retenção) estão em `SOURCES.md`.
 
 **291 fontes cadastradas, 282 ativas.** Ativas por classe: Imprensa regional 202, Imprensa nacional/internacional 60, Oficial 19, Rede social 1.
 

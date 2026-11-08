@@ -8,7 +8,7 @@ import random
 import re
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import run_once
+from corvo_engine.pipeline import run_once
 
 START = datetime(2026, 10, 2, 6, 0, tzinfo=timezone.utc)
 STEP = timedelta(minutes=10)

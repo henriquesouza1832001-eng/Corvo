@@ -1,12 +1,12 @@
 """Achados da SEGUNDA revisão independente (2026-10-03): cada um vira um teste que falha sem a correção."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.baseline import Baseline, ewma_baseline
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import assign_event_ids, is_due
-from pulso_engine.processing.clustering import Cluster
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.importance import brazil_relevant
+from corvo_engine.baseline import Baseline, ewma_baseline
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import assign_event_ids, is_due
+from corvo_engine.processing.clustering import Cluster
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.importance import brazil_relevant
 
 T = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
 

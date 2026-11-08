@@ -1,13 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
-import "./styles/tokens.css";
-import "./styles/base.css";
-import "./styles/app.css";
-import "./styles/dashboard.css";
+import { CorvoApp } from "./corvo/CorvoApp";
+import "./corvo/corvo.css";
 
+// A UI anterior (monitor do Brasil, em src/App.tsx e src/components) continua no repositório, mas não é mais montada.
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<App />
+		<CorvoApp />
 	</StrictMode>,
 );

@@ -12,8 +12,8 @@ from xml.sax.saxutils import escape
 
 import pytest
 
-from pulso_engine.flags import FLAGS
-from pulso_engine.pipeline import run_once
+from corvo_engine.flags import FLAGS
+from corvo_engine.pipeline import run_once
 
 NOW = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)
 
@@ -22,7 +22,7 @@ NOW = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)
 def _default_flags(monkeypatch):
     # Mede o comportamento de PRODUÇÃO (flags no padrão), mesmo que o ambiente do desenvolvedor ligue alguma V2.
     for name in FLAGS:
-        monkeypatch.delenv(f"PULSO_FLAG_{name}", raising=False)
+        monkeypatch.delenv(f"CORVO_FLAG_{name}", raising=False)
 
 
 def rss(items, desc: str = "d") -> bytes:
@@ -221,7 +221,7 @@ def test_paraphrased_coverage_of_one_story_is_one_event():
 
 @pytest.fixture
 def cluster_refine(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_CLUSTER_REFINE", "1")
+    monkeypatch.setenv("CORVO_FLAG_CLUSTER_REFINE", "1")
 
 
 @pytest.mark.usefixtures("cluster_refine")
@@ -265,7 +265,7 @@ def test_network_failure_is_still_offline():
 
 @pytest.fixture
 def noise_gate(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_NOISE_GATE", "1")
+    monkeypatch.setenv("CORVO_FLAG_NOISE_GATE", "1")
 
 
 @pytest.mark.usefixtures("noise_gate")

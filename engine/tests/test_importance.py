@@ -1,4 +1,4 @@
-from pulso_engine.processing.importance import assess, brazil_relevant
+from corvo_engine.processing.importance import assess, brazil_relevant
 
 
 def test_importance_ranks_disaster_above_gossip():

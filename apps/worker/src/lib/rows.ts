@@ -1,4 +1,4 @@
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 
 export interface EventRow {
 	id: string;
@@ -26,13 +26,13 @@ export interface EventRow {
 export const EVENT_COLUMNS =
 	"id,title,summary,category,status,latitude,longitude,geo_precision,geo_confidence,state,city,severity,confidence,pulse,alert_level,score_breakdown,signal_count,source_count,detected_at,updated_at";
 
-export function toEvent(r: EventRow): PulsoEvent {
-	let breakdown: PulsoEvent["score_breakdown"] = [];
+export function toEvent(r: EventRow): CorvoEvent {
+	let breakdown: CorvoEvent["score_breakdown"] = [];
 	try {
 		breakdown = JSON.parse(r.score_breakdown);
 	} catch {
 		// breakdown corrompido não derruba a API
 	}
 	const { id, score_breakdown: _b, ...rest } = r;
-	return { event_id: id, ...rest, score_breakdown: breakdown } as PulsoEvent;
+	return { event_id: id, ...rest, score_breakdown: breakdown } as CorvoEvent;
 }

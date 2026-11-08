@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine import pipeline
-from pulso_engine.pipeline import chunks, run_once
+from corvo_engine import pipeline
+from corvo_engine.pipeline import chunks, run_once
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)
 ROW = {"item_id": "fc-x", "method": "pulse_empirical_delta", "scope": "BR", "p_v1": 0.4, "p_v2": 0.6, "outcome": 1}
@@ -15,13 +15,13 @@ def _run():
 
 
 def test_flag_off_sends_an_empty_list_and_never_computes(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_FORECAST_V2_SHADOW", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_FORECAST_V2_SHADOW", raising=False)
     monkeypatch.setattr(pipeline, "shadow_rows", lambda forecasts: pytest.fail("flag desligada: não deveria calcular"))
     assert _run()["shadow_results"] == []
 
 
 def test_flag_on_puts_the_rows_in_the_batch(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_FORECAST_V2_SHADOW", "1")
+    monkeypatch.setenv("CORVO_FLAG_FORECAST_V2_SHADOW", "1")
     monkeypatch.setattr(pipeline, "shadow_rows", lambda forecasts: [ROW])
     assert _run()["shadow_results"] == [ROW]
 

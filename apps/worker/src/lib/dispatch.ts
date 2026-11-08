@@ -32,7 +32,7 @@ export async function dispatchWorkflow(
 					Authorization: `Bearer ${env.GH_DISPATCH_TOKEN}`,
 					Accept: "application/vnd.github+json",
 					"X-GitHub-Api-Version": "2022-11-28",
-					"User-Agent": "pulso-scheduler",
+					"User-Agent": "corvo-scheduler",
 				},
 				body: JSON.stringify(inputs ? { ref: "main", inputs } : { ref: "main" }),
 			},

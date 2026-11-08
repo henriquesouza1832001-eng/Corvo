@@ -1,6 +1,6 @@
 # Gazetteer dos municípios brasileiros (`geo_v2`)
 
-Base local com **os 5.571 municípios** do IBGE, usada pela geolocalização V2 (`engine/pulso_engine/processing/geo_v2.py`, flag `GEO_V2`). Resolve o problema de um município do interior cair no centro da capital do estado.
+Base local com **os 5.571 municípios** do IBGE, usada pela geolocalização V2 (`engine/corvo_engine/processing/geo_v2.py`, flag `GEO_V2`). Resolve o problema de um município do interior cair no centro da capital do estado.
 
 | Item | Valor |
 |---|---|

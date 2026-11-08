@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import type { EventDetail as EventDetailData, SignalRow } from "../../lib/api";
 import { api } from "../../lib/api";
 import { ago, CATEGORY_PT, STATUS_PT } from "../../lib/format";
@@ -9,7 +9,7 @@ import { Icon, CAT_ICON, catColor } from "../ui/Icon";
 import { LevelTag } from "../ui/LevelTag";
 
 /** Transparência editorial: o evento, por que tem esse score, e os sinais que o sustentam. */
-export function EventDetail({ event }: { event: PulsoEvent }) {
+export function EventDetail({ event }: { event: CorvoEvent }) {
 	const [detail, setDetail] = useState<EventDetailData | null>(null);
 	const [err, setErr] = useState<string | null>(null);
 
@@ -88,7 +88,7 @@ export function EventDetail({ event }: { event: PulsoEvent }) {
 			</div>
 
 			<p className="dim" style={{ margin: "10px 0 2px", fontSize: 11, letterSpacing: "0.12em" }}>
-				POR QUE PULSO {event.pulse}?
+				POR QUE CORVO {event.pulse}?
 			</p>
 			<ul className="whylist">
 				{event.score_breakdown.map((c) => (

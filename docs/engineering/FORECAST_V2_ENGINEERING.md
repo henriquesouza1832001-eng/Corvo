@@ -4,7 +4,7 @@
 > Última atualização: 2026-10-04.
 
 ## 1. Diagnóstico de partida
-- Previsões em produção: 1 método (`pulse_empirical_delta` v1, Pulso do Brasil, 60 min) + volume por categoria. Medição do Codex (2026-10-03): **20 resolvidas, 0 positivos**, Brier de referência 0, skill indefinido. **Não há evidência preditiva e nenhum ajuste de modelo deve ser tunado com N=20.**
+- Previsões em produção: 1 método (`pulse_empirical_delta` v1, Corvo do Brasil, 60 min) + volume por categoria. Medição do Codex (2026-10-03): **20 resolvidas, 0 positivos**, Brier de referência 0, skill indefinido. **Não há evidência preditiva e nenhum ajuste de modelo deve ser tunado com N=20.**
 - Consequência: nesta fase o trabalho é de **infraestrutura de honestidade** (tempo, ausência, cobertura, incerteza, abstenção), não de acurácia. O que o V2 promete é saber o que não sabe.
 
 ## 2. O que existe (arquivos, todos puros e testados)
@@ -44,7 +44,7 @@ FEATURES: signals_5/15/60m, acceleration_60m, persistence_min, anomaly_15m, inde
 MODEL_VERSION: heuristic-1   FEATURE_VERSION: 1
 EXPECTED BENEFIT: queda de falsos positivos em picos só-sociais e em ondas de republicação; abstenção em vez de chute sem cobertura
 EXPECTED FAILURE MODE: abstenção excessiva (MIN_COVERAGE alto), prior global dominando, STALE_AFTER_MIN mal calibrado
-FILES: engine/pulso_engine/forecast_v2_features.py, forecast_v2_model.py, anomaly_v2_bridge.py; engine/tests/test_forecast_v2_features.py, test_forecast_v2_model.py
+FILES: engine/corvo_engine/forecast_v2_features.py, forecast_v2_model.py, anomaly_v2_bridge.py; engine/tests/test_forecast_v2_features.py, test_forecast_v2_model.py
 TEST COMMAND: cd engine && py -m pytest tests/test_forecast_v2_features.py tests/test_forecast_v2_model.py -q
 ```
 

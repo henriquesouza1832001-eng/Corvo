@@ -1,6 +1,6 @@
 name: Prévia por branch
 
-# Publica o front da branch pessoal em https://pulso-web-<branch>.henriquesouza.workers.dev,
+# Publica o front da branch pessoal em https://corvo-web-<branch>.henriquesouza.workers.dev,
 # para revisar antes do PR/merge na main. Só leitura: a prévia repassa GET /api/* público à API.
 on:
   push:
@@ -44,10 +44,10 @@ jobs:
         run: npm run build
       - name: Deploy da prévia
         working-directory: apps/web
-        run: npx wrangler deploy --config wrangler.preview.jsonc --name "pulso-web-${{ github.ref_name }}"
+        run: npx wrangler deploy --config wrangler.preview.jsonc --name "corvo-web-${{ github.ref_name }}"
       - name: Verificar prévia
         run: |
-          url="https://pulso-web-${{ github.ref_name }}.henriquesouza.workers.dev"
+          url="https://corvo-web-${{ github.ref_name }}.henriquesouza.workers.dev"
           # Worker recém-criado pode levar ~1 min para responder no workers.dev.
           for i in $(seq 1 24); do
             if curl -fsS -o /dev/null "$url/" && curl -fsS -o /dev/null "$url/api/pulse/br"; then ok=1; break; fi

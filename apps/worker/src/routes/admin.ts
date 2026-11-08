@@ -257,7 +257,7 @@ const pulseHistoryQuery = z.object({
 	hours: z.coerce.number().int().min(1).max(24 * 30).default(72),
 });
 
-/** Série do Pulso por escopo: matéria-prima dos previsores e da resolução. */
+/** Série do Corvo por escopo: matéria-prima dos previsores e da resolução. */
 admin.get("/pulse-history", async (c) => {
 	const q = pulseHistoryQuery.safeParse(c.req.query());
 	if (!q.success) return c.json({ error: "invalid_query" }, 400);

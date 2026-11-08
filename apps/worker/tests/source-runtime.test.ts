@@ -56,7 +56,7 @@ describe("a observabilidade nunca custa dado de verdade", () => {
 		expect((s.sqlite.prepare("SELECT COUNT(*) AS n FROM signals").get() as { n: number }).n).toBe(2);
 	});
 
-	it("migration atrasada de QUALQUER tabela opcional não trava o produto: eventos, sinais, Pulso, séries e previsões gravam; só o opcional falha", async () => {
+	it("migration atrasada de QUALQUER tabela opcional não trava o produto: eventos, sinais, Corvo, séries e previsões gravam; só o opcional falha", async () => {
 		const clean = setup();
 		await clean.post(BATCH);
 		const product = ["sources", "events", "signals", "pulse_history", "source_health", "series", "forecasts"];

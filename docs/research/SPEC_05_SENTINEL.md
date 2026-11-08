@@ -3,10 +3,10 @@
 > Passos 3–5 da ordem de `docs/CURRENT_ENGINE_STATE.md` §7. O código puro já existe; esta spec cobre só o que toca arquivos compartilhados (pipeline, migration, ingest, Worker, workflow).
 
 ## 1. Código novo (puro, testado, sem rede)
-- `engine/pulso_engine/intelligence/trends.py`: `window_metrics`, `trend_state` (`RISING | STABLE_HIGH | STABLE | FALLING | QUIET | INSUFFICIENT`), `persistence_min`, `trends`.
-- `engine/pulso_engine/anomaly.py`: `window_anomaly(count, minutes, base)` e `percentile_rank`; com baseline inválido devolve `status: "BASELINE INSUFICIENTE"` e score 0.
-- `engine/pulso_engine/research/sentinel.py`: `detect_candidates`, `should_investigate` (gatilho configurável em `SentinelConfig`), `find_active` (sem pesquisa repetida), `advance` (NEW → INVESTIGATING → RESOLVING → CLOSED; devolve só o que mudou).
-- `engine/pulso_engine/radar.py`: `analyze(signals, obs_rows, active, now, cfg, duplicates_by_hash, emerging)`; `main` delega ao `pipeline.main`.
+- `engine/corvo_engine/intelligence/trends.py`: `window_metrics`, `trend_state` (`RISING | STABLE_HIGH | STABLE | FALLING | QUIET | INSUFFICIENT`), `persistence_min`, `trends`.
+- `engine/corvo_engine/anomaly.py`: `window_anomaly(count, minutes, base)` e `percentile_rank`; com baseline inválido devolve `status: "BASELINE INSUFICIENTE"` e score 0.
+- `engine/corvo_engine/research/sentinel.py`: `detect_candidates`, `should_investigate` (gatilho configurável em `SentinelConfig`), `find_active` (sem pesquisa repetida), `advance` (NEW → INVESTIGATING → RESOLVING → CLOSED; devolve só o que mudou).
+- `engine/corvo_engine/radar.py`: `analyze(signals, obs_rows, active, now, cfg, duplicates_by_hash, emerging)`; `main` delega ao `pipeline.main`.
 
 ## 2. Integração no pipeline (turno de commit exigido)
 Em `pipeline.run_once`, depois de `build_series`/`build_observations` e antes de montar o retorno:

@@ -1,6 +1,6 @@
 # Conformidade das fontes (relatório gerado)
 
-> Gerado por `py -m pulso_engine.compliance --write` a partir de `engine/config/sources.json`. **Não editar à mão.** Nenhuma fonte é APPROVED automaticamente: a decisão é humana (`review_status` + `reviewed_by` + `reviewed_at` + `terms_url`).
+> Gerado por `py -m corvo_engine.compliance --write` a partir de `engine/config/sources.json`. **Não editar à mão.** Nenhuma fonte é APPROVED automaticamente: a decisão é humana (`review_status` + `reviewed_by` + `reviewed_at` + `terms_url`).
 
 - Fontes cadastradas: **291** · ativas: **282** · domínios ativos distintos: **238** (domínios com revisão pendente: 238).
 

@@ -3,9 +3,9 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from pulso_engine.collectors.social.bluesky import BlueskyAdapter, parse_uri
-from pulso_engine.collectors.social.common import SocialAPIError
-from pulso_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
+from corvo_engine.collectors.social.bluesky import BlueskyAdapter, parse_uri
+from corvo_engine.collectors.social.common import SocialAPIError
+from corvo_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
 
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
 DID = "did:plc:abcdefghijklmnopqrstuvwx"

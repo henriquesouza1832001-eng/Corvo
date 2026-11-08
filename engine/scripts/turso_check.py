@@ -46,11 +46,11 @@ print("select:", dict(zip(cols, row)))
 
 # escrita, leitura e JSON em lote (o formato que o ingest vai usar), numa tabela temporária de teste
 data, ms = pipeline([
-    ("CREATE TABLE IF NOT EXISTS _pulso_check (k TEXT PRIMARY KEY, v INTEGER)", None),
-    ("INSERT INTO _pulso_check (k,v) VALUES ('a',1),('b',2) ON CONFLICT(k) DO UPDATE SET v=excluded.v", None),
-    ("SELECT COUNT(*) AS n, SUM(v) AS s FROM _pulso_check", None),
+    ("CREATE TABLE IF NOT EXISTS _corvo_check (k TEXT PRIMARY KEY, v INTEGER)", None),
+    ("INSERT INTO _corvo_check (k,v) VALUES ('a',1),('b',2) ON CONFLICT(k) DO UPDATE SET v=excluded.v", None),
+    ("SELECT COUNT(*) AS n, SUM(v) AS s FROM _corvo_check", None),
     ("SELECT value FROM json_each(?)", [{"type": "text", "value": json.dumps([1, 2, 3])}]),
-    ("DROP TABLE _pulso_check", None),
+    ("DROP TABLE _corvo_check", None),
 ])
 for i, r in enumerate(data["results"][:-1]):
     print(i, r["type"], r.get("response", {}).get("result", {}).get("affected_row_count"), "linhas afetadas" if r["type"] == "ok" else r)

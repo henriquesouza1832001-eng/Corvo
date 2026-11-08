@@ -4,7 +4,7 @@ import urllib.error
 
 import pytest
 
-from pulso_engine import client
+from corvo_engine import client
 
 
 class _Resp(io.BytesIO):
@@ -66,6 +66,6 @@ def test_auth_error_is_not_retried(monkeypatch):
 
 
 def test_missing_token_fails_fast(monkeypatch):
-    monkeypatch.delenv("PULSO_INGEST_TOKEN", raising=False)
-    with pytest.raises(RuntimeError, match="PULSO_INGEST_TOKEN"):
+    monkeypatch.delenv("CORVO_INGEST_TOKEN", raising=False)
+    with pytest.raises(RuntimeError, match="CORVO_INGEST_TOKEN"):
         client.push_batch({"batch_id": "b"}, base_url="https://w")

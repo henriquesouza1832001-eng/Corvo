@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from pulso_engine.processing import geo_v2
-from pulso_engine.processing.geo_v2 import DATA, resolve
+from corvo_engine.processing import geo_v2
+from corvo_engine.processing.geo_v2 import DATA, resolve
 
 ROWS = json.loads(DATA.read_text(encoding="utf-8"))
 BY_ID = {r["ibge_id"]: r for r in ROWS}

@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pulso_engine.collectors.social.common import USER_AGENT, SocialAPIError, request_json  # noqa: E402
+from corvo_engine.collectors.social.common import USER_AGENT, SocialAPIError, request_json  # noqa: E402
 
 failed = False
 

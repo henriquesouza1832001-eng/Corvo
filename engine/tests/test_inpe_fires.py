@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.official import inpe_fires as inpe
-from pulso_engine.collectors.official.inpe_fires import InpeFiresAdapter
+from corvo_engine.collectors.official import inpe_fires as inpe
+from corvo_engine.collectors.official.inpe_fires import InpeFiresAdapter
 
 NOW = datetime(2026, 10, 3, 14, 30, tzinfo=timezone.utc)
 SRC = {"id": "inpe-queimadas", "adapter": "inpe_fires", "source_class": "OFFICIAL",
