@@ -5,6 +5,7 @@
 #   stop      desliga o coletor
 #   restart   desliga e liga
 #   logs [n]  últimas n linhas do log (padrão 20)
+#   painel    painel ao vivo no terminal (feed da API: pressão do orçamento e últimas notícias); Ctrl+C sai
 #   enviar    pede o token (digitação oculta), grava em deploy/box/.env e passa a ENVIAR à API
 #   seco      volta ao modo --dry-run (decide e guarda só local; não envia nada)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
@@ -29,6 +30,7 @@ case "$1" in
     pkill -f 'deploy/box/run.sh' 2>/dev/null; pkill -f 'corvo_engine.collect' 2>/dev/null; echo "desligado"
     ;;
   restart) sh "$0" stop; sleep 2; sh "$0" start ;;
+  painel) shift; PYTHONPATH="$ROOT/engine" python -m corvo_engine.collect.painel "$@" ;;
   logs) tail -n "${2:-20}" "$LOG" ;;
   enviar)
     printf "Cole o token (não aparece na tela) e tecle Enter: "; stty -echo 2>/dev/null; read -r TOK; stty echo 2>/dev/null; echo
@@ -40,5 +42,5 @@ case "$1" in
   seco)
     INT=$(grep '^CORVO_INTERVALO=' "$ENVF" 2>/dev/null | cut -d= -f2); echo "CORVO_INTERVALO=${INT:-900}" > "$ENVF"; echo "modo seco"; sh "$0" restart ;;
   atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,11p' "$0" ;;
+  *) sed -n '2,12p' "$0" ;;
 esac
