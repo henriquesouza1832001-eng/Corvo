@@ -49,6 +49,8 @@
 
 | 14 | 2026-11-08 | Note8 acceptance follow-up: market closure, official-source confirmation, and full proof metrics | FX weekend-window annulment; local feed catalog supplies official-source IDs; registry records source count, confirmation, and resolution rules; panel prints Brier/base/skill/ECE and remaining events per key; targeted tests 18 passed | Hugin sealed unchanged; no eval examples opened | 458/day; freio checked before commit | dashboard metrics remain N/A with zero forecast outcomes; no calibration or success claim | final report commit |
 
+| 15 | 2026-11-08 | Full engine verification after note8 | 1,098 passed, 6 xfailed, 6 failed in `test_failure_injection.py` loopback-name cases | no sealed Hugin change | 458/day; freio green | failures surfaced in untouched `safe_http.py` outside allowed scope; recorded for owner/red-team follow-up | report commit |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
