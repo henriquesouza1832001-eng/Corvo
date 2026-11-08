@@ -42,7 +42,9 @@ def window_anomaly(count: int, minutes: int, base) -> dict:
         return {"score": 0.0, "z": 0.0, "percentile": None, "basis": getattr(base, "basis", "ewma"), "status": NO_BASELINE}
     frac = minutes / 60
     mean = base.mean * frac
-    std = max(base.std * math.sqrt(frac), MIN_STD * math.sqrt(frac))
+    # Ruído mínimo de CONTAGEM (Poisson: variância = média): um histórico quase constante (desvio ~0) não pode fazer 7 sinais num normal de 6
+    # parecerem anomalia. O desvio da janela é o MAIOR entre o histórico escalado, o piso e a raiz da média esperada.
+    std = max(base.std * math.sqrt(frac), MIN_STD * math.sqrt(frac), math.sqrt(max(mean, 0.0)))
     z = (count - mean) / std
     pct = percentile_rank(count / frac, getattr(base, "values", ()))  # mesma unidade das contagens horárias
     score = max(0.0, min(1.0, z / Z_SATURATION))

@@ -14,11 +14,10 @@ import re
 from dataclasses import dataclass, replace
 
 from ..models import SOCIAL_CLASSES, Signal
-from ..processing.clustering import tokens
 from ..processing.keyword_engine import _fold
+from .provenance import origin_groups
 from .sentinel import Investigation
 
-COPY_JACCARD = 0.8  # títulos com esta sobreposição de tokens são a mesma matéria republicada
 MIN_INDEPENDENT_CONFIRMED = 3  # sem fonte oficial, confirmar exige 3 origens independentes...
 MIN_TYPES_CONFIRMED = 2  # ...de ao menos 2 tipos de fonte, um deles não social
 
@@ -32,6 +31,38 @@ CLAIM_PAIRS: tuple[tuple[str, str, str], ...] = (
 )
 
 
+# Negativa oficial: a fonte OFICIAL desmente/descarta o que outras dizem. Vale como CONTRADIÇÃO (não como confirmação), por maioria de
+# cópias que seja o outro lado.
+DENIAL = re.compile(r"nega(?:m|u|ram|do)?|desment\w+|descart\w+|falso|boato|fake|nao ha (?:risco|registro|rompimento|vitima|alerta|previsao)|sem risco|"
+                    r"nao (?:indica|indicam|ha indicio|houve|existe|ha confirmacao|prev[eê])|sem previsao de|sem precipitacao|nao ha")
+GENERIC = frozenset({"defesa", "civil", "situacao", "risco", "nao", "sem", "normal", "ainda", "sobre", "regiao", "capital", "horas", "proximas",
+                     "estado", "cidade", "governo", "prefeitura", "informou", "disse"})
+STATES = ("SUPPORTED", "UNCONFIRMED", "DISPUTED")
+
+
+def _topic_words(s: Signal) -> set[str]:
+    return {w for w in re.findall(r"[a-z]{5,}", _fold(f"{s.title} {s.text or ''}")) if w not in GENERIC}
+
+
+def official_denials(signals: list[Signal]) -> list[dict]:
+    """Sinais OFICIAIS que negam um assunto tratado por outros sinais NÃO oficiais. Devolve contradições com `official_side` = "b"."""
+    out = []
+    claimants = [s for s in signals if s.source_class != "OFFICIAL"]
+    for d in (s for s in signals if s.source_class == "OFFICIAL"):
+        if not DENIAL.search(_fold(f"{d.title} {d.text or ''}")):
+            continue
+        topic = _topic_words(d)
+        claims = [c for c in claimants if topic & _topic_words(c) and not DENIAL.search(_fold(f"{c.title} {c.text or ''}"))]
+        if claims:
+            out.append({"topic": "negativa oficial", "side_a": {"sources": sorted({c.source_id for c in claims}), "official": False, "example": claims[0].title},
+                        "side_b": {"sources": [d.source_id], "official": True, "example": d.title}, "official_side": "b"})
+    return out
+
+
+def is_denial(s: Signal) -> bool:
+    return s.source_class == "OFFICIAL" and bool(DENIAL.search(_fold(f"{s.title} {s.text or ''}")))
+
+
 @dataclass(frozen=True)
 class Validation:
     event_candidate: str
@@ -42,22 +73,14 @@ class Validation:
     source_types: int
     copy_ratio: float
     suggested_status: str
-    contradiction_score: float  # 0-1, entra em EventStats.contradiction
+    contradiction_score: float
+    claim_state: str = "UNCONFIRMED"  # SUPPORTED | UNCONFIRMED | DISPUTED (estado da ALEGAÇÃO, separado do status da investigação)  # 0-1, entra em EventStats.contradiction
 
 
 def _origins(signals: list[Signal]) -> list[list[Signal]]:
-    """Agrupa matérias quase idênticas (republicação): cada grupo vale UMA origem."""
-    groups: list[tuple[frozenset[str], list[Signal]]] = []
-    for s in signals:
-        toks = tokens(s.title)
-        for gtoks, members in groups:
-            union = len(toks | gtoks)
-            if union and len(toks & gtoks) / union >= COPY_JACCARD:
-                members.append(s)
-                break
-        else:
-            groups.append((toks, [s]))
-    return [m for _, m in groups]
+    """Agrupa publicações DERIVADAS (republicação, agência, atribuição, cópia, social repetindo): cada grupo vale UMA origem.
+    Implementação em `research/provenance.py` (RT-008); mantido o nome por compatibilidade."""
+    return origin_groups(signals)
 
 
 def claim_side(a: str, b: str, folded: str) -> str | None:
@@ -106,11 +129,11 @@ def validate(inv: Investigation, members: list[Signal], evidence_signals: list[S
         seen.setdefault(s.hash, s)
     signals = list(seen.values())
     groups = _origins(signals)
-    independent = len({s.source_id for g in groups for s in g[:1]}) if groups else 0
+    independent = len(groups)  # ORIGENS (cópias já fundidas), não veículos
     classes = {s.source_class for s in signals}
-    official = any(s.source_class == "OFFICIAL" for s in signals)
+    official = any(s.source_class == "OFFICIAL" and not is_denial(s) for s in signals)  # negativa oficial NÃO é confirmação
     non_social = bool(classes - SOCIAL_CLASSES)
-    contradictions = find_contradictions(signals)
+    contradictions = find_contradictions(signals) + official_denials(signals)
     copies = len(signals) - len(groups)
     # Fonte oficial que concorda com um dos lados não zera a disputa: a divergência fica registrada.
     status = _status(official, contradictions, independent, len(classes), non_social, inv.status)
@@ -121,6 +144,7 @@ def validate(inv: Investigation, members: list[Signal], evidence_signals: list[S
         contradictions=tuple(contradictions), official_confirmation=official, independent_sources=independent,
         source_types=len(classes), copy_ratio=round(copies / len(signals), 3) if signals else 0.0,
         suggested_status=status, contradiction_score=min(1.0, len(contradictions) / 2),
+        claim_state="DISPUTED" if contradictions else ("SUPPORTED" if status == "CONFIRMED" else "UNCONFIRMED"),
     )
 
 

@@ -40,9 +40,18 @@ def _history(scope: str, category: str, per_hour: int = 3, days: int = 21) -> li
              "sources": 2, "duplicates": 0} for h in range(1, 24 * days)]
 
 
+_ANGLES = ["moradores relatam transtorno", "prefeitura monta gabinete de crise", "motoristas ficam presos por horas", "comércio fecha as portas",
+           "bombeiros atendem chamados", "equipes técnicas chegam ao local", "tráfego é desviado por vias paralelas", "escolas suspendem aulas",
+           "transporte coletivo opera com atraso", "especialistas explicam as causas", "autoridades pedem cautela", "voluntários ajudam famílias",
+           "hospitais reforçam atendimento", "obras de emergência começam", "previsão indica nova piora", "órgão regulador cobra explicações"]
+
+
 def _burst(start_id: int, n: int, first_min: float, last_min: float, category: str, state: str, title: str, cls="NEWS_REGIONAL") -> list[Signal]:
+    """Rajada de publicações DISTINTAS (cada veículo com seu ângulo): com títulos idênticos seria uma cascata de cópias, que o motor
+    corretamente conta como UMA origem (RT-008). Os ângulos variam entre veículos; poucos coincidem de propósito."""
     step = (first_min - last_min) / max(1, n - 1)
-    return [_sig(start_id + i, first_min - i * step, f"{cls.lower()}-{i % 9}", cls, category, state, f"{title} relato {i}") for i in range(n)]
+    return [_sig(start_id + i, first_min - i * step, f"{cls.lower()}-{i % 9}", cls, category, state, f"{title}: {_ANGLES[i % len(_ANGLES)]}")
+            for i in range(n)]
 
 
 def normal_day() -> Scenario:

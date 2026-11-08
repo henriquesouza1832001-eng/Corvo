@@ -15,9 +15,9 @@ from .research.sentinel import Investigation, SentinelConfig, advance, detect_ca
 
 def analyze(signals: list[Signal], obs_rows: list[dict], active: list[Investigation], now: datetime,
             cfg: SentinelConfig = SentinelConfig(), duplicates_by_hash: dict[str, int] | None = None,
-            emerging: dict[tuple[str, str], float] | None = None) -> dict:
+            emerging: dict[tuple[str, str], float] | None = None, calendar=None, coverage: float | None = None) -> dict:
     """Devolve candidatos, motivos de disparo, tendência nacional e SÓ as investigações que mudaram."""
-    candidates = detect_candidates(signals, obs_rows, now, cfg, emerging, duplicates_by_hash)
+    candidates = detect_candidates(signals, obs_rows, now, cfg, emerging, duplicates_by_hash, calendar, coverage)
     return {
         "candidates": candidates,
         "triggered": [(c.scope, c.category, should_investigate(c, cfg)[1]) for c in candidates if should_investigate(c, cfg)[0]],

@@ -64,8 +64,10 @@ class Snapshot:
     agreement: dict
     excluded_future: int  # sinais descartados por serem posteriores ao cutoff (P0): visível, nunca silencioso
 
+    source_coverage: float | None = None  # razão de FONTES frescas (contrato de frescor da plataforma); None = não se aplica/desconhecida
+
     def content(self) -> dict:
-        return {"scope": self.scope, "category": self.category, "event_type": self.event_type, "data_cutoff": self.data_cutoff,
+        return {"source_coverage": self.source_coverage, "scope": self.scope, "category": self.category, "event_type": self.event_type, "data_cutoff": self.data_cutoff,
                 "feature_version": self.feature_version, "features": {k: f.as_dict() for k, f in sorted(self.features.items())},
                 "coverage": self.coverage, "agreement": self.agreement, "excluded_future": self.excluded_future}
 
@@ -124,7 +126,7 @@ def family_agreement(signals: list[Signal], cutoff: datetime, window_min: int = 
 
 
 def build_snapshot(signals: list[Signal], cutoff: datetime, scope: str, category: str, obs_rows: list[dict] | None = None,
-                   event_type: str | None = None, duplicates_by_hash: dict[str, int] | None = None) -> Snapshot:
+                   event_type: str | None = None, duplicates_by_hash: dict[str, int] | None = None, source_coverage: float | None = None) -> Snapshot:
     seen, excluded = visible_signals(signals, cutoff)
     mine = _scope_signals(seen, scope, category)
     have = bool(seen)  # sem NENHUM sinal visível: contagens não são zero, são indisponíveis
@@ -152,4 +154,4 @@ def build_snapshot(signals: list[Signal], cutoff: datetime, scope: str, category
     feats["evidence_age_min"] = Feature("evidence_age_min", round(last_age, 1) if last_age is not None else None,
                                         (STALE if last_age is not None and last_age > STALE_AFTER_MIN else VALUE) if mine else MISSING, last_age)
     return Snapshot(scope, category, event_type, _iso(cutoff), FEATURE_VERSION, feats, sensor_coverage(seen, cutoff, event_type),
-                    family_agreement(mine, cutoff), excluded)
+                    family_agreement(mine, cutoff), excluded, source_coverage)

@@ -96,3 +96,13 @@ def test_probability_is_never_zero_or_one():
     for prior in (Prior(0.9999, "x", 999), Prior(0.0001, "x", 999)):
         p = forecast(s, prior)["probability"]
         assert 0 < p < 1
+
+
+def test_source_coverage_raises_uncertainty_and_critical_coverage_abstains():
+    sigs = strong()
+    full = forecast(build_snapshot(sigs, CUTOFF, "UF:MG", "WEATHER", history(), "FLOOD", source_coverage=1.0), PRIOR)
+    partial = forecast(build_snapshot(sigs, CUTOFF, "UF:MG", "WEATHER", history(), "FLOOD", source_coverage=0.4), PRIOR)
+    assert partial["uncertainty"] > full["uncertainty"] and any("cobertura de FONTES" in r for r in partial["uncertainty_reasons"])
+    crit = forecast(build_snapshot(sigs, CUTOFF, "UF:MG", "WEATHER", history(), "FLOOD", source_coverage=0.1), PRIOR)
+    assert crit["status"] == "INSUFFICIENT_DATA" and "crítica" in crit["abstention_reason"] and crit["probability"] is None
+    assert build_snapshot(sigs, CUTOFF, "UF:MG", "WEATHER", history(), "FLOOD", source_coverage=0.4).hash != build_snapshot(sigs, CUTOFF, "UF:MG", "WEATHER", history(), "FLOOD").hash

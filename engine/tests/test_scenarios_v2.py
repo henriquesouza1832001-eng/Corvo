@@ -89,4 +89,5 @@ def test_conflicting_reports_are_recorded_not_averaged():
     v = validate(inv(), [a, b, o])
     assert v.suggested_status == "DISPUTED" and v.official_confirmation and v.contradiction_score > 0
     with_dispute, _ = confidence_v2([a, b, o], contradiction=v.contradiction_score)
-    assert with_dispute < confidence_v2([a, b, o])[0]
+    assert with_dispute < confidence_v2([a, b, o], contradiction=0.0)[0]
+    assert confidence_v2([a, b, o])[0] == with_dispute  # sem argumento a confiança detecta a contradição sozinha

@@ -66,3 +66,33 @@ def contextual_baseline(rows: list[dict], scope: str, category: str, at: datetim
             return SeasonalBaseline(mean, std, len(values), basis, sum(1 for v in values if v > 0), tuple(values))
     return INSUFFICIENT
 
+
+
+# --- Calendário de contexto: eventos programados (jogo, show, operação) explicam atividade ESPERADA, nunca confirmam nada --------------
+from dataclasses import dataclass, field  # noqa: E402
+
+
+@dataclass(frozen=True)
+class ScheduledEvent:
+    """Evento conhecido de antemão que eleva o normal de certas categorias num escopo e janela de tempo."""
+    label: str  # ex.: "jogo no Mineirão", "show no Allianz Parque"
+    start: datetime
+    end: datetime
+    scope: str  # "BR" vale para qualquer escopo; "UF:MG" só para aquele estado
+    categories: frozenset[str]
+    multiplier: float  # quanto o volume normal sobe por causa do evento (>= 1)
+
+
+@dataclass(frozen=True)
+class ContextCalendar:
+    holidays: dict[date, str] = field(default_factory=dict)
+    events: tuple[ScheduledEvent, ...] = ()
+
+    def expected_multiplier(self, scope: str, category: str, at: datetime) -> tuple[float, tuple[str, ...]]:
+        """(fator, rótulos): produto dos multiplicadores dos eventos ATIVOS que cobrem o escopo e a categoria. 1.0 = sem contexto."""
+        m, labels = 1.0, []
+        for e in self.events:
+            if e.start <= at <= e.end and category in e.categories and e.scope in ("BR", scope) and e.multiplier > 1.0:
+                m *= e.multiplier
+                labels.append(e.label)
+        return m, tuple(labels)

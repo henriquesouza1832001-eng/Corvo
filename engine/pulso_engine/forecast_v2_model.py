@@ -18,6 +18,7 @@ import math
 from dataclasses import dataclass
 
 from .forecast_v2_features import MISSING, STALE, UNAVAILABLE, Snapshot
+from .intelligence.coverage import CRITICAL_COVERAGE, LOW_COVERAGE
 
 MODEL_VERSION = "heuristic-1"
 CONTEXT_VERSION = "none"
@@ -114,6 +115,10 @@ def uncertainty(s: Snapshot, prior: Prior) -> tuple[float, list[str]]:
         u += 0.3 * (1 - cov)
         if cov < 0.5:
             reasons.append("cobertura de sensores baixa")
+    if s.source_coverage is not None:  # fontes fora do ar/paradas/vazias: a visão do mundo está incompleta
+        u += 0.3 * (1 - s.source_coverage)
+        if s.source_coverage < LOW_COVERAGE:
+            reasons.append(f"cobertura de FONTES {s.source_coverage:.0%}")
     if s.coverage["stale"]:
         u += 0.1
         reasons.append("sensor parado: " + ",".join(s.coverage["stale"]))
@@ -138,6 +143,8 @@ def abstention(s: Snapshot) -> str | None:
     f = s.features
     if f["signals_60m"].state == UNAVAILABLE:
         return "snapshot sem dados visíveis no corte"
+    if s.source_coverage is not None and s.source_coverage < CRITICAL_COVERAGE:
+        return f"cobertura de fontes {s.source_coverage:.0%} < {CRITICAL_COVERAGE:.0%}: a visão do mundo está crítica"
     if s.coverage["ratio"] is not None and s.coverage["ratio"] < MIN_COVERAGE:
         return f"cobertura de sensores {s.coverage['ratio']} < {MIN_COVERAGE}"
     if f["evidence_age_min"].state == STALE and f["signals_60m"].value == 0:

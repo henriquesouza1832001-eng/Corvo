@@ -11,11 +11,16 @@ import hashlib
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 
-from ..anomaly import window_anomaly
-from ..baseline import ewma_baseline, seasonal_baseline, seasonal_hourly
+from ..anomaly import NO_BASELINE, window_anomaly
 from ..intelligence.trends import window_metrics
 from ..models import Signal
+from ..intelligence.baseline_hierarchy import ResolvedBaseline, resolve_baseline
+from ..intelligence.context_engine import ContextCalendar
+from ..intelligence.coverage import LOW_COVERAGE
+from .provenance import provenance
 
+UNEXPECTED_FLOOR = 0.35
+ALERT_CATEGORIES = frozenset({"WEATHER", "EMERGENCY", "INFRASTRUCTURE", "HEALTH", "TRAFFIC", "SECURITY"})
 STATES = ("NEW", "INVESTIGATING", "CORRELATING", "WAITING_CONFIRMATION", "CONFIRMED", "DISPUTED", "RESOLVING", "CLOSED")
 
 
@@ -23,6 +28,9 @@ STATES = ("NEW", "INVESTIGATING", "CORRELATING", "WAITING_CONFIRMATION", "CONFIR
 class SentinelConfig:
     """Todos os valores configuráveis (nenhum número mágico escondido)."""
     anomaly_score: float = 0.65
+    unexpected_floor: float = 0.35  # abaixo disto, com baseline VÁLIDO, a atividade é ESPERADA: diversidade/oficial de rotina não abre
+    min_anomaly_origins: int = 2  # origens para a ANOMALIA abrir (>= 1 delas não social): 1000 cópias de uma matéria são 1 origem
+    min_origins: int = 3  # origens independentes (cópias não contam) para a diversidade de tipos abrir uma investigação
     source_type_count: int = 3
     min_signals_for_types: int = 3  # tipos de fonte só disparam com volume mínimo (2 sinais de 3 tipos não é nada)
     emerging_term_score: float = 0.75
@@ -46,6 +54,19 @@ class Candidate:
     official_signal: bool
     emerging_term_score: float = 0.0
     signal_hashes: tuple[str, ...] = ()
+    origin_count: int = 0  # origens (cópias/republicações já fundidas)
+    independent_origins: int = 0  # origens NÃO sociais
+    official_alert: bool = False  # sinal oficial de categoria de impacto físico (clima, emergência, infraestrutura...), não boletim de rotina
+    baseline_valid: bool = True  # False = não se sabe o que é normal (BASELINE INSUFICIENTE)
+    baseline_level: str = "dow_hour"  # nível do fallback usado (dow_hour, hour, all_hours, national_scaled, insufficient)
+    baseline_reliability: float = 1.0  # 0-1
+    coverage: float | None = None  # razão de fontes FRESH (None = não se aplica/desconhecida); baixa = visão degradada
+    context: tuple[str, ...] = ()  # eventos programados/feriado que explicam parte da atividade (o ESPERADO nunca confirma nada)
+
+    @property
+    def expectedness(self) -> str:
+        """UNEXPECTED (fora do normal), EXPECTED (dentro do normal conhecido) ou UNKNOWN (sem baseline: nada se afirma)."""
+        return "UNEXPECTED" if self.score >= UNEXPECTED_FLOOR else ("EXPECTED" if self.baseline_valid else "UNKNOWN")
 
 
 @dataclass(frozen=True)
@@ -69,21 +90,20 @@ def _id(scope: str, category: str, at: datetime) -> str:
     return "inv-" + hashlib.sha1(f"{scope}|{category}|{at.strftime('%Y%m%d%H')}".encode()).hexdigest()[:10]
 
 
-def _baseline(rows: list[dict], scope: str, category: str, now: datetime):
-    """Sazonal quando houver histórico; senão EWMA das horas observadas; senão inválido (nunca finge normal)."""
-    seasonal = seasonal_baseline(rows, scope, category, now)
-    if seasonal.valid:
-        return seasonal
-    return ewma_baseline(list(seasonal_hourly(rows, scope, category, now).values()))
+def _baseline(rows: list[dict], scope: str, category: str, now: datetime, calendar: ContextCalendar | None = None) -> ResolvedBaseline:
+    """Melhor base disponível com o fallback VISÍVEL (dia da semana x hora -> hora -> todas as horas -> nacional escalado -> inválido).
+    Feriado conta como domingo quando há calendário. Nunca finge normal."""
+    return resolve_baseline(rows, scope, category, now, calendar.holidays if calendar else None)
 
 
 def detect_candidates(signals: list[Signal], obs_rows: list[dict], now: datetime,
                       cfg: SentinelConfig = SentinelConfig(), emerging: dict[tuple[str, str], float] | None = None,
-                      duplicates_by_hash: dict[str, int] | None = None) -> list[Candidate]:
+                      duplicates_by_hash: dict[str, int] | None = None, calendar: ContextCalendar | None = None,
+                      coverage: float | None = None) -> list[Candidate]:
     """Um candidato por (escopo, categoria) com atividade recente. O gatilho é decidido em `should_investigate`."""
     cells: dict[tuple[str, str], list[Signal]] = {}
     for s in signals:
-        if s.category == "OTHER" or s.timestamp > now:
+        if s.category == "OTHER" or s.timestamp > now or s.collected_at > now:  # nada publicado OU coletado depois do corte entra
             continue
         for scope in ["BR"] + ([f"UF:{s.state}"] if s.state else []):
             cells.setdefault((scope, s.category), []).append(s)
@@ -93,24 +113,45 @@ def detect_candidates(signals: list[Signal], obs_rows: list[dict], now: datetime
         ctx = window_metrics(sigs, now, cfg.context_window_min, duplicates_by_hash)
         if not win.signal_count and not ctx.signal_count:
             continue
-        an = window_anomaly(win.signal_count, cfg.window_min, _baseline(obs_rows, scope, cat, now))
-        recent = tuple(sorted(s.hash for s in sigs if now - s.timestamp <= timedelta(minutes=cfg.context_window_min)))
+        # Contexto: um evento programado ativo (jogo, show) eleva o normal: o volume é comparado com o normal AJUSTADO, não com o do dia comum.
+        mult, ctx_labels = calendar.expected_multiplier(scope, cat, now) if calendar else (1.0, ())
+        rb = _baseline(obs_rows, scope, cat, now, calendar)
+        an = window_anomaly(round(win.signal_count / mult), cfg.window_min, rb.base)
+        window = [s for s in sigs if now - s.timestamp <= timedelta(minutes=cfg.context_window_min)]
+        recent = tuple(sorted(s.hash for s in window))
+        prov = provenance(window)
+        alert = any(s.source_class == "OFFICIAL" and s.category in ALERT_CATEGORIES for s in window)
         out.append(Candidate(scope, cat, an["score"], an["z"], an["basis"], ctx.signal_count, ctx.source_type_count,
-                             ctx.official_confirmation, (emerging or {}).get((scope, cat), 0.0), recent))
+                             ctx.official_confirmation, (emerging or {}).get((scope, cat), 0.0), recent,
+                             prov["origin_count"], prov["independent_origin_count"], alert, an["status"] != NO_BASELINE, rb.level, rb.reliability, coverage, ctx_labels))
     return out
 
 
 def should_investigate(c: Candidate, cfg: SentinelConfig = SentinelConfig()) -> tuple[bool, tuple[str, ...]]:
-    """Gatilho (§25): anomalia, diversidade de tipos de fonte, sinal oficial ou termo emergente. Devolve os motivos."""
+    """Gatilho: o INESPERADO manda; diversidade e sinal oficial só corroboram quando há inesperado (ou quando não se sabe o normal).
+
+    - anomalia forte abre sozinha;
+    - diversidade de tipos de fonte abre só se houver >= `min_origins` ORIGENS (cem cópias não são cem origens) E a atividade for
+      inesperada ou o baseline for desconhecido (com baseline válido e atividade esperada, três tipos de fonte falando é rotina);
+    - sinal oficial abre se for ALERTA de impacto físico, ou se vier junto de atividade inesperada; boletim oficial de rotina não;
+    - termo emergente forte.
+    Devolve os motivos (explicação do "por que abriu"); sem motivo = não abre."""
     reasons = []
-    if c.score >= cfg.anomaly_score:
-        reasons.append(f"anomalia {c.score:.2f} (z {c.z:.1f}, base {c.basis})")
-    if c.source_type_count >= cfg.source_type_count and c.signal_count >= cfg.min_signals_for_types:
-        reasons.append(f"{c.source_type_count} tipos de fonte")
-    if cfg.official_signal and c.official_signal:
-        reasons.append("sinal oficial")
+    unexpected = c.score >= cfg.unexpected_floor
+    # Volume bruto não é evidência: uma cascata de cópias (1 origem) ou uma enxurrada só de redes sociais não abre investigação sozinha.
+    evidence_ok = c.origin_count >= cfg.min_anomaly_origins and c.independent_origins >= 1
+    if c.score >= cfg.anomaly_score and evidence_ok:
+        reasons.append(f"anomalia {c.score:.2f} (z {c.z:.1f}, base {c.basis}, {c.origin_count} origens)")
+    gate = unexpected or not c.baseline_valid
+    if gate and c.source_type_count >= cfg.source_type_count and c.signal_count >= cfg.min_signals_for_types and c.origin_count >= cfg.min_origins:
+        why = "atividade inesperada" if unexpected else "base insuficiente: normal desconhecido"
+        reasons.append(f"{c.source_type_count} tipos de fonte, {c.origin_count} origens ({why})")
+    if cfg.official_signal and c.official_signal and (c.official_alert or unexpected):
+        reasons.append("alerta oficial de impacto" if c.official_alert else "sinal oficial com atividade inesperada")
     if c.emerging_term_score >= cfg.emerging_term_score:
         reasons.append(f"termo emergente {c.emerging_term_score:.2f}")
+    if reasons and c.coverage is not None and c.coverage < LOW_COVERAGE:  # a visão está degradada: a explicação diz isso
+        reasons.append(f"visão degradada: cobertura {c.coverage:.0%}")
     return bool(reasons), tuple(reasons)
 
 

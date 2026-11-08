@@ -10,6 +10,7 @@ import math
 import statistics
 
 from ..anomaly import NO_BASELINE, window_anomaly
+from .coverage import factor as coverage_factor, view_state
 
 MAD_SCALE = 1.4826  # converte MAD em desvio padrão equivalente sob normalidade
 MIN_ROBUST_STD = 1.0
@@ -41,12 +42,12 @@ def anomaly_confidence(base, n_signals: int) -> float:
     if not getattr(base, "valid", False):
         return 0.0
     samples = getattr(base, "samples", None) or getattr(base, "hours", 0)
-    basis_factor = {"dow_hour": 1.0, "hour": 0.8}.get(getattr(base, "basis", "ewma"), 0.6)
+    basis_factor = {"dow_hour": 1.0, "hour": 0.8, "all_hours": 0.55, "national_scaled": 0.45}.get(getattr(base, "basis", "ewma"), 0.6)
     volume = min(1.0, n_signals / 5)
     return round(min(1.0, samples / FULL_CONFIDENCE_SAMPLES) * basis_factor * volume, 3)
 
 
-def anomaly_v2(count: int, minutes: int, base) -> dict:
+def anomaly_v2(count: int, minutes: int, base, coverage: float | None = None) -> dict:
     """Resultado completo. `base`: `SeasonalBaseline` (preferido) ou `Baseline`."""
     classic = window_anomaly(count, minutes, base)
     if classic["status"] == NO_BASELINE:
@@ -55,5 +56,8 @@ def anomaly_v2(count: int, minutes: int, base) -> dict:
     # o score usa o MENOR entre z clássico e robusto quando ambos existem: só é anomalia se as duas réguas concordam
     z = classic["z"] if rz is None else min(classic["z"], rz)
     score = round(max(0.0, min(1.0, z / Z_SATURATION)), 3)
-    return {**classic, "z": round(z, 2), "robust_z": rz, "score": score, "confidence": anomaly_confidence(base, count),
+    # Cobertura baixa = a contagem pode estar SUBESTIMADA (sensores fora do ar não contam): o score não é inventado, mas a confiança da medida
+    # cai e a visão é rotulada (`view`).
+    return {**classic, "z": round(z, 2), "robust_z": rz, "score": score, "confidence": round(anomaly_confidence(base, count) * coverage_factor(coverage), 3),
+            "view": view_state(coverage),
             "status": "ANOMALY" if score >= 0.65 else "NORMAL"}

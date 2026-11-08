@@ -27,7 +27,8 @@ def _circular_hour_gap(a: int, b: int) -> int:
 
 def hour_deltas(points: list[dict], at: datetime) -> list[float]:
     """Variações de 60 min de pontos REAIS cujo início cai a +-1 h da hora local de `at`."""
-    pts = sorted(((_ts(p["timestamp"]), float(p["score"])) for p in points), key=lambda x: x[0])
+    # P0: pontos do Pulso POSTERIORES ao instante da previsão nunca entram (nem como ponto de chegada de um par)
+    pts = sorted(((_ts(p["timestamp"]), float(p["score"])) for p in points if _ts(p["timestamp"]) <= at), key=lambda x: x[0])
     times = [t for t, _ in pts]
     target_hour = at.astimezone(BR_TZ).hour
     out: list[float] = []
