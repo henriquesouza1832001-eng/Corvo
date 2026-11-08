@@ -46,11 +46,11 @@ Em uma revisão manual das 818 notícias reais:
 - **Ruído** (esporte, celebridade, opinião, "price prediction", rotina regulatória, ajuda humanitária).
 - Corte BUFFER normal 0,50 e HOT 0,75; pressão aperta (economia 0,60/0,85; crítico 0,95/0,95).
 
-Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas): **666 `irrelevant`, 71 `stale`, 29 `below_threshold`, 32 HOT, 20 BUFFER**.
+Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **666 `irrelevant`, 71 `stale`, 29 `below_threshold`, 32 HOT, 20 BUFFER**. Com o pré-ajuste v3 (commit desta sessão) a relevância aceita 89 de 816 únicos (só título, sem idade nem duplicata), contra 110 antes.
 
 ### 3.3 Problemas conhecidos (comece por aqui, confirme com dados)
-1. **HOT generoso demais.** Na revisão só por relevância, ~77% dos aceitos são HOT (`conflito_chave` sozinho dá 0,90). HOT deveria ser raro (alvo ≤ 25% dos aceitos). Reavalie pesos e o corte HOT.
-2. **Conflito em região-chave passa em bloco:** qualquer "strikes" no Iêmen ou "Iran executes militant" vira HOT. Separar escalada que mexe em energia, rotas e potências do ruído local.
+1. **HOT generoso demais.** Na revisão só por relevância, ~79% dos aceitos são HOT (70 de 89). HOT deveria ser raro (alvo ≤ 25% dos aceitos). Reavalie pesos e o corte HOT.
+2. **Conflito e fala de banco central (pré-ajuste v3 já feito).** O conflito regional deixou de gravar sozinho e a fala de dirigente também; a auditoria dos 52 gravados foi de 35% para 62% de keep (otimista: ajustado olhando esses mesmos itens). **Confirme no conjunto lacrado**; ainda faltam os marginais restantes (banco do Paraguai, balanços, "S&P exposto à IA").
 3. **Rotina residual:** "Federal Reserve Board requests public comment... stablecoin" (marginal), "PRA fines HDI Global ..." classificado como `comercio` (investigue qual termo casou), "Air raid alerts and attacks on schools" (UN).
 4. **UN News** é quase todo humanitário; meça se a fonte vale a pena (ficha da fonte, T5). **G1 geral** tem pouco rendimento de mercado.
 5. **Geocodificador:** vários itens relevantes sem lugar; risco de falso positivo (um item de incêndio local no Brasil apareceu como "Israel/Gaza" por algum termo do resumo: investigue).
@@ -91,6 +91,9 @@ Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas): **666 `irrelev
 | `engine/corvo_engine/intake/geo.py` | geocodificador por tabela (`_PLACES`) |
 | `engine/corvo_engine/intake/store.py` | memória de URLs já vistas (SQLite, 48 h) |
 | `engine/corvo_engine/oracle/publisher.py` | monta o lote, `classify_kind`, estatística por execução (delta), `last_decisions` |
+| `engine/corvo_engine/munin/` | **Munin** (memória): `scoring` (Brier, taxa-base, skill, ECE), `registry` (validador de previsão), `leakage` (anti-futuro), `retention` (o que se guarda e por quanto tempo). 18 testes |
+| `engine/benchmarks/corvo_munin_eval.py` | bancada de prova de Munin (`--synthetic` ou arquivo de resolvidas) |
+| `engine/benchmarks/corvo_make_sample.py` | monta a amostra de rotulagem (aceitos + rejeitados, lacre 70/30, pesos) |
 | `engine/benchmarks/corvo_review.py` | **ferramenta de revisão**: recalcula a relevância de um corpus e lista aceitas e rejeitadas (só relevância; ignora idade, duplicata e cota) |
 | `engine/tests/test_intake_gate.py`, `test_oracle_publisher.py`, `test_collect_runner.py` | testes que protegem o comportamento |
 | `apps/worker/src/routes/corvo.ts` | API (**só leia**): formato do lote, teto de escrita |
@@ -152,9 +155,10 @@ Salve a linha de base em `docs/corvo/RELATORIO_NOITE_<data>.md` **antes** de mud
 | T8 | **Simulação de carga e orçamento.** Simule 24 h com o volume medido e com **5×**, sob pressão normal, economia e crítico. | Projeção ≤ 5 mil linhas/dia no ritmo medido e ≤ 25 mil com 5×; teste automatizado. |
 | T9 | **Robustez da coleta.** Feed que muda de formato, devolve HTML, trava, dá 5xx ou 403 não derruba o ciclo. Teste respostas ruins (XML quebrado, vazio, gigante, redirecionamento). | Testes novos; o ciclo sempre termina e registra a falha por fonte. |
 | T10 | **Novas fontes candidatas** (só oficiais e RSS/Atom): SEC, CFTC, US Treasury (OFAC), BCE/BoJ/PBoC se houver feed, GDACS, NOAA/NHC, USGS (mais feeds), IMF/WTO/OPEC, agências de Ásia, África e América Latina (espanhol e português). **Verifique cada URL na hora.** | Cada fonte nova com linha em `SOURCES.md`; `enabled: false` se os termos não estiverem claros. Máximo de 15 novas. |
+| T12 | **Munin: usar e endurecer a bancada** (`corvo_engine/munin`). Rode `corvo_munin_eval.py --synthetic`, escreva cenários realistas (previsor com viés, com poucos dados, com vazamento) e **mais testes** nos invariantes de M1/M2. Proponha M3 (tabela tema para ativos) e M6 (regra de aprendizado com amostra mínima de 30) **sem mudar contrato**. | Novos testes passando; relatório com a proposta de M3 e M6; nenhuma previsão inventada. |
 | T11 | **Agrupamento por acontecimento** (proposta, **sem implementar contrato**): quantos aprovados são o mesmo fato em fontes diferentes e quanto o agrupamento economizaria. | Seção no relatório com números e desenho de contrato para o dono aprovar. |
 
-**Prioridade:** T0, T1, T2, T3, T8 (qualidade e economia do que vai ao banco); depois T4, T5, T6, T9, T7; T10 e T11 se sobrar tempo. Termine bem o que começou.
+**Prioridade:** T0, T1, T2, T3, T8 (qualidade e economia do que vai ao banco); depois T12 (Munin), T4, T5, T6, T9, T7; T10 e T11 se sobrar tempo. Termine bem o que começou.
 
 ## 9. A regra de decisão que você está calibrando
 ```

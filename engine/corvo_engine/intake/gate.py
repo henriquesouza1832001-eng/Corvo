@@ -19,22 +19,30 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 _R = re.IGNORECASE
 TOPICS: dict[str, tuple[float, re.Pattern[str]]] = {
     # política monetária (não "Fed aprova aplicação de banco": isso é rotina e vai para o ruído)
-    "banco_central": (1.0, re.compile(r"\b(fomc|federal open market committee|rate (cuts?|hikes?|decisions?|rises?|increase[ds]?|maintained|held)|bank rate|interest rates?|monetary policy|policy rate|key rates?|discount rate|quantitative (easing|tightening)|dot plot|treasury yields?|bond yields?|yield curve|powell|lagarde|ueda|bailey|boj|pboc|copom|selic|juros|pol[ií]tica monet[aá]ria)\b", _R)),
-    "dados_macro": (0.9, re.compile(r"\b(inflation|cpi|ppi|pce|gdp|payrolls?|nonfarm|unemployment|jobless|retail sales|pmi|recession|wage (growth|tracker)|professional forecasters|bank lending survey|jobs (report|data|added)|added [\d,]+ jobs|job (gains|losses|growth)|infla[cç][aã]o|pib|desemprego|recess[aã]o)\b", _R)),
+    "banco_central": (1.0, re.compile(r"\b(fomc|federal open market committee|rate (cuts?|hikes?|decisions?|rises?|increase[ds]?|maintained|held)|bank rate|policy rate|key rates?|discount rate|quantitative (easing|tightening)|dot plot|monetary policy (decision|decisions|statement|summary|meeting)|copom|selic|pboc)\b", _R)),
+    "banco_central_contexto": (0.7, re.compile(r"\b(interest rates?|treasury yields?|bond yields?|yield curve|juros)\b", _R)),
+    "banco_central_fala": (0.45, re.compile(r"\b(monetary policy|pol[ií]tica monet[aá]ria|powell|lagarde|ueda|bailey|boj)\b", _R)),
+    "banco_central_lideranca": (0.9, re.compile(r"\b(lagarde|powell|ueda|bailey|fed chair|ecb president|governor)\b.{0,60}\b(step(s|ped)? down|resign\w*|succe\w+|nominat\w*|replace\w*)", _R | re.S)),
+    "dados_macro": (0.9, re.compile(r"\b(inflation|cpi|ppi|pce|gdp|payrolls?|nonfarm|unemployment|jobless|retail sales|pmi|recession|jobs (report|data|added)|added [\d,]+ jobs|job (gains|losses|growth)|infla[cç][aã]o|pib|desemprego|recess[aã]o)\b", _R)),
     "comercio": (0.9, re.compile(r"\b(tariffs?|sanctions?|embargo|export (ban|controls?)|trade (war|deal|talks|surplus|deficit)|san[cç][aã]o|san[cç][oõ]es|tarifas?)\b", _R)),
     # commodity só com contexto de preço/oferta (senão "gold" é karatê e "oil" é ONG)
     "energia": (0.9, re.compile(r"\b(oil (price|prices|output|production|supply|exports?|market|cuts?)|crude( oil)?|brent|wti|opec\+?|natural gas|lng|gold (price|prices|rally|record|futures|reserves)|copper (price|prices)|lithium (price|prices)|wheat (price|prices|exports?)|strait of hormuz|pipelines?|refiner(y|ies)|tankers?|cargo vessel|shipping lanes?|petr[oó]leo|g[aá]s natural)\b", _R)),
-    "geopolitica": (0.75, re.compile(r"\b(war|guerra|invasion|air ?strikes?|missiles?|drone (attacks?|strikes?)|drones? (hit|struck|strike|attack)|(struck|hit|targeted) by (a |\d+ )?drones?|russian drones|blasts? (heard|hit|rock)|explosions? heard|shelling|naval blockade|blockade|bloqueio|houthis?|red sea|gulf of oman|taiwan strait|south china sea|ceasefire|cessar-fogo|troops? (to )?(deploy\w*|enter|cross|mass\w*|withdraw\w*)|nuclear (deal|talks|programme|program|test|weapons?|inspections?)|coup|golpe)\b", _R)),
+    "geopolitica": (0.5, re.compile(r"\b(war|guerra|invasion|air ?strikes?|missiles?|drone (attacks?|strikes?)|drones? (hit|struck|strike|attack)|(struck|hit|targeted) by (a |\d+ )?drones?|russian drones|blasts? (heard|hit|rock)|explosions? heard|shelling|naval blockade|blockade|bloqueio|houthis?|red sea|gulf of oman|taiwan strait|south china sea|ceasefire|cessar-fogo|troops? (to )?(deploy\w*|enter|cross|mass\w*|withdraw\w*)|nuclear (deal|talks|programme|program|test|weapons?|inspections?)|coup|golpe)\b", _R)),
     "conflito_chave": (0.95, re.compile(
-        r"(?=.*\b(iran|hormuz|persian gulf|gulf of oman|saudi|russia|russian|ukraine|kyiv|taiwan|south china sea|red sea|houthis?|israel|gaza|north korea)\b)"
-        r"(?=.*\b(war|air ?strikes?|strikes?|missiles?|drones?|blockade|attacks?|escalat\w*|ceasefire|nuclear|troops|shelling|explosions?|blasts? (heard|hit|rock))\b)", _R | re.S)),
+        r"(?=.*\b(iran|hormuz|persian gulf|gulf of oman|red sea|bab el-mandeb|suez|taiwan|south china sea|strait of malacca)\b)"
+        r"(?=.*\b(war|air ?strikes?|strikes?|missiles?|drones?|blockade|escalat\w*|ceasefire|nuclear|troops|shelling|explosions?|blasts? (heard|hit|rock)|shipping|vessel|tanker)\b)", _R | re.S)),
+    "conflito_regional": (0.5, re.compile(
+        r"(?=.*\b(russia|russian|ukraine|kyiv|saudi|houthis?|yemen|israel|gaza|lebanon|syria|north korea)\b)"
+        r"(?=.*\b(war|air ?strikes?|strikes?|missiles?|drones?|blockade|attacks?|escalat\w*|ceasefire|nuclear|troops|shelling|explosions?)\b)", _R | re.S)),
     "catastrofe": (0.9, re.compile(r"\b(earthquake|tsunami|hurricane|typhoon|cyclone|terremoto|furac[aã]o|tuf[aã]o)\b", _R)),
-    "infraestrutura": (0.85, re.compile(
+    "infraestrutura": (0.75, re.compile(
         r"\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|inc[eê]ndio|explos[aã]o|apag[aã]o)\b.{0,70}\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|energy network|nationwide|semiconductors?|mines?|terminals?|airports?|exchanges?|data cent(er|re)s?|refinaria|usina|porto|oleoduto)\b"
         r"|\b(refiner\w*|plants?|factor(y|ies)|ports?|pipelines?|(power )?grids?|energy network|power network|semiconductors?|mines?|terminals?|airports?|data cent(er|re)s?|refinaria|usina|porto|oleoduto)\b.{0,70}\b(explosions?|fires?|blackouts?|outages?|cyberattacks?|ransomware|hacked|shut ?down|strikes?|damaged?|inc[eê]ndio|explos[aã]o|apag[aã]o)\b", _R | re.S)),
     "cripto": (0.85, re.compile(r"\b(bitcoin etfs?|ether etfs?|spot etfs?|etf (flows?|outflows?|inflows?)|crypto (hack|exploit|regulation|ban|exchange)s?|exchange (hack|insolvency|halts?)|stablecoin|depeg|halving|sec (sues|approves|charges)|cftc|ofac|binance|coinbase|tether|mexc|exploit|rug ?pull|liquidat(ed|ions?))\b", _R)),
-    "empresas": (0.8, re.compile(r"\b(bankruptcy|chapter 11|default(s|ed)?|bank (run|runs|collapse|failure|lockout)|banking (crisis|scandal)|bailout|merger|acquisition|takeover|earnings|guidance|downgrade|credit rating|moody'?s|fitch|delist(ing|ed)?|ipo|buybacks?|fal[eê]ncia|recupera[cç][aã]o judicial)\b", _R)),
-    "politica": (0.7, re.compile(r"\b(government (collapses?|falls)|prime minister (resigns?|ousted)|impeach(ment|ed)?|snap election|state of emergency|martial law|elei[cç][aã]o antecipada)\b", _R)),
+    "empresas": (0.8, re.compile(r"\b(bankruptcy|chapter 11|default(s|ed)?|bank (run|runs|collapse|failure|lockout)|banking (crisis|scandal)|bailout|downgrade|credit rating|moody'?s|fitch|delist(ing|ed)?|fal[eê]ncia|recupera[cç][aã]o judicial)\b", _R)),
+    "empresas_corrente": (0.6, re.compile(r"\b(merger|acquisition|takeover|earnings|guidance|ipo|buybacks?)\b", _R)),
+    "politica": (0.7, re.compile(r"\b(government (collapses?|falls)|prime minister (resigns?|ousted)|snap election|state of emergency|martial law|elei[cç][aã]o antecipada)\b", _R)),
+    "politica_fraca": (0.5, re.compile(r"\b(impeach(ment|ed)?|ousted president|president resigns?)\b", _R)),
     "mercado": (0.75, re.compile(r"\b(s&p ?500|nasdaq|dow jones|dxy|dollar index|vix|circuit breakers?|(stocks?|shares|equities|markets?|wall street) (rout|slump|swoons?|plunges?|tumbles?|sinks?|slides?|surges?|rall(y|ies)|climbs?)|(trillions?|billions?) wiped|wiped (off|from)|market (crash|rout|selloff|sell-off|value)|flash crash|queda das bolsas|bolsa despenca)\b", _R)),
 }
 # Ruído: o que parece notícia, mas não muda preço de nada (esporte, celebridade, opinião, rotina de órgão regulador, ajuda humanitária).
@@ -45,7 +53,7 @@ _NOISE = re.compile(
     r"enforcement actions?|approval of application|survey of consumer finances|banknotes?|office space|appointment of|"
     r"minutes of the (?!federal open market).{0,60}(committee|group|forum|taskforce)|industry forum|green notice|statistical notice|market notice|"
     r"questionnaire|transcript|remit for|dates for|blood bank|karate|funeral|war crimes|humanitarian|refugees?|undocumented|"
-    r"war (secretary|department|room|memorial)|children|women and girls|rights chief|peacekeeping|aid teams|nuclear waste|schools?)\b",
+    r"war (secretary|department|room|memorial)|children|women and girls|rights chief|peacekeeping|aid teams|nuclear waste|schools?|fscs|fee tariff|armed attack on police)\b",
     _R,
 )
 _TRACKING = {"utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid", "ref", "cmpid"}
@@ -110,12 +118,12 @@ def _hits(blob: str) -> list[tuple[float, str]]:
 
 
 def score(item: NewsItem) -> tuple[float, tuple[str, ...]]:
-    """Relevância 0-1 para MERCADO. O título decide; tema achado só no resumo vale 60% (resumo de feed traz muita palavra solta)."""
+    """Relevância 0-1 para MERCADO. O título decide; tema achado só no resumo vale 50% (nunca chega ao banco) (resumo de feed traz muita palavra solta)."""
     if _NOISE.search(f"{item.title} {item.text[:300]}"):
         return 0.0, ()
     hits, factor = _hits(item.title), 1.0
     if not hits:
-        hits, factor = _hits(item.text[:500]), 0.6
+        hits, factor = _hits(item.text[:500]), 0.5
     if not hits:
         return 0.0, ()
     best = max(w for w, _ in hits)

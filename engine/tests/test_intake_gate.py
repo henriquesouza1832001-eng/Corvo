@@ -89,9 +89,17 @@ def test_market_lexicon_accepts_the_right_things_and_drops_routine():
         "Bitcoin ETFs flip negative for 2026 after $1.28 billion outflow week",
         "AI stocks climb after trillions wiped from market values",
         "Paraguay's former president charged after bank collapse",
-        "Russia launches massive strike on Kyiv",
+        "ECB President Lagarde to step down on 7 February 2027",
+        "Tanker hit by drone near Strait of Hormuz as Iran vows response",
     ]
     drop = [
+        "Russia launches massive strike on Kyiv",  # conflito regional sozinho não mexe em preço (marginal)
+        "Yemen: 30 dead in strikes on Taiz market",
+        "Christine Lagarde: Interview with Yomiuri Shimbun",  # fala sem decisão
+        "Iran executes Baluch militant over armed attack on police station",
+        "Paraguay's ousted president appears before prosecutors after impeachment",
+        "Results of the ECB Survey of Professional Forecasters for the fourth quarter of 2026",
+        "PRA fines HDI Global SE for inaccurate reporting of FSCS Liabilities and FSCS Fee Tariff",
         "Federal Reserve Board announces approval of application by Peoples Bancorp Inc.",
         "Federal Reserve Board announces enforcement action with Ontario Bancorporation, Inc.",
         "Bank of England announces the four animals that will feature on our next series of banknotes",
@@ -116,3 +124,17 @@ def test_relevance_is_judged_before_age_and_official_sources_get_a_longer_window
     assert g.admit(item("Fed announces rate cut as inflation cools", "https://x.com/o2", age=old)).reason == "stale"
     official = NewsItem("fed", "https://x.com/o3", "Fed announces rate cut as inflation cools", NOW - old, "", 0.95, 72 * 3600)
     assert g.admit(official).decision is Decision.HOT
+
+
+def test_regional_conflict_only_counts_when_it_touches_energy_or_routes():
+    g = gate()
+    assert g.admit(item("Russia strikes Ukraine energy grid, blackouts across Kyiv", "https://x.com/r1")).decision is not Decision.DROP  # infraestrutura crítica
+    assert g.admit(item("Russia strikes Ukraine as talks stall", "https://x.com/r2")).decision is Decision.DROP
+    hot = g.admit(item("US strikes on Iran as missiles hit Qeshm Island", "https://x.com/r3"))
+    assert hot.decision is Decision.HOT and "conflito_chave" in hot.topics
+
+
+def test_central_bank_decision_is_hot_but_speech_alone_is_not_stored():
+    g = gate()
+    assert g.admit(item("Bank rate increased to 4% - Monetary Policy Summary", "https://x.com/b1")).decision is Decision.HOT
+    assert g.admit(item("Isabel Schnabel: reflections on monetary policy", "https://x.com/b2")).decision is Decision.DROP

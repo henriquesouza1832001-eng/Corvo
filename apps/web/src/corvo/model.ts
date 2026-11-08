@@ -5,7 +5,7 @@
 export type Pressure = "normal" | "economy" | "critical";
 export type Verdict = "hot" | "buffer" | "drop";
 export type Kind = "fato" | "reportagem" | "rumor" | "opiniao" | "previsao";
-export type Topic = "banco_central" | "dados_macro" | "comercio" | "energia" | "geopolitica" | "conflito_chave" | "catastrofe" | "infraestrutura" | "cripto" | "empresas" | "politica" | "mercado";
+export type Topic = "banco_central" | "banco_central_contexto" | "banco_central_fala" | "banco_central_lideranca" | "dados_macro" | "comercio" | "energia" | "geopolitica" | "conflito_chave" | "conflito_regional" | "catastrofe" | "infraestrutura" | "cripto" | "empresas" | "empresas_corrente" | "politica" | "politica_fraca" | "mercado";
 
 export const HOT_MIN: Record<Pressure, number> = { normal: 0.75, economy: 0.85, critical: 0.95 };
 export const BUFFER_MIN: Record<Pressure, number> = { normal: 0.5, economy: 0.6, critical: 0.95 };
@@ -69,16 +69,22 @@ export const REASON_LABEL: Record<string, string> = {
 
 export const TOPIC_LABEL: Record<Topic, string> = {
 	banco_central: "banco central",
+	banco_central_contexto: "juros e títulos",
+	banco_central_fala: "fala de dirigente",
+	banco_central_lideranca: "comando do banco central",
 	dados_macro: "dados macro",
 	comercio: "comércio e sanções",
 	energia: "energia e commodities",
 	geopolitica: "conflito",
 	conflito_chave: "conflito em região-chave",
+	conflito_regional: "conflito regional",
 	catastrofe: "catástrofe",
 	infraestrutura: "infraestrutura crítica",
 	cripto: "cripto",
 	empresas: "empresas e crédito",
+	empresas_corrente: "empresas",
 	politica: "crise política",
+	politica_fraca: "política",
 	mercado: "mercado",
 };
 
@@ -103,15 +109,21 @@ export const ANCHORS = [
 
 export const TOPIC_COLOR: Record<Topic, string> = {
 	banco_central: "#29d8ff",
+	banco_central_contexto: "#29d8ff",
+	banco_central_fala: "#29d8ff",
+	banco_central_lideranca: "#29d8ff",
 	dados_macro: "#5aa9ff",
 	comercio: "#ff8a3d",
 	energia: "#e0c341",
 	geopolitica: "#ff6a3d",
 	conflito_chave: "#ff3d3d",
+	conflito_regional: "#ff8a3d",
 	catastrofe: "#ff4d5e",
 	infraestrutura: "#ff7a90",
 	cripto: "#ffb000",
 	empresas: "#c0a0ff",
+	empresas_corrente: "#c0a0ff",
 	politica: "#b58cff",
+	politica_fraca: "#b58cff",
 	mercado: "#39ff88",
 };

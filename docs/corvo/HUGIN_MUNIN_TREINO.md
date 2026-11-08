@@ -22,8 +22,8 @@ Este documento diz **o que significa "certo"** para cada um, **como medir** e **
 | **Pergunta que responde** | "Isto pode mexer em mercado?" | "O que aconteceu depois, e quanto confiar?" |
 | **Faz** | lê, filtra, classifica, localiza | guarda, esquece, registra previsões, confere, calibra |
 | **Roda** | a cada 10 min (coleta) | a cada previsão e a cada resultado |
-| **Estado hoje** | **no ar** (24 feeds, portão v2) | **desenhado, ainda não existe em código** |
-| **Esta noite** | **ajustar com dados** (principal) | **construir a bancada de prova offline** e o desenho |
+| **Estado hoje** | **no ar** (24 feeds, portão v3) | **bancada de prova pronta** (`corvo_engine/munin`, 18 testes); previsão real ainda não publicada |
+| **Esta noite** | **medir e ajustar com dados** (principal) | **usar e ampliar a bancada**; propor M3 e M6 |
 | **Métrica-rainha** | precisão do HOT e recall do keep | erro de calibração e Brier contra a taxa-base |
 | **Pior erro** | perder o que mexe em preço | prometer certeza que não tem |
 
@@ -120,6 +120,8 @@ flowchart LR
 
 ### 3.2 Auditoria do que já foi para o banco (T0, feita em 2026-11-08)
 
+> Esta tabela é a **auditoria inicial** (portão v2). Depois dela foi feito um **pré-ajuste (v3)**; os resultados dele estão logo abaixo.
+
 | Rótulo | Qtde | % | Leitura |
 |---|---|---|---|
 | ✅ **keep** (mexe em preço) | 18 | **35%** | Irã/Golfo, tarifas, juros BoE/BoJ, MEXC, ETFs, Binance |
@@ -127,7 +129,20 @@ flowchart LR
 | ❌ **drop** (não devia entrar) | 4 | 8% | protesto de fazendeiros, mercado em Taiz, navio no Ártico |
 
 > [!WARNING]
-> **Meta é ≥ 85% de keep entre as gravadas. Hoje são 35%.** Esse é o buraco que você fecha primeiro. Causas já identificadas: (1) `conflito_chave` dá 0,90 para qualquer ataque no Iêmen ou na Ucrânia; (2) falas de banco central com nome de pessoa dão 0,98 (HOT); (3) `politica` e `empresas` deixam passar notícia regional sem efeito em preço.
+> **Meta é ≥ 85% de keep entre as gravadas.** A auditoria inicial deu **35%**. Causas: (1) `conflito_chave` dava 0,90 para qualquer ataque no Iêmen ou na Ucrânia; (2) falas de banco central com nome de pessoa davam 0,98 (HOT); (3) `politica` e `empresas` deixavam passar notícia regional sem efeito em preço.
+
+#### Pré-ajuste v3 (já feito antes da sua noite)
+Corrigidas as três causas: conflito **regional** (Rússia, Ucrânia, Iêmen, Israel, Síria...) pesa 0,50 e **não grava sozinho**; conflito em **região-chave** (Irã, Hormuz, Golfo, Mar Vermelho, Taiwan, Mar do Sul da China) segue 0,95; banco central separado em **decisão** (1,0), **contexto** (0,7), **fala** (0,45, não grava) e **troca de comando** (0,9); `impeachment` e balanço de empresa pesam menos; tema só no resumo vale 50% e nunca chega ao banco.
+
+| Nas mesmas 52 auditadas | Antes | Depois |
+|---|---|---|
+| ✅ keep que continuam aceitas | 18 de 18 | **18 de 18** (nenhum perdido) |
+| 🟡 marginal aceitas | 30 | **11** |
+| ❌ drop aceitos | 4 | **0** |
+| **Keep entre as aceitas** | **35%** | **62%** |
+
+> [!CAUTION]
+> **Este 62% é otimista**: o ajuste foi feito **olhando esses mesmos 52 itens**. A prova de verdade é no **conjunto lacrado** da sua amostra. Ainda faltam 23 pontos para a meta de 85%: os 11 marginais restantes (banco do Paraguai, balanços, "S&P exposto à IA", troca de comando de banco central) mostram onde a régua ainda é frouxa.
 
 ### 3.3 Modos de falha de Hugin (use como lista de caça)
 
@@ -218,17 +233,17 @@ Feed que devolve HTML, trava, muda de formato ou dá 5xx **não derruba o ciclo*
 > **Missão:** guardar só o que merece, **esquecer no prazo**, registrar cada previsão **antes** do resultado e **conferir depois**, para saber em que tipo de previsão o CORVO acerta e em qual não.
 
 > [!CAUTION]
-> **Honestidade sobre o estado.** Munin **ainda não existe em código**: a tabela de previsões está vazia e nenhuma previsão é publicada. O corpus tem horas ou dias, não meses. Portanto, **não existe aprendizado estatístico possível esta noite**. O que você entrega é a **bancada de prova** (harness offline, testada com dados sintéticos) e o **desenho** para o dono aprovar. Inventar acerto com amostra pequena é o erro que este guia existe para evitar.
+> **Honestidade sobre o estado.** Nenhuma previsão é publicada em produção e a tabela de previsões está vazia. O corpus tem horas ou dias, não meses. Portanto, **não existe aprendizado estatístico possível esta noite**. O que **já existe** é a **bancada de prova** em `engine/corvo_engine/munin/` (contas, registro validado, retenção, anti-vazamento) e a ferramenta `benchmarks/corvo_munin_eval.py`, ambas testadas (18 testes) com dados sintéticos. O seu trabalho é **usar, endurecer e ampliar** a bancada, e **propor** M3 e M6. Inventar acerto com amostra pequena é o erro que este guia existe para evitar.
 
 ## 4. Munin em seis habilidades
 
 | # | Habilidade | "Certo" significa | Estado | Entrega esta noite |
 |---|---|---|---|---|
-| **M1** | 🗄️ **Guardar certo** | só HOT/BUFFER; **nunca** o texto de um DROP; só título, link e resumo curto | ✅ no ar | **teste de invariante** automatizado |
-| **M2** | 🧹 **Esquecer certo** | notícia 30 dias, estatística 14 dias, hash 48 h | ✅ no ar | teste de retenção |
+| **M1** | 🗄️ **Guardar certo** | só HOT/BUFFER; **nunca** o texto de um DROP; só título, link e resumo curto | ✅ no ar | ✅ **invariante testado** (`munin/retention.py`); amplie |
+| **M2** | 🧹 **Esquecer certo** | notícia 30 dias, estatística 14 dias, hash 48 h | ✅ no ar | ✅ **prazos conferidos contra o Worker** em teste |
 | **M3** | 🔗 **Ligar a ativos** | cada item aprovado aponta para ativos plausíveis, com direção e horizonte | ❌ `assets` vai vazio | **tabela tema → ativos** proposta e testada |
-| **M4** | 📝 **Registrar previsão** | probabilidade, intervalo, evidências, **método**; nunca sem método | 🟡 tabela existe, API recusa o inválido | **esquema e validador** do registro |
-| **M5** | ⚖️ **Conferir** | resultado contra o preço real, sem olhar o futuro | ❌ | **bancada offline** (Brier, calibração, vazamento) |
+| **M4** | 📝 **Registrar previsão** | probabilidade, intervalo, evidências, **método**; nunca sem método | 🟡 tabela existe, API recusa o inválido | ✅ **validador** (`munin/registry.py`) casado com a API |
+| **M5** | ⚖️ **Conferir** | resultado contra o preço real, sem olhar o futuro | 🟡 contas prontas, sem dados reais | ✅ **bancada** (`munin/scoring.py`, `leakage.py`); falta alimentá-la com resultados reais |
 | **M6** | 🎓 **Aprender** | peso de fonte e de tema a partir de resultado, com amostra mínima | ❌ | **proposta** + regra de "sem dados suficientes" |
 
 ### 4.1 O ciclo de vida de uma previsão
@@ -253,7 +268,7 @@ stateDiagram-v2
 
 ### 4.2 M5 — a bancada de prova (o centro do trabalho de Munin)
 
-Construa `engine/benchmarks/corvo_munin_eval.py` (sem rede no teste; dados sintéticos no CI). Ela precisa calcular, sobre uma lista de `(previsão, resultado)`:
+Já existe: `engine/corvo_engine/munin/` e `engine/benchmarks/corvo_munin_eval.py` (`--synthetic` mostra um previsor calibrado contra um exagerado: ECE 0,014 contra 0,211). Ela calcula, sobre uma lista de `(previsão, resultado)`:
 
 | Medida | Fórmula / ideia | Para que serve |
 |---|---|---|
@@ -303,10 +318,10 @@ Comece com uma **tabela editável e auditável** (nada de LLM):
 
 | Métrica | Hoje | Meta | Conjunto |
 |---|---|---|---|
-| Keep entre as gravadas (T0) | **35%** | ≥ 85% | auditoria do feed |
+| Keep entre as gravadas (T0) | **35%** (v2) · **62%** (v3, otimista) | ≥ 85% | auditoria do feed |
 | Precisão do HOT | a medir | ≥ 0,85 | lacrado |
 | Recall do keep | a medir | ≥ 0,90 | lacrado |
-| HOT entre os aceitos | ~60 a 77% | ≤ 25% | corpus |
+| HOT entre os aceitos | ~79% (70 de 89, só relevância) | ≤ 25% | corpus |
 | Fusões erradas (dedup) | a medir | ≤ 2% | pares rotulados |
 | Rumor/opinião como fato | a medir | **0** | rotulado |
 | Cobertura do mapa | a medir | ≥ 85% | aprovados |
@@ -317,12 +332,12 @@ Comece com uma **tabela editável e auditável** (nada de LLM):
 
 | Métrica | Hoje | Meta | Conjunto |
 |---|---|---|---|
-| Texto de DROP guardado | 0 (por desenho) | **0, com teste** | invariante |
-| Retenção cumprida | por desenho | 100%, com teste | sintético |
-| Registro com os 4 campos | validado na API | 100%, com teste | sintético |
-| Vazamento temporal | sem teste | **falha se existir** | sintético |
-| Skill sobre a taxa-base | n/a | calculável e testado | sintético |
-| ECE | n/a | calculável e testado | sintético |
+| Texto de DROP guardado | 0 | **0 (testado)** | invariante |
+| Retenção cumprida | 30/14/48 conferidos | 100% (testado) | sintético |
+| Registro com os 4 campos | API **e** `munin/registry.py` | 100% (testado) | sintético |
+| Vazamento temporal | `munin/leakage.py` testado | **falha se existir** | sintético |
+| Skill sobre a taxa-base | calculável (+0,35 no simulado calibrado) | só com dados reais ≥ 100 | sintético |
+| ECE | calculável (0,014 no simulado calibrado) | ≤ 0,05 com ≥ 100 resolvidas | sintético |
 
 ---
 
@@ -343,8 +358,8 @@ gantt
     Ajustar H2 e H3 (filtro e dedup)              :h4, after h3, 90m
     Ajustar H5, H4, H1 (mapa, tipo, fontes)       :h5, after h4, 60m
     section Munin
-    Invariantes M1 e M2 (testes)                  :m1, after h3, 30m
-    Bancada M5 e registro M4 (sintético)          :m2, after m1, 75m
+    Rodar e endurecer a bancada (M1 a M5)         :m1, after h3, 45m
+    Alimentar M5 com cenários realistas           :m2, after m1, 60m
     Proposta M3 e M6                              :m3, after m2, 30m
     section Entrega
     Relatório e commits                           :r1, after h5, 30m
@@ -360,8 +375,9 @@ gantt
 | `engine/benchmarks/corvo_review.py` | ✅ | lista aceitas e rejeitadas de um corpus (só relevância) |
 | `engine/benchmarks/corvo_make_sample.py` | ✅ | monta a amostra estratificada com lacre 70/30 e pesos |
 | `engine/benchmarks/corvo_gate_eval.py` | 🔨 **você cria** | matriz `label × verdict`, precisão/recall **ponderados por `w`**, por conjunto |
-| `engine/benchmarks/corvo_munin_eval.py` | 🔨 **você cria** | Brier, taxa-base, skill, ECE, cobertura, vazamento (sintético) |
-| `engine/tests/…` | 🔨 | invariantes de M1/M2, pares de dedup, contraexemplos de léxico e de geo |
+| `engine/benchmarks/corvo_munin_eval.py` | ✅ | Brier, taxa-base, skill, ECE, cobertura (`--synthetic` ou arquivo de resolvidas) |
+| `engine/corvo_engine/munin/` | ✅ | `scoring`, `registry`, `leakage`, `retention`; 18 testes em `tests/test_munin.py` |
+| `engine/tests/…` | 🔨 | **amplie**: pares de dedup, contraexemplos de léxico e de geo (M1/M2 já têm testes) |
 
 > [!NOTE]
 > **Ponderação.** A amostra tem **todos os aceitos** (peso 1) e **parte dos rejeitados** (peso `w` = total de rejeitados ÷ amostrados). Recall e taxa de keep descartado devem usar esses pesos, senão superestimam o erro dos rejeitados.
