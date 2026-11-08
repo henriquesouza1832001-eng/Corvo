@@ -12,7 +12,7 @@ interface ApiForecast {
 	forecast_id: string; question: string; probability: number; interval_low: number; interval_high: number;
 	evidences: number; sources: number; method: string; horizon: string; status: "aberta" | "calibrando" | "resolvida";
 }
-interface ApiStats { received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number>; sources: Record<string, number> }
+interface ApiStats { bucket: string; received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number>; sources: Record<string, number> }
 export interface ApiFeed {
 	generated_at: string; pressure: Pressure; budget: { used: number; limit: number };
 	news: ApiNews[]; stats: ApiStats[]; forecasts: ApiForecast[];
@@ -24,6 +24,8 @@ export interface LiveView {
 	items: (NewsItem & { verdict: "hot" | "buffer"; reason: string })[];
 	totals: { received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number> };
 	sources: Record<string, number>;
+	/** Uma barra por hora (mais antiga primeiro): quantas notícias chegaram e o que o portão decidiu. */
+	hourly: { bucket: string; received: number; hot: number; buffer: number; dropped: number }[];
 	forecasts: ForecastCard[];
 	generatedAt: string;
 }
@@ -43,6 +45,7 @@ export function toView(f: ApiFeed): LiveView {
 		generatedAt: f.generated_at,
 		totals,
 		sources,
+		hourly: [...f.stats].reverse().map((s) => ({ bucket: s.bucket, received: s.received, hot: s.hot, buffer: s.buffer, dropped: s.dropped })),
 		items: f.news.map((n) => ({
 			id: n.item_id, source: n.source_id, reliability: n.source_reliability, title: n.title,
 			minutesAgo: Math.max(0, Math.round((now - Date.parse(n.published_at)) / 60_000)),

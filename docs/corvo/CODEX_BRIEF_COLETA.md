@@ -83,7 +83,7 @@ Cuidar de **tudo da coleta e do treino do bot** do CORVO:
 
 ## 2. Contexto do produto (2 minutos)
 - **CORVO:** motor preditivo do mundo todo. Nome: Hugin (pensamento: lê, filtra, classifica, localiza) e Munin (memória: guarda, registra previsões, confere, esquece), os corvos de Odin.
-- **Arquitetura:** a coleta roda hoje no GitHub Actions (`.github/workflows/collect.yml`, a cada 10 min, **só liga depois do merge na `main`, decisão do dono**) e depois no Oracle (junto do repositório MNEME). Eles empurram lotes para a API `corvo-api` (Cloudflare Worker sobre **Turso**); o painel `corvo-web` só lê.
+- **Arquitetura:** a coleta roda hoje no GitHub Actions (`.github/workflows/collect.yml`, a cada 10 min, **só liga depois do merge na `main`, decisão do dono**) e, no futuro, num servidor com Docker (`deploy/oracle`). Eles empurram lotes para a API `corvo-api` (Cloudflare Worker sobre **Turso**); o painel `corvo-web` só lê.
 - **Por que o portão existe:** o banco tem limite (Turso grátis: 10 milhões de escritas por mês; teto de projeto de 300 mil linhas por dia, `DAILY_WRITE_LIMIT`). Cada notícia gravada custa ~2 linhas. **Toda linha gravada precisa merecer.** Mais do que quota, o objetivo é **qualidade**: um painel e, no futuro, previsões alimentados só por sinal.
 - Leia também: `docs/corvo/TRATAMENTO_NOTICIAS.md`, `docs/corvo/ARQUITETURA.md`, `docs/COLLECTION_PROTOCOL.md`, `docs/sources/SOURCES.md`, `AGENTS.md`.
 

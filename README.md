@@ -1,44 +1,44 @@
 # CORVO
 
-**CORVO é um motor preditivo para o mundo todo.** O nome vem de Hugin (pensamento) e Munin (memória), os corvos de Odin que sobrevoam os nove reinos todos os dias e voltam para contar o que viram. Aqui, eles leem o planeta e voltam com previsões.
+**CORVO coleta as notícias do mundo, separa o que pode mexer em mercado e aprende a prever o que vem depois.** O nome vem de Hugin (pensamento) e Munin (memória), os corvos de Odin que sobrevoam os nove reinos todos os dias e voltam para contar o que viram.
 
-A ideia é prever **quase qualquer coisa que se possa medir**: política, catástrofes, conflitos, economia, câmbio, ações, cripto, commodities, energia e o que mais tiver sinal. Toda previsão sai com **probabilidade, incerteza, evidências e método**, e depois é conferida contra o que aconteceu de verdade.
+- **Hugin** lê, filtra, classifica e localiza. Decide, antes de gravar qualquer coisa, se uma notícia pode mexer em cripto, ações, câmbio, juros ou commodities.
+- **Munin** guarda o que importa, esquece no prazo, registra cada previsão com probabilidade, incerteza, evidências e método, e confere o resultado para saber em que tipo de previsão acerta.
 
-> O CORVO usa notícias como um sensor entre muitos, ao lado de metrô, trânsito, voos, energia, internet e atenção pública: sinais indiretos que mudam **antes** da manchete. Como isso funciona e seus limites: [docs/corvo/SENSORES.md](docs/corvo/SENSORES.md). Como a notícia é tratada e armazenada: [docs/corvo/TRATAMENTO_NOTICIAS.md](docs/corvo/TRATAMENTO_NOTICIAS.md).
+O CORVO é um sistema independente: coleta, analisa e prevê. Não envia ordens e não é recomendação de investimento.
 
-## O que o CORVO faz
+## O que ele faz hoje
 
-1. **Lê o mundo:** notícias de todos os países, comunicados oficiais, calendários econômicos e sensores indiretos.
-2. **Filtra antes de gravar:** um portão de admissão descarta duplicata, notícia velha, assunto irrelevante e excesso por fonte, para proteger o banco e deixar só o que importa.
-3. **Separa fato de rumor:** na dúvida é "reportagem"; só fonte oficial vira "fato". Alegação não é fato.
-4. **Descobre o que o acontecimento toca:** juntar as matérias do mesmo fato e ligar a ativos (BTC, dólar, ouro, petróleo, índices).
-5. **Prevê com honestidade:** sem histórico suficiente, diz que não sabe. Toda previsão é registrada e pontuada (Brier), e o histórico de acertos calibra as próximas.
-6. **Mostra num painel:** feed tratado, funil do portão e previsões, atualizado a cada 30 segundos.
+1. **Lê o mundo:** 24 feeds públicos (bancos centrais, agências, imprensa, mercados e cripto) a cada 10 minutos.
+2. **Filtra antes de gravar:** um portão descarta o que já viu, o que é velho, repetido ou fora do assunto. Hoje sobram cerca de 4% do que chega.
+3. **Separa fato de rumor:** na dúvida é "reportagem"; só fonte oficial vira "fato".
+4. **Localiza no mapa-múndi** e mostra num painel, atualizado a cada 30 segundos.
+5. **Protege o banco:** o que é descartado vira só um contador e um código curto da URL (48 h); o que é gravado tem prazo (30 dias).
 
-O CORVO **não envia ordens de compra ou venda** e não é recomendação de investimento. As decisões de trade ficam com o [MNEME](https://github.com/th1agx/MNEME), que mede cada resultado em simulado antes de qualquer dinheiro real.
+## O que vem a seguir: virar preditivo
+
+As previsões ainda **não** estão publicadas. O caminho está descrito em [docs/corvo/PREDITIVO.md](docs/corvo/PREDITIVO.md): notícia, evento, hipótese de impacto, previsão pela taxa-base, conferência com o preço real e calibração. Sem amostra suficiente, o CORVO responde "dados insuficientes".
 
 ## Arquitetura
 
 ```text
- MNEME / coletores            ORACLE (base e cérebro)                   CLOUDFLARE (só o painel)
- notícias, sensores  ───────▶ portão de admissão → motor de previsão ──▶ corvo-api (D1 + KV) ──▶ corvo-web
-                              histórico grande, calibração              POST /api/corvo/ingest    GET /api/corvo/feed
+ feeds públicos ──▶ coletor Python ──▶ portão (Hugin) ──▶ API (Cloudflare Worker) ──▶ Turso ──▶ painel
+                    a cada 10 min      só o que importa    POST /api/corvo/ingest      banco     GET /api/corvo/feed
+                                                                                    (+ cache KV)
 ```
 
-- **Oracle:** coleta, decide e guarda o histórico (roda ao lado do MNEME, [docs/corvo/MNEME_INTEGRACAO.md](docs/corvo/MNEME_INTEGRACAO.md)).
-- **Cloudflare:** guarda e exibe só o que o painel precisa, no plano gratuito (D1 de 100 mil linhas por dia, KV de cache).
-- Detalhes e rotas: [docs/corvo/ARQUITETURA.md](docs/corvo/ARQUITETURA.md).
+Detalhes, rotas e limites de escrita: [docs/corvo/ARQUITETURA.md](docs/corvo/ARQUITETURA.md). Como o CORVO trata e guarda a notícia: [docs/corvo/TRATAMENTO_NOTICIAS.md](docs/corvo/TRATAMENTO_NOTICIAS.md). Como rodar a coleta: [docs/corvo/IMPLANTACAO.md](docs/corvo/IMPLANTACAO.md).
 
 ## Peças do repositório
 
 | Peça | Pasta | Tecnologia |
 |---|---|---|
 | Painel | [apps/web](apps/web) | React + TypeScript + Vite |
-| API | [apps/worker](apps/worker) | Cloudflare Worker + Hono + zod, D1 e KV |
-| Motor | [engine](engine) | Python (`corvo_engine`): portão, publicador, sentinela, previsão |
+| API | [apps/worker](apps/worker) | Cloudflare Worker + Hono + zod, banco Turso e cache KV |
+| Motor | [engine](engine) | Python (`corvo_engine`): coleta, portão (Hugin), Munin, publicador |
 | Contratos | [packages/shared](packages/shared) | TypeScript (espelho em `engine/corvo_engine/models.py`) |
-| Banco | [database](database) | migrations SQL do D1 |
-| Implantação no Oracle | [deploy/oracle](deploy/oracle) | Docker Compose |
+| Banco | [database](database) | migrations SQL |
+| Implantação | [deploy/oracle](deploy/oracle) | Docker Compose para rodar a coleta num servidor |
 
 ## O que o CORVO nunca faz
 
@@ -46,12 +46,15 @@ O CORVO **não envia ordens de compra ou venda** e não é recomendação de inv
 - Tratar alegação política como fato, recomendar voto ou prever vencedor de eleição como certeza.
 - Burlar login, captcha, limites ou termos de uso de qualquer fonte.
 - Publicar previsão sem probabilidade, incerteza, evidências e método.
+- Enviar ordens de compra ou venda.
 
 ## Estado hoje (novembro de 2026)
 
-- **Pronto:** coleta global de 24 feeds (agências, bancos centrais, mercados, cripto), portão de admissão com testes, API `corvo-api` e painel `corvo-web` no ar, publicador do lado do Oracle, arquivos de implantação.
-- **Painel:** mostra dados de demonstração (avisa na tela) até chegar o primeiro lote real do Oracle.
-- **Herdado do Pulso:** o motor de eventos, anomalia, Sentinela e previsão foi feito para o Brasil (UFs, INMET, IBGE). A generalização para o mundo é o próximo grande passo.
-- **Falta:** fontes globais documentadas, impacto por ativo, previsões reais publicadas, catálogo de âncoras e sensores indiretos, e o adaptador do lado do MNEME.
+- **Pronto:** coleta de 24 feeds, portão calibrado com testes, API e painel no ar sobre o Turso, bancada de prova do Munin (contas honestas, registro validado, anti-vazamento).
+- **Em construção:** eventos (juntar o mesmo fato de várias fontes), hipóteses de impacto por ativo e a previsão pela taxa-base.
+- **Falta:** fonte de preços para conferir previsões, sensores indiretos (movimento ao redor de lugares onde decisões acontecem) e o histórico para calibrar.
+- **Herdado do projeto anterior:** parte do motor foi feita para o Brasil (estados, INMET, IBGE) e ainda precisa ser generalizada para o mundo.
 
-Documentação para quem contribui: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CORVO_OVERVIEW.md](CORVO_OVERVIEW.md).
+## Quem contribui
+
+[AGENTS.md](AGENTS.md) (regras para agentes e pessoas), [CONTRIBUTING.md](CONTRIBUTING.md), [CORVO_OVERVIEW.md](CORVO_OVERVIEW.md) e o treino de Hugin e Munin em [docs/corvo/HUGIN_MUNIN_TREINO.md](docs/corvo/HUGIN_MUNIN_TREINO.md).

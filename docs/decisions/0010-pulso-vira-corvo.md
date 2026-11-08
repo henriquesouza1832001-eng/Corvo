@@ -1,6 +1,6 @@
 # 0010 — Pulso vira CORVO
 
-**Decisão.** O projeto passa a se chamar CORVO (Hugin e Munin, os corvos de Odin). O escopo deixa de ser o monitor do Brasil e passa a ser um radar global de notícias (política, catástrofes, macro, cripto, ações, câmbio) que gera previsões calibradas. Trabalha em par com o MNEME (github.com/th1agx/MNEME): o MNEME decide e mede trades, o CORVO entrega contexto externo e nunca ordens.
+**Decisão.** O projeto passa a se chamar CORVO (Hugin e Munin, os corvos de Odin). O escopo deixa de ser o monitor do Brasil e passa a ser um radar global de notícias (política, catástrofes, macro, cripto, ações, câmbio) que gera previsões calibradas. O CORVO é independente: coleta, analisa e prevê, e nunca envia ordens.
 
 **O que mudou.** Pacotes `corvo_engine` e `@corvo/*`, documentação, repositório GitHub (`Corvo`) e o front (`apps/web/src/corvo`, sem câmeras, com dados de demonstração).
 

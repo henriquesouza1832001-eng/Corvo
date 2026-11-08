@@ -22,7 +22,31 @@ const PRESSURES: { id: Pressure; label: string; hint: string }[] = [
 	{ id: "economy", label: "ECONOMIA", hint: "a partir de 60%: só o que tem relevância" },
 	{ id: "critical", label: "CRÍTICO", hint: "a partir de 85%: só o essencial" },
 ];
-const VERDICT_LABEL: Record<Verdict, string> = { hot: "GRAVA", buffer: "BUFFER", drop: "DESCARTA" };
+const VERDICT_LABEL: Record<Verdict, string> = { hot: "GRAVA", buffer: "FILA", drop: "DESCARTA" };
+
+/** Do dado à previsão: o que já funciona e o que ainda está sendo construído (honesto; ver docs/corvo/PREDITIVO.md). */
+const STAGES: { who: "HUGIN" | "MUNIN"; name: string; text: string; state: "pronto" | "em construção" | "planejado" }[] = [
+	{ who: "HUGIN", name: "Lê e filtra", text: "Coleta feeds do mundo, descarta o que não mexe em mercado e classifica o resto.", state: "pronto" },
+	{ who: "HUGIN", name: "Junta em eventos", text: "O mesmo fato em várias fontes vira um evento só, com o número de confirmações.", state: "planejado" },
+	{ who: "MUNIN", name: "Levanta hipóteses", text: "Liga o tema a ativos candidatos, com direção e horizonte, numa tabela auditável.", state: "em construção" },
+	{ who: "MUNIN", name: "Prevê com a taxa-base", text: "Começa pela frequência histórica de cada tipo de evento e diz “dados insuficientes” sem amostra.", state: "em construção" },
+	{ who: "MUNIN", name: "Confere e calibra", text: "Compara com o preço real, mede o erro contra a taxa-base e só então ganha confiança.", state: "em construção" },
+];
+
+function HourlyBars({ data }: { data: { bucket: string; received: number; hot: number; buffer: number; dropped: number }[] }) {
+	const max = Math.max(1, ...data.map((d) => d.received));
+	return (
+		<div className="hourly" role="img" aria-label="Notícias lidas por hora e o que foi gravado">
+			{data.map((d) => (
+				<div key={d.bucket} className="hbar" title={`${new Date(d.bucket).toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}: ${d.received} lidas · ${d.hot} grava · ${d.buffer} fila · ${d.dropped} descartadas`}>
+					<i className="hd" style={{ height: `${(d.dropped / max) * 100}%` }} />
+					<i className="hb" style={{ height: `${(d.buffer / max) * 100}%` }} />
+					<i className="hh" style={{ height: `${(d.hot / max) * 100}%` }} />
+				</div>
+			))}
+		</div>
+	);
+}
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 function Clock() {
@@ -39,6 +63,8 @@ export function CorvoApp() {
 	const [simulated, setSimulated] = useState<Pressure>("normal");
 	const [filter, setFilter] = useState<Verdict | "all">("all");
 	const [selected, setSelected] = useState<string | null>(null);
+	const [query, setQuery] = useState("");
+	const [topicFilter, setTopicFilter] = useState<string>("all");
 	const pressure: Pressure = live ? live.pressure : simulated;
 	const budget = live ? live.budget : DEMO_BUDGET;
 	const forecasts: ForecastCard[] = live ? live.forecasts : DEMO_FORECASTS;
@@ -58,7 +84,14 @@ export function CorvoApp() {
 		return { c, reasons };
 	}, [live, rows]);
 	const total = live ? live.totals.received : rows.length;
-	const shown = rows.filter((r) => (filter === "all" ? true : r.verdict === filter));
+	const q = query.trim().toLowerCase();
+	const shown = rows.filter(
+		(r) =>
+			(filter === "all" ? true : r.verdict === filter) &&
+			(topicFilter === "all" ? true : r.n.topics.includes(topicFilter as never)) &&
+			(q === "" || `${r.n.title} ${r.n.source} ${r.n.region ?? ""}`.toLowerCase().includes(q)),
+	);
+	const presentTopics = Array.from(new Set(rows.filter((r) => r.verdict !== "drop").flatMap((r) => r.n.topics)));
 	const ticker = rows.filter((r) => r.verdict === "hot").slice(0, 20);
 	// velocidade constante (~45 px/s): a duração cresce com o tamanho do texto, em vez de correr mais rápido quando há mais manchetes
 	const tickerSecs = Math.max(90, Math.round(ticker.reduce((n, r) => n + r.n.title.length + 24, 0) * 0.17));
@@ -76,7 +109,7 @@ export function CorvoApp() {
 				</div>
 				<div className="status">
 					<Clock />
-					<span className={`pill ${live ? "on" : "demo"}`} title={live ? "Dados reais do Oracle via Cloudflare" : "Ainda não chegou nenhum dado real"}>
+					<span className={`pill ${live ? "on" : "demo"}`} title={live ? "Dados reais, coletados e enviados à API do CORVO" : "Ainda não chegou nenhum dado real"}>
 						{live ? "● AO VIVO" : "○ DEMONSTRAÇÃO · DADOS FICTÍCIOS"}
 					</span>
 					<span className={`pill p-${pressure}`}>PRESSÃO {PRESSURES.find((p) => p.id === pressure)?.label}</span>
@@ -124,12 +157,27 @@ export function CorvoApp() {
 				</article>
 			</section>
 
+			<section className="path" aria-labelledby="t-path">
+				<h2 id="t-path">DO DADO À PREVISÃO <small>como Hugin e Munin viram o preditivo, etapa por etapa</small></h2>
+				<ol className="stages">
+					{STAGES.map((s, i) => (
+						<li key={s.name} className={`stage ${s.who === "HUGIN" ? "h" : "m"}`}>
+							<span className="st-n">{i + 1}</span>
+							<b>{s.name}</b>
+							<small className="st-who">{s.who}</small>
+							<p>{s.text}</p>
+							<span className={`st-state s-${s.state.replace(" ", "-")}`}>{s.state}</span>
+						</li>
+					))}
+				</ol>
+			</section>
+
 			<div className="grid">
 				<section className="box map-box" aria-labelledby="t-map">
 					<h2 id="t-map">MAPA-MÚNDI <small>{located} notícias localizadas · losangos = pontos de observação (coleta em preparação)</small></h2>
 					<WorldMap items={rows.map((r) => ({ n: r.n, verdict: r.verdict }))} selected={selected} onSelect={setSelected} />
 					<ul className="key" aria-label="Legenda de temas">
-						{(Object.keys(TOPIC_LABEL) as (keyof typeof TOPIC_LABEL)[]).map((t) => (
+						{(presentTopics.length ? presentTopics : (Object.keys(TOPIC_LABEL) as (keyof typeof TOPIC_LABEL)[])).map((t) => (
 							<li key={t}><i style={{ background: TOPIC_COLOR[t] }} /> {TOPIC_LABEL[t]}</li>
 						))}
 					</ul>
@@ -149,17 +197,23 @@ export function CorvoApp() {
 							</button>
 						))}
 					</div>
-					<p className="mono sm">gravar já ≥ {pct(HOT_MIN[pressure])} · buffer ≥ {pct(BUFFER_MIN[pressure])}</p>
-					<div className="funnel" role="img" aria-label={`${total} recebidas: ${counts.c.hot} gravadas, ${counts.c.buffer} em buffer, ${counts.c.drop} descartadas`}>
+					<p className="mono sm">grava já com relevância ≥ {pct(HOT_MIN[pressure])} · vai para a fila com ≥ {pct(BUFFER_MIN[pressure])}</p>
+					<div className="funnel" role="img" aria-label={`${total} recebidas: ${counts.c.hot} gravadas, ${counts.c.buffer} na fila, ${counts.c.drop} descartadas`}>
 						{(["hot", "buffer", "drop"] as Verdict[]).map((v) => (
 							<div key={v} className={`fb ${v}`} style={{ flexGrow: Math.max(counts.c[v], 0.0001) }}>{counts.c[v] > 0 && <span>{counts.c[v]}</span>}</div>
 						))}
 					</div>
 					<ul className="legend">
 						<li><i className="dot hot" /> grava {counts.c.hot}</li>
-						<li><i className="dot buffer" /> buffer {counts.c.buffer}</li>
+						<li><i className="dot buffer" /> fila {counts.c.buffer}</li>
 						<li><i className="dot drop" /> descarta {counts.c.drop}</li>
-					</ul>
+						</ul>
+						{live && live.hourly.length > 1 && (
+							<>
+								<h2 className="sub">ATIVIDADE POR HORA <small>lidas · fila · grava</small></h2>
+								<HourlyBars data={live.hourly} />
+							</>
+						)}
 					{Object.keys(counts.reasons).length > 0 && (
 						<ul className="log" aria-label="Motivos dos descartes">
 							{Object.entries(counts.reasons).map(([r, n]) => <li key={r}><span>{n}×</span> {REASON_LABEL[r] ?? r}</li>)}
@@ -178,7 +232,15 @@ export function CorvoApp() {
 							))}
 						</div>
 					</div>
-					{shown.length === 0 && <p className="muted">Nada por aqui ainda.</p>}
+					<div className="filters">
+							<input className="search" type="search" placeholder="buscar por título, fonte ou país" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Buscar no feed" />
+							<select className="sel" value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} aria-label="Filtrar por tema">
+								<option value="all">todos os temas</option>
+								{presentTopics.map((t) => <option key={t} value={t}>{TOPIC_LABEL[t]}</option>)}
+							</select>
+						</div>
+						<p className="muted sm">{shown.length} de {rows.length} · títulos no idioma original da fonte · clique numa notícia para ver o motivo e os ativos</p>
+						{shown.length === 0 && <p className="muted">Nada por aqui com esse filtro.</p>}
 					<ul className="feed">
 						{shown.map(({ n, verdict, reason }) => (
 							<NewsRow key={n.id} n={n} verdict={verdict} reason={reason} selected={selected === n.id} onSelect={() => setSelected(selected === n.id ? null : n.id)} />
@@ -207,8 +269,7 @@ export function CorvoApp() {
 			</div>
 
 			<footer>
-				O CORVO não envia ordens nem é recomendação de investimento. Previsão sem histórico fica marcada como “calibrando”. Trades são decididos pelo{" "}
-				<a href="https://github.com/th1agx/MNEME" rel="noreferrer">MNEME</a>.
+				O CORVO só coleta, analisa e prevê. Não envia ordens e não é recomendação de investimento. Toda previsão mostra probabilidade, incerteza, evidências e método, e fica marcada como “calibrando” enquanto não tiver histórico de acertos.
 			</footer>
 		</div>
 	);

@@ -113,7 +113,7 @@ class OraclePublisher:
                 "lat": place[1] if place else None,
                 "lon": place[2] if place else None,
                 "region": place[0] if place else None,
-                "assets": [],  # impacto por ativo vem do motor de previsão (MNEME/CORVO), ainda não ligado
+                "assets": [],  # impacto por ativo vem do Munin (hipóteses em munin/impact.py), ainda não ligado
             })
         if not items:
             return {"pressure": pressure.value, "sent_news": 0, "received": 0, "api": None}

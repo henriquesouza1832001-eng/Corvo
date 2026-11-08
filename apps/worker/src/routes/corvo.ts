@@ -6,7 +6,7 @@ import { utcDay, type BudgetMode } from "../lib/budget";
 import { cacheControl } from "../lib/cache";
 
 /**
- * API do painel do CORVO. O Oracle (cérebro, junto do MNEME) EMPURRA os dados aqui com `POST /api/corvo/ingest`;
+ * API do painel do CORVO. O coletor (Python, no GitHub Actions ou num servidor) EMPURRA os dados aqui com `POST /api/corvo/ingest`;
  * o painel só LÊ. O KV guarda o instantâneo do feed por alguns segundos para o painel não bater no D1 a cada visita.
  */
 export const corvo = new Hono<AppEnv>();
