@@ -4,7 +4,7 @@ Como saber se o sistema está bem, o que fazer quando não está e como verifica
 
 ## 1. O sistema está bem? (30 segundos)
 ```
-py -m corvo_engine.healthcheck            # lê https://pulso-api.henriquesouza.workers.dev/api/health
+py -m corvo_engine.healthcheck            # lê https://corvo-api.henriquesouza.workers.dev/api/health
 ```
 Imprime "saudável" ou os PROBLEMAS e sai com código 1. O Cron da Cloudflare aciona isso nos minutos 15 e 45 de cada hora (e o `schedule` do GitHub fica como reserva) (`.github/workflows/healthcheck.yml`): se o workflow falhar, o dono do repositório é avisado. Regras: API e banco ONLINE; último pulso há menos de 30 min; menos da metade das fontes OFFLINE; ao menos 40% ONLINE entre as que já reportaram; nenhum `AUTH_ERROR`.
 
@@ -27,7 +27,7 @@ Outras leituras públicas: `GET /api/stats` (eventos ativos, sinais em 2 h e 24 
 ## 3. Verificar uma mudança antes de abrir o PR
 1. `cd engine && py -m pytest` e, na raiz, `npm run typecheck && npm test && npm run build`.
 2. Rodada real, sem enviar nada: `py -m corvo_engine.pipeline` (leva ~45 s com ~100 fontes). Conferir a contagem de sinais e eventos e o topo por Corvo.
-3. Se mexeu em ingestão, Worker local: `npm run db:migrate -w @corvo/worker`, `npx wrangler dev --port 8787` (em outro terminal), e `PULSO_API_URL=http://127.0.0.1:8787 PULSO_INGEST_TOKEN=<o de apps/worker/.dev.vars> py -m corvo_engine.pipeline --push` **duas ou três vezes seguidas**: da segunda em diante o lote deve ser pequeno (poucos sinais e eventos). Se voltar a mandar centenas de linhas iguais, o orçamento do D1 estourará em produção.
+3. Se mexeu em ingestão, Worker local: `npm run db:migrate -w @corvo/worker`, `npx wrangler dev --port 8787` (em outro terminal), e `CORVO_API_URL=http://127.0.0.1:8787 CORVO_INGEST_TOKEN=<o de apps/worker/.dev.vars> py -m corvo_engine.pipeline --push` **duas ou três vezes seguidas**: da segunda em diante o lote deve ser pequeno (poucos sinais e eventos). Se voltar a mandar centenas de linhas iguais, o orçamento do D1 estourará em produção.
 4. Chamar as rotas: `/api/health`, `/api/stats`, `/api/events`, `/api/forecasts`, `/api/pulse/states`.
 5. Mudou contrato? Atualizar `packages/shared/src/contracts.ts`, `engine/corvo_engine/models.py` e `docs/api/API.md` no mesmo PR, com a label `contract`.
 

@@ -598,7 +598,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ap = argparse.ArgumentParser(description="Roda uma rodada do Engine do CORVO.")
     ap.add_argument("--config", type=Path, default=DEFAULT_SOURCES)
-    ap.add_argument("--push", action="store_true", help="envia ao Worker (exige PULSO_API_URL e PULSO_INGEST_TOKEN)")
+    ap.add_argument("--push", action="store_true", help="envia ao Worker (exige CORVO_API_URL e CORVO_INGEST_TOKEN)")
     ap.add_argument("--source", action="append", metavar="ID",
                     help="piloto: roda só estas fontes, mesmo desativadas (proibido com --push)")
     ap.add_argument("--respect-interval", action="store_true",

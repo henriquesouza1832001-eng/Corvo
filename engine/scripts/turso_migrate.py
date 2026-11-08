@@ -1,10 +1,10 @@
 """Copia o D1 para o Turso: aplica as migrations (esquema) e importa os dados de um dump do D1.
 
 Uso (no CI, com TURSO_URL/TURSO_TOKEN nos segredos):
-    npx wrangler d1 export pulso --remote --no-schema --output dump.sql
+    npx wrangler d1 export corvo --remote --no-schema --output dump.sql
     py engine/scripts/turso_migrate.py [dump.sql]
 
-Idempotente: migrations já aplicadas são puladas (tabela `_pulso_migrations`) e os dados entram com INSERT OR REPLACE.
+Idempotente: migrations já aplicadas são puladas (tabela `_corvo_migrations`) e os dados entram com INSERT OR REPLACE.
 Nunca imprime o token. Termina com erro se a contagem de linhas por tabela não bater com o dump.
 """
 import json
@@ -22,7 +22,7 @@ token = os.environ.get("TURSO_TOKEN", "").strip().strip("\"'").strip()
 if not url or not token:
     sys.exit("TURSO_URL/TURSO_TOKEN ausentes")
 base = url.replace("libsql://", "https://").rstrip("/")
-SKIP_TABLES = {"d1_migrations", "_cf_KV", "sqlite_sequence", "_pulso_migrations"}
+SKIP_TABLES = {"d1_migrations", "_cf_KV", "sqlite_sequence", "_corvo_migrations"}
 CHUNK_BYTES = 600_000
 
 
@@ -46,8 +46,8 @@ def scalar(sql):
 
 
 # 1) esquema: as mesmas migrations do D1, uma vez cada
-call([{"type": "execute", "stmt": {"sql": "CREATE TABLE IF NOT EXISTS _pulso_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)"}}])
-applied = {row[0]["value"] for row in call([{"type": "execute", "stmt": {"sql": "SELECT name FROM _pulso_migrations"}}])[0]["response"]["result"]["rows"]}
+call([{"type": "execute", "stmt": {"sql": "CREATE TABLE IF NOT EXISTS _corvo_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)"}}])
+applied = {row[0]["value"] for row in call([{"type": "execute", "stmt": {"sql": "SELECT name FROM _corvo_migrations"}}])[0]["response"]["result"]["rows"]}
 # `database/pending/` guarda migrations já válidas para o Turso mas ainda fora do deploy do D1 (ver database/pending/README.md)
 files = sorted([*(ROOT / "database/migrations").glob("*.sql"), *(ROOT / "database/pending").glob("*.sql")], key=lambda f: f.name)
 for f in files:
@@ -55,7 +55,7 @@ for f in files:
         print("migration já aplicada:", f.name)
         continue
     call([{"type": "sequence", "sql": f.read_text(encoding="utf-8")},
-          {"type": "execute", "stmt": {"sql": "INSERT INTO _pulso_migrations (name, applied_at) VALUES (?1, datetime('now'))", "args": [{"type": "text", "value": f.name}]}}])
+          {"type": "execute", "stmt": {"sql": "INSERT INTO _corvo_migrations (name, applied_at) VALUES (?1, datetime('now'))", "args": [{"type": "text", "value": f.name}]}}])
     print("migration aplicada:", f.name)
 
 # 2) dados: dump do D1 (uma instrução por linha), em lotes, com INSERT OR REPLACE

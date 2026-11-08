@@ -10,8 +10,8 @@ queima a nossa conta junto. Só entram chaves criadas na conta do projeto.
 ## 1. Criar as chaves
 | Rede | Onde | O que guardar |
 |---|---|---|
-| **Bluesky** (grátis, imediato) | Criar uma conta só do bot. Em Configurações > Privacidade e segurança > **Senhas de app**, criar uma senha. | `BLUESKY_HANDLE` (ex.: `pulso-bot.bsky.social`) e `BLUESKY_APP_PASSWORD` (`xxxx-xxxx-xxxx-xxxx`). Nunca a senha da conta. |
-| **Reddit** (exige aprovação prévia) | reddit.com/prefs/apps, app do tipo "script", depois o pedido de acesso à API. | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` e `REDDIT_USER_AGENT` (formato `web:pulso-engine:0.1 (by /u/SUA_CONTA)`). |
+| **Bluesky** (grátis, imediato) | Criar uma conta só do bot. Em Configurações > Privacidade e segurança > **Senhas de app**, criar uma senha. | `BLUESKY_HANDLE` (ex.: `corvo-bot.bsky.social`) e `BLUESKY_APP_PASSWORD` (`xxxx-xxxx-xxxx-xxxx`). Nunca a senha da conta. |
+| **Reddit** (exige aprovação prévia) | reddit.com/prefs/apps, app do tipo "script", depois o pedido de acesso à API. | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` e `REDDIT_USER_AGENT` (formato `web:corvo-engine:0.1 (by /u/SUA_CONTA)`). |
 | **X** (plano pago) | developer.x.com, plano com busca recente (confira o preço atual). | `X_BEARER_TOKEN`. |
 
 Guardar cada um como **segredo do GitHub** (Settings > Secrets and variables > Actions). Nunca em arquivo, chat ou issue.

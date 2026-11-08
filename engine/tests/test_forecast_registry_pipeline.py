@@ -17,7 +17,7 @@ def _run(**kw):
 
 
 def test_every_new_forecast_gets_an_immutable_auditable_snapshot(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_FORECAST_REGISTRY", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_FORECAST_REGISTRY", raising=False)
     b = _run()
     new = [f for f in b["forecasts"] if f["status"] == "open"]
     assert new and len(b["forecast_registry"]) == len(new)
@@ -32,7 +32,7 @@ def test_already_open_forecasts_are_not_registered_again_and_flag_off_means_noth
     b = _run()
     already = [dict(f) for f in b["forecasts"] if f["status"] == "open"]
     assert _run(open_forecasts=already)["forecast_registry"] == []  # imutável: só o que ainda não existe
-    monkeypatch.setenv("PULSO_FLAG_FORECAST_REGISTRY", "0")
+    monkeypatch.setenv("CORVO_FLAG_FORECAST_REGISTRY", "0")
     assert _run()["forecast_registry"] == []
 
 

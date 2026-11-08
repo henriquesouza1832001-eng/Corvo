@@ -1,6 +1,6 @@
-// Prévia por branch (pulso-web-<branch>): serve o front e repassa SÓ leituras públicas da API.
+// Prévia por branch (corvo-web-<branch>): serve o front e repassa SÓ leituras públicas da API.
 // O repasse é feito no servidor, então a API de produção não precisa liberar CORS para a prévia.
-const API = "https://pulso-api.henriquesouza.workers.dev";
+const API = "https://corvo-api.henriquesouza.workers.dev";
 
 export default {
 	async fetch(request, env) {

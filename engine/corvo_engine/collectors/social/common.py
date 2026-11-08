@@ -11,7 +11,7 @@ from ...models import Signal
 from ...processing.geo import locate, state_place
 from ...processing.keyword_engine import KeywordEngine
 from ...processing.normalizer import clean_text, content_hash
-USER_AGENT = "pulso-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
+USER_AGENT = "corvo-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
 MAX_BYTES = 5_000_000
 _URL = re.compile(r"https?://\S+")
 _MENTION = re.compile(r"(?<!\w)@\w{1,30}")

@@ -36,7 +36,7 @@ def test_public_destinations_including_nat64_to_public_still_work(ip):
 
 @pytest.mark.parametrize("host", ["2130706433", "0x7f000001", "0177.0.0.1", "127.1", "0x7f.1", "017700000001", "localhost"])
 def test_encoded_loopback_forms_are_resolved_then_blocked(host, monkeypatch):
-    monkeypatch.delenv("PULSO_ALLOW_PRIVATE_FETCH", raising=False)
+    monkeypatch.delenv("CORVO_ALLOW_PRIVATE_FETCH", raising=False)
     with pytest.raises(UnsafeURLError):
         validate_destination(host, 80)
 
@@ -62,8 +62,8 @@ def test_dns_answer_with_nat64_metadata_is_blocked(monkeypatch):
                                  "http://[64:ff9b::a9fe:a9fe]/latest/meta-data/"])
 def test_userinfo_and_encoded_urls_never_open_a_socket_to_a_private_address(url, monkeypatch):
     """Qualquer que seja o motivo da recusa (guarda, URL inválida, nome inexistente), nenhum socket conecta num IP interno."""
-    monkeypatch.delenv("PULSO_ALLOW_PRIVATE_FETCH", raising=False)
-    monkeypatch.setenv("PULSO_API_URL", "https://pulso-api.example.workers.dev")
+    monkeypatch.delenv("CORVO_ALLOW_PRIVATE_FETCH", raising=False)
+    monkeypatch.setenv("CORVO_API_URL", "https://corvo-api.example.workers.dev")
     dialed = []
 
     def fake_connect(self, addr):

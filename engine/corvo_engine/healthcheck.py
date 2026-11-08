@@ -1,6 +1,6 @@
 """Verificação de saúde da produção (rota pública /api/health). Sai com código 1 se algo estiver errado.
 
-Uso: py -m corvo_engine.healthcheck [URL_BASE]     (padrão: PULSO_API_URL ou a API de produção)
+Uso: py -m corvo_engine.healthcheck [URL_BASE]     (padrão: CORVO_API_URL ou a API de produção)
 Roda a cada 30 min no GitHub (.github/workflows/healthcheck.yml): workflow que falha avisa o dono do repositório.
 Só lê rotas públicas; não usa nenhum segredo.
 """
@@ -11,7 +11,7 @@ import os
 import sys
 import urllib.request
 
-DEFAULT_BASE = "https://pulso-api.henriquesouza.workers.dev"
+DEFAULT_BASE = "https://corvo-api.henriquesouza.workers.dev"
 MAX_COLLECTION_AGE_S = 30 * 60  # a coleta roda a cada 5 min: 30 min sem pulso é falha, não atraso
 MAX_OFFLINE_RATIO = 0.5  # mais da metade das fontes OFFLINE: algo geral (rede, bloqueio, deploy quebrado)
 MIN_ONLINE_RATIO = 0.4  # entre as fontes que já reportaram, ao menos 40% ONLINE
@@ -47,14 +47,14 @@ def evaluate(health: dict) -> list[str]:
 
 def fetch(base: str) -> dict:
     req = urllib.request.Request(f"{base.rstrip('/')}/api/health",
-                                 headers={"User-Agent": "pulso-healthcheck/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"})
+                                 headers={"User-Agent": "corvo-healthcheck/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"})
     with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - URL de configuração do próprio projeto
         return json.loads(resp.read())
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    base = argv[0] if argv else os.environ.get("PULSO_API_URL", DEFAULT_BASE)
+    base = argv[0] if argv else os.environ.get("CORVO_API_URL", DEFAULT_BASE)
     try:
         health = fetch(base)
     except Exception as exc:  # noqa: BLE001

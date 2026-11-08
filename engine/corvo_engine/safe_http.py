@@ -11,8 +11,8 @@ para `http://169.254.169.254/`, `localhost`, `10.x`... Este módulo fecha a clas
   e IPv4 mapeado em IPv6;
 - só http/https (nada de `file://`, `ftp://`, `data:`), inclusive em redirect.
 
-Exceções declaradas: o próprio Worker do CORVO (host de `PULSO_API_URL`, que no desenvolvimento é `localhost`) e a variável
-`PULSO_ALLOW_PRIVATE_FETCH=1`, só para os testes de caos que sobem servidores em loopback. Em produção a variável não existe.
+Exceções declaradas: o próprio Worker do CORVO (host de `CORVO_API_URL`, que no desenvolvimento é `localhost`) e a variável
+`CORVO_ALLOW_PRIVATE_FETCH=1`, só para os testes de caos que sobem servidores em loopback. Em produção a variável não existe.
 Instalado como opener global em `corvo_engine/__init__.py`, então vale para RSS, INMET, IDAP, INPE, sociais e o cliente do Worker.
 Limitação: se houver proxy no ambiente (HTTP(S)_PROXY), o destino validado é o do proxy, que então decide o resto.
 """
@@ -32,7 +32,7 @@ class UnsafeURLError(ValueError):
 
 
 def _api_host() -> tuple[str | None, int | None]:
-    p = urlparse(os.environ.get("PULSO_API_URL", "http://localhost:8787"))
+    p = urlparse(os.environ.get("CORVO_API_URL", "http://localhost:8787"))
     return p.hostname, p.port
 
 
@@ -59,7 +59,7 @@ def is_public_ip(ip: str) -> bool:
 
 
 def _allowed(host: str | None, port: int | None) -> bool:
-    if os.environ.get("PULSO_ALLOW_PRIVATE_FETCH", "") in ("1", "true", "on"):
+    if os.environ.get("CORVO_ALLOW_PRIVATE_FETCH", "") in ("1", "true", "on"):
         return True
     api_host, api_port = _api_host()
     return bool(host) and host == api_host and (api_port is None or port is None or port == api_port)

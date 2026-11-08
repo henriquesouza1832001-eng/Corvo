@@ -33,7 +33,7 @@ Vale para **toda** fonte, humana ou agente. Quem integra uma fonte segue este pr
 ## 5. Como coletar
 | Item | Regra |
 |---|---|
-| Identificação | `User-Agent: pulso-engine/<versão> (+URL do projeto)`. Nunca fingir ser navegador. |
+| Identificação | `User-Agent: corvo-engine/<versão> (+URL do projeto)`. Nunca fingir ser navegador. |
 | Cadência | Notícias RSS ≥ 300 s; oficiais conforme a API; sociais conforme cota. Adicionar *jitter* de ±10% para não sincronizar rajadas. |
 | Requisição condicional | Usar `ETag`/`If-Modified-Since` quando a fonte suportar. |
 | Timeout e tamanho | 15 s e 5 MB por requisição. |

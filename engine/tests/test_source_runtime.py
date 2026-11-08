@@ -128,7 +128,7 @@ def test_empty_or_stale_content_with_ok_transport_never_opens_the_breaker():
 
 
 def test_shadow_by_default_collects_even_an_open_breaker_and_does_not_evolve_its_state(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_CIRCUIT_BREAKER_ENFORCE", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_CIRCUIT_BREAKER_ENFORCE", raising=False)
     open_row = {"source_id": "a", "breaker_state": "OPEN", "consecutive_failures": 3, "opened_count": 1, "breaker_reason": "OFFLINE",
                 "next_attempt_at": (NOW + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")}
     calls = []
@@ -139,7 +139,7 @@ def test_shadow_by_default_collects_even_an_open_breaker_and_does_not_evolve_its
 
 
 def test_enforce_skips_an_open_breaker_without_calling_the_source_and_reports_why(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_CIRCUIT_BREAKER_ENFORCE", "1")
+    monkeypatch.setenv("CORVO_FLAG_CIRCUIT_BREAKER_ENFORCE", "1")
     until = (NOW + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
     open_row = {"source_id": "a", "breaker_state": "OPEN", "consecutive_failures": 3, "opened_count": 1, "breaker_reason": "OFFLINE", "next_attempt_at": until}
     calls = []
@@ -154,7 +154,7 @@ def test_enforce_skips_an_open_breaker_without_calling_the_source_and_reports_wh
 
 
 def test_half_open_probe_success_closes_and_failure_reopens_with_longer_backoff(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_CIRCUIT_BREAKER_ENFORCE", "1")
+    monkeypatch.setenv("CORVO_FLAG_CIRCUIT_BREAKER_ENFORCE", "1")
     due = {"source_id": "a", "breaker_state": "OPEN", "consecutive_failures": 3, "opened_count": 1, "breaker_reason": "OFFLINE",
            "next_attempt_at": (NOW - timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M:%SZ")}
     ok = rows(cycle([src("a")], feed({"a": rss()}), NOW, {"a": due}))["a"]
@@ -187,14 +187,14 @@ def test_last_content_advance_is_carried_when_nothing_new_arrives():
 
 
 def test_flags_off_means_no_runtime_rows_and_no_breaker_effect(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_RUNTIME_PERSIST", "0")
-    monkeypatch.setenv("PULSO_FLAG_CIRCUIT_BREAKER", "0")
+    monkeypatch.setenv("CORVO_FLAG_RUNTIME_PERSIST", "0")
+    monkeypatch.setenv("CORVO_FLAG_CIRCUIT_BREAKER", "0")
     b = cycle([src("a")], feed({"a": rss()}), NOW)
     assert b["source_runtime"] == []
 
 
 def test_runtime_persist_without_freshness_marks_unavailable_not_fresh(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_SOURCE_FRESHNESS", "0")
+    monkeypatch.setenv("CORVO_FLAG_SOURCE_FRESHNESS", "0")
     r = rows(cycle([src("a")], feed({"a": rss()}), NOW))["a"]
     assert r["freshness_state"] == "UNAVAILABLE" and r["transport"] == "ONLINE"
 

@@ -33,7 +33,7 @@ def by_id(batch):
 
 
 def test_200_fresh_200_stale_200_empty_and_offline_are_four_different_things(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_SOURCE_FRESHNESS", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_SOURCE_FRESHNESS", raising=False)
     fetcher = feed({"fresh": rss([("Acidente grave em Betim deixa feridos", date(10))]),
                     "stale": rss([("Notícia antiga de ontem sobre obra", date(3000))]),
                     "empty": rss([]), "down": OSError("connection reset")})
@@ -60,10 +60,10 @@ def test_repeated_content_is_detected_against_stored_hashes(monkeypatch):
 
 
 def test_flag_off_disables_it_and_changes_nothing_else(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_SOURCE_FRESHNESS", "0")
+    monkeypatch.setenv("CORVO_FLAG_SOURCE_FRESHNESS", "0")
     fetcher = feed({"fresh": rss([("Acidente grave em Betim deixa feridos", date(10))])})
     off = run_once([src("fresh")], fetcher=fetcher, now=NOW)
-    monkeypatch.setenv("PULSO_FLAG_SOURCE_FRESHNESS", "1")
+    monkeypatch.setenv("CORVO_FLAG_SOURCE_FRESHNESS", "1")
     on = run_once([src("fresh")], fetcher=fetcher, now=NOW)
     assert off["source_freshness"] == [] and len(on["source_freshness"]) == 1
     strip = lambda b: {k: v for k, v in b.items() if k not in ("batch_id", "source_freshness", "source_runtime")}  # noqa: E731

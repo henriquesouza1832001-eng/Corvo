@@ -59,8 +59,8 @@ flowchart LR
   end
   subgraph Cloudflare["Cloudflare"]
     CRON["Cron Trigger */5"] -->|workflow_dispatch| GHA["collect.yml"]
-    WK["Worker pulso-api<br/>Hono + zod"]
-    FE["Worker pulso-web<br/>React + Vite"]
+    WK["Worker corvo-api<br/>Hono + zod"]
+    FE["Worker corvo-web<br/>React + Vite"]
   end
   DB[("Turso (ativo)<br/>D1 = reserva")]
   Fontes --> COL
@@ -100,7 +100,7 @@ O Engine **não** roda no Worker: roda em Python no GitHub Actions (`.github/wor
 |---|---|
 | Engine | Python ≥ 3.11 (`engine/pyproject.toml`), **sem dependências de runtime** (só biblioteca padrão); `pytest` só em dev. CI usa 3.12. |
 | API | Cloudflare Worker, Hono `^4.9`, zod `^4.1`, Wrangler `^4.40`, TypeScript `^5.9`, Vitest `^3.2` (`apps/worker/package.json`). |
-| Frontend | React `^19.2`, Vite `^7`, TypeScript (`apps/web/package.json`); publicado como Worker com assets (`pulso-web`). |
+| Frontend | React `^19.2`, Vite `^7`, TypeScript (`apps/web/package.json`); publicado como Worker com assets (`corvo-web`). |
 | Contratos | `packages/shared` (`@corvo/shared`), espelhados em `engine/corvo_engine/models.py`. |
 | Banco | **Turso ativo** (`DB_BACKEND="turso"` em `apps/worker/wrangler.jsonc`); D1 continua como binding de reserva. Ver §11. |
 | Agendamento | Cron da Cloudflare (`*/5 * * * *`) aciona o workflow de coleta; `healthcheck.yml` roda em `17,47 * * * *`. |
@@ -187,7 +187,7 @@ Trilha de auditoria (migrations em `database/pending/`): `forecast_registry` (sn
 
 ## 10. Feature flags
 
-`engine/corvo_engine/flags.py`, variável `PULSO_FLAG_<NOME>`. São 16; estas 3 ligam por padrão e **só gravam trilha de auditoria**: `HISTORY_OBSERVATIONS`, `SENTINEL`, `FORECAST_REGISTRY`. As outras 13 estão **desligadas**: `SEASONAL_BASELINE_V2`, `ANOMALY_V2`, `CLUSTER_REFINE`, `SEMANTIC_CLUSTERING`, `GEO_V2`, `CONFIDENCE_V2`, `SEVERITY_V2`, `PULSE_V2`, `NATIONAL_PULSE_V2`, `DRIVER_VALIDATOR`, `EVENT_ESCALATION`, `FORECAST_V2_SHADOW`, `CONTEXT_ENGINE`. Regra: o V1 fica em produção; cada V2 passa por shadow → backtest → comparação → canário.
+`engine/corvo_engine/flags.py`, variável `CORVO_FLAG_<NOME>`. São 16; estas 3 ligam por padrão e **só gravam trilha de auditoria**: `HISTORY_OBSERVATIONS`, `SENTINEL`, `FORECAST_REGISTRY`. As outras 13 estão **desligadas**: `SEASONAL_BASELINE_V2`, `ANOMALY_V2`, `CLUSTER_REFINE`, `SEMANTIC_CLUSTERING`, `GEO_V2`, `CONFIDENCE_V2`, `SEVERITY_V2`, `PULSE_V2`, `NATIONAL_PULSE_V2`, `DRIVER_VALIDATOR`, `EVENT_ESCALATION`, `FORECAST_V2_SHADOW`, `CONTEXT_ENGINE`. Regra: o V1 fica em produção; cada V2 passa por shadow → backtest → comparação → canário.
 
 ## 11. Persistência: Turso e D1
 
@@ -296,7 +296,7 @@ Cada fonte tem `access`, `terms_url`, `interval_s`, `retention_days`, `display`,
 
 ## 21. Próximos passos
 
-Lista completa e viva em `docs/engineering/FALTA_FAZER.md`. Em resumo: (1) medir frescor de conteúdo por fonte; (2) calibrar a Sentinela contra o dia normal; (3) criar `ADMIN_TOKEN`/`PULSO_ADMIN_TOKEN` e regra de rate limit/WAF; (4) mover a contagem de `write_budget` para dentro da transação e ensaiar Turso/D1 reais; (5) corpus histórico com positivos e *hard negatives*, depois ablation e calibração fora do tempo; (6) revisão humana das 279 fontes; (7) chaves de Reddit/X/Bluesky e piloto de 48 h; (8) separar D1 e Turso quando a cota renovar.
+Lista completa e viva em `docs/engineering/FALTA_FAZER.md`. Em resumo: (1) medir frescor de conteúdo por fonte; (2) calibrar a Sentinela contra o dia normal; (3) criar `ADMIN_TOKEN`/`CORVO_ADMIN_TOKEN` e regra de rate limit/WAF; (4) mover a contagem de `write_budget` para dentro da transação e ensaiar Turso/D1 reais; (5) corpus histórico com positivos e *hard negatives*, depois ablation e calibração fora do tempo; (6) revisão humana das 279 fontes; (7) chaves de Reddit/X/Bluesky e piloto de 48 h; (8) separar D1 e Turso quando a cota renovar.
 
 ## 22. Como executar, testar e fazer deploy
 
@@ -310,7 +310,7 @@ py -m pytest                # testes do motor
 py -m corvo_engine.pipeline # uma rodada completa, sem enviar nada
 py -m corvo_engine.audit    # o que cada fonte entrega agora
 ```
-Variáveis do Engine para enviar de verdade: `PULSO_API_URL` e `PULSO_INGEST_TOKEN` (o token nunca vai ao Git).
+Variáveis do Engine para enviar de verdade: `CORVO_API_URL` e `CORVO_INGEST_TOKEN` (o token nunca vai ao Git).
 
 **Testar** (o que o CI roda):
 ```bash
@@ -318,7 +318,7 @@ npm run typecheck && npm test && npm run build
 cd engine && py -m pytest
 ```
 
-**Deploy:** automático a cada merge na `main` (`.github/workflows/deploy.yml`): valida → aplica `database/migrations` no D1 → publica o Worker (`pulso-api`) → publica o front (`pulso-web`) → verifica `/api/health`. Merge só com CI verde (`bash scripts/merge_when_green.sh <PR>`). O fluxo de branches é `hen`/`thig`/`art`/`isar` → PR → `main`; nenhuma outra branch. Migrations de `database/pending/` não vão pelo deploy: são aplicadas no Turso pelo workflow `Turso schema`. Segredos (`INGEST_TOKEN`, `TURSO_URL`, `TURSO_TOKEN`, `GH_DISPATCH_TOKEN`, opcional `ADMIN_TOKEN`) ficam em `wrangler secret`; nunca no repositório. Atenção: `docs/DEPLOY.md` ainda descreve o fluxo anterior ao Turso.
+**Deploy:** automático a cada merge na `main` (`.github/workflows/deploy.yml`): valida → aplica `database/migrations` no D1 → publica o Worker (`corvo-api`) → publica o front (`corvo-web`) → verifica `/api/health`. Merge só com CI verde (`bash scripts/merge_when_green.sh <PR>`). O fluxo de branches é `hen`/`thig`/`art`/`isar` → PR → `main`; nenhuma outra branch. Migrations de `database/pending/` não vão pelo deploy: são aplicadas no Turso pelo workflow `Turso schema`. Segredos (`INGEST_TOKEN`, `TURSO_URL`, `TURSO_TOKEN`, `GH_DISPATCH_TOKEN`, opcional `ADMIN_TOKEN`) ficam em `wrangler secret`; nunca no repositório. Atenção: `docs/DEPLOY.md` ainda descreve o fluxo anterior ao Turso.
 
 ## 23. Documentação relevante
 

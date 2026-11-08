@@ -33,14 +33,14 @@ def seasonal_rows(weeks=6, days=None):
 
 
 def test_flag_off_cluster_anomaly_ignores_observations(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_SEASONAL_BASELINE_V2", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_SEASONAL_BASELINE_V2", raising=False)
     sigs = [sig(i, minutes_ago=2 + i) for i in range(8)]
     c = cluster_of(sigs)
     assert cluster_anomaly(c, sigs, [], NOW, seasonal_rows()) == cluster_anomaly(c, sigs, [], NOW, None)
 
 
 def test_flag_on_uses_seasonal_baseline_and_falls_back_without_history(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_SEASONAL_BASELINE_V2", "1")
+    monkeypatch.setenv("CORVO_FLAG_SEASONAL_BASELINE_V2", "1")
     sigs = [sig(i, minutes_ago=2 + i) for i in range(8)]  # 8 sinais na última hora, num domingo 3h normalmente quieto
     c = cluster_of(sigs)
     assert cluster_anomaly(c, sigs, [], NOW, seasonal_rows()) > 0.5  # a base sazonal enxerga o anormal
@@ -56,8 +56,8 @@ def test_cluster_refine_flag_is_wired(monkeypatch):
 
     src = {"id": "x", "name": "x", "domain": "x", "adapter": "rss", "source_class": "NEWS_HIGH", "url": "u", "state": None, "enabled": True}
     feed = lambda url: b"<rss><channel></channel></rss>"  # noqa: E731
-    monkeypatch.delenv("PULSO_FLAG_CLUSTER_REFINE", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_CLUSTER_REFINE", raising=False)
     off = run_once([src], fetcher=feed, now=NOW)
-    monkeypatch.setenv("PULSO_FLAG_CLUSTER_REFINE", "1")
+    monkeypatch.setenv("CORVO_FLAG_CLUSTER_REFINE", "1")
     on = run_once([src], fetcher=feed, now=NOW)
     assert off["events"] == on["events"] == []  # sem sinais, as duas flags dão o mesmo resultado (V1 intacto)

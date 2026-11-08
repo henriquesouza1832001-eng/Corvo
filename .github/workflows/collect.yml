@@ -41,8 +41,8 @@ jobs:
       - name: Rodar o Engine
         working-directory: engine
         env:
-          PULSO_API_URL: ${{ secrets.PULSO_API_URL }}
-          PULSO_INGEST_TOKEN: ${{ secrets.PULSO_INGEST_TOKEN }}
+          CORVO_API_URL: ${{ secrets.CORVO_API_URL }}
+          CORVO_INGEST_TOKEN: ${{ secrets.CORVO_INGEST_TOKEN }}
           PYTHONIOENCODING: utf-8
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.push }}" != "true" ]; then

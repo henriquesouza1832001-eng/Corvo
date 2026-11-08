@@ -15,13 +15,13 @@ def _run():
 
 
 def test_flag_off_sends_an_empty_list_and_never_computes(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_FORECAST_V2_SHADOW", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_FORECAST_V2_SHADOW", raising=False)
     monkeypatch.setattr(pipeline, "shadow_rows", lambda forecasts: pytest.fail("flag desligada: não deveria calcular"))
     assert _run()["shadow_results"] == []
 
 
 def test_flag_on_puts_the_rows_in_the_batch(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_FORECAST_V2_SHADOW", "1")
+    monkeypatch.setenv("CORVO_FLAG_FORECAST_V2_SHADOW", "1")
     monkeypatch.setattr(pipeline, "shadow_rows", lambda forecasts: [ROW])
     assert _run()["shadow_results"] == [ROW]
 

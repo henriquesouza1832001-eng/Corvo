@@ -3,7 +3,7 @@ import type { CameraFeed, Forecast, CorvoEvent, PulseSnapshot, SourceHealth } fr
 /** Em produção defina VITE_API_BASE (URL pública do Worker). Nunca coloque segredos aqui. */
 const BASE: string =
 	import.meta.env.VITE_API_BASE ??
-	(import.meta.env.PROD ? "https://pulso-api.henriquesouza.workers.dev" : "");
+	(import.meta.env.PROD ? "https://corvo-api.henriquesouza.workers.dev" : "");
 
 async function get<T>(path: string): Promise<T> {
 	const res = await fetch(`${BASE}${path}`);

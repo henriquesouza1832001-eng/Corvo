@@ -1,0 +1,19 @@
+# CORVO na Oracle A1, ao lado do MNEME. NÃO é ligado ainda: só sobe quando o dono mandar (ver docs/corvo/MNEME_INTEGRACAO.md).
+# Uso (na A1):  cd ~/corvo/deploy/oracle && cp .env.example .env && docker compose up -d --build
+services:
+  corvo:
+    build:
+      context: ../..
+      dockerfile: deploy/oracle/Dockerfile
+    restart: always
+    env_file: .env # CORVO_API_URL e CORVO_INGEST_TOKEN; nunca vão para o Git
+    volumes:
+      - ./inbox:/inbox:ro # o MNEME deposita aqui os .jsonl de notícias que coletou
+      - corvo-state:/state
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+volumes:
+  corvo-state:

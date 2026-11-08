@@ -74,15 +74,15 @@ _OBS = obs_rows()
 @contextmanager
 def flags_env(**on: bool) -> Iterator[None]:
     """Mede com as flags no PADRÃO de produção, exceto as passadas aqui (e o SENTINEL, ligado para contar investigações)."""
-    saved = {k: v for k, v in os.environ.items() if k.startswith("PULSO_FLAG_")}
+    saved = {k: v for k, v in os.environ.items() if k.startswith("CORVO_FLAG_")}
     try:
         for name in FLAGS:
-            os.environ.pop(f"PULSO_FLAG_{name}", None)
+            os.environ.pop(f"CORVO_FLAG_{name}", None)
         for name, value in {"SENTINEL": True, **on}.items():
-            os.environ[f"PULSO_FLAG_{name}"] = "1" if value else "0"
+            os.environ[f"CORVO_FLAG_{name}"] = "1" if value else "0"
         yield
     finally:
-        for k in [k for k in os.environ if k.startswith("PULSO_FLAG_")]:
+        for k in [k for k in os.environ if k.startswith("CORVO_FLAG_")]:
             del os.environ[k]
         os.environ.update(saved)
 

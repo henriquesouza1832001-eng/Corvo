@@ -44,7 +44,7 @@ npm run db:seed                    # dados FICTÍCIOS, só para desenvolvimento
 copy apps\worker\.dev.vars.example apps\worker\.dev.vars
 npm run dev:worker                 # API em http://localhost:8787
 ```
-Em outro terminal: `cd engine` e `py -m corvo_engine.pipeline` (rodada simulada, não envia nada). Para ver eventos reais no seu banco local: `$env:PULSO_API_URL="http://localhost:8787"; $env:PULSO_INGEST_TOKEN="<o valor do seu .dev.vars>"; py -m corvo_engine.pipeline --push`.
+Em outro terminal: `cd engine` e `py -m corvo_engine.pipeline` (rodada simulada, não envia nada). Para ver eventos reais no seu banco local: `$env:CORVO_API_URL="http://localhost:8787"; $env:CORVO_INGEST_TOKEN="<o valor do seu .dev.vars>"; py -m corvo_engine.pipeline --push`.
 
 **Armadilhas conhecidas (Windows):** use `py`, não `python`; se o `npm run dev:worker` ficar mudo, há um servidor antigo preso na porta (feche pelo Gerenciador de Tarefas ou use outra porta com `--port`); nunca rode o seed em produção.
 

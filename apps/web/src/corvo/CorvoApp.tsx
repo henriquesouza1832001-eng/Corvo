@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { DEMO_BUDGET, DEMO_FORECASTS, DEMO_NEWS } from "./demo";
+import { useLiveFeed } from "./feed";
 import {
 	BUFFER_MIN,
 	HOT_MIN,
@@ -31,11 +32,19 @@ function Raven({ size = 28 }: { size?: number }) {
 }
 
 export function CorvoApp() {
-	const [pressure, setPressure] = useState<Pressure>("normal");
+	const live = useLiveFeed();
+	const [simulated, setSimulated] = useState<Pressure>("normal");
 	const [filter, setFilter] = useState<Verdict | "all">("all");
+	const pressure: Pressure = live ? live.pressure : simulated;
+	const budget = live ? live.budget : DEMO_BUDGET;
+	const forecasts = live ? live.forecasts : DEMO_FORECASTS;
 
-	const rows = useMemo(() => DEMO_NEWS.map((n) => ({ n, d: decide(n, pressure) })), [pressure]);
+	const rows = useMemo(
+		() => (live ? live.items.map((n) => ({ n, d: { verdict: n.verdict as Verdict, reason: n.reason } })) : DEMO_NEWS.map((n) => ({ n, d: decide(n, pressure) }))),
+		[live, pressure],
+	);
 	const counts = useMemo(() => {
+		if (live) return { c: { hot: live.totals.hot, buffer: live.totals.buffer, drop: live.totals.dropped } as Record<Verdict, number>, reasons: live.totals.reasons };
 		const c: Record<Verdict, number> = { hot: 0, buffer: 0, drop: 0 };
 		const reasons: Record<string, number> = {};
 		for (const { d } of rows) {
@@ -43,9 +52,9 @@ export function CorvoApp() {
 			if (d.verdict === "drop") reasons[d.reason] = (reasons[d.reason] ?? 0) + 1;
 		}
 		return { c, reasons };
-	}, [rows]);
+	}, [live, rows]);
 	const shown = rows.filter(({ d }) => filter === "all" || d.verdict === filter);
-	const total = rows.length;
+	const total = live ? live.totals.received : rows.length;
 
 	return (
 		<>
@@ -57,7 +66,11 @@ export function CorvoApp() {
 						<p>Hugin e Munin sobrevoam o mundo e voltam com o que viram.</p>
 					</div>
 				</div>
-				<span className="badge" title="Nenhum dado desta página é real">demonstração · dados fictícios</span>
+				{live ? (
+					<span className="badge live" title="Dados reais vindos do Oracle via Cloudflare">ao vivo · {new Date(live.generatedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+				) : (
+					<span className="badge" title="Ainda não chegou nenhum dado real do Oracle">demonstração · dados fictícios</span>
+				)}
 			</header>
 
 			<main>
@@ -100,12 +113,12 @@ export function CorvoApp() {
 							<div>
 								<strong>Pressão do orçamento</strong>
 								<small>
-									{DEMO_BUDGET.used.toLocaleString("pt-BR")} de {DEMO_BUDGET.limit.toLocaleString("pt-BR")} linhas hoje. Experimente os outros modos.
+									{budget.used.toLocaleString("pt-BR")} de {budget.limit.toLocaleString("pt-BR")} linhas hoje.{live ? "" : " Experimente os outros modos."}
 								</small>
 							</div>
 							<div className="seg" role="radiogroup" aria-label="Pressão do orçamento">
 								{PRESSURES.map((p) => (
-									<button key={p.id} role="radio" aria-checked={pressure === p.id} className={pressure === p.id ? "on" : ""} title={p.hint} onClick={() => setPressure(p.id)}>
+									<button key={p.id} role="radio" aria-checked={pressure === p.id} disabled={!!live} className={pressure === p.id ? "on" : ""} title={p.hint} onClick={() => setSimulated(p.id)}>
 										{p.label}
 									</button>
 								))}
@@ -140,7 +153,7 @@ export function CorvoApp() {
 					<div className="row">
 						<h2 id="feed">Notícias tratadas</h2>
 						<div className="seg" role="group" aria-label="Filtrar por decisão">
-							{(["all", "hot", "buffer", "drop"] as const).map((f) => (
+							{(live ? (["all", "hot", "buffer"] as const) : (["all", "hot", "buffer", "drop"] as const)).map((f) => (
 								<button key={f} className={filter === f ? "on" : ""} aria-pressed={filter === f} onClick={() => setFilter(f)}>
 									{f === "all" ? "todas" : VERDICT_LABEL[f]}
 								</button>
@@ -160,7 +173,8 @@ export function CorvoApp() {
 						Uma previsão sem histórico de acerto fica marcada como <em>calibrando</em>. Sinal fraco não é fato, e alegação política não vira fato.
 					</p>
 					<div className="forecasts">
-						{DEMO_FORECASTS.map((f) => (
+						{forecasts.length === 0 && <p className="lede">Nenhuma previsão publicada ainda.</p>}
+						{forecasts.map((f) => (
 							<Forecast key={f.id} f={f} />
 						))}
 					</div>

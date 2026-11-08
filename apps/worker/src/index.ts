@@ -11,7 +11,7 @@ import { admin } from "./routes/admin";
 import { forecasts } from "./routes/forecasts";
 import { stats } from "./routes/stats";
 import { history } from "./routes/history";
-import { cameras } from "./routes/cameras";
+import { corvo } from "./routes/corvo";
 import type { AppEnv, Bindings } from "./env";
 import { TursoDatabase } from "./lib/turso";
 import { dispatchCollection, dispatchHealthcheck, isHealthcheckSlot } from "./lib/dispatch";
@@ -46,7 +46,7 @@ app.route("/api/map", map);
 app.route("/api/forecasts", forecasts);
 app.route("/api/stats", stats);
 app.route("/api/history", history);
-app.route("/api/cameras", cameras);
+app.route("/api/corvo", corvo);
 app.route("/api/ingest", ingest);
 app.route("/api/admin", admin);
 

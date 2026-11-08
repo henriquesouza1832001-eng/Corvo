@@ -21,7 +21,7 @@ from ...processing.importance import brazil_relevant
 from ...processing.keyword_engine import KeywordEngine
 from ...processing.normalizer import canonical_url, clean_text, content_hash, is_broadcast_listing
 
-USER_AGENT = "pulso-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
+USER_AGENT = "corvo-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
 MAX_BYTES = 5_000_000
 ATOM = "{http://www.w3.org/2005/Atom}"
 DC = "{http://purl.org/dc/elements/1.1/}"

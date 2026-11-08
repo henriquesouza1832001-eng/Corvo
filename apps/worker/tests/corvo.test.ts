@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+import { setup } from "./helpers/ingest";
+
+const NOW = new Date().toISOString();
+const news = (id: string, extra = {}) => ({
+	item_id: id, source_id: "agencia", source_reliability: 0.8, title: `Notícia ${id}`, url: "https://a.com/" + id, published_at: NOW,
+	verdict: "hot", reason: "relevant", relevance: 0.9, kind: "fato", topics: ["banco_central"], assets: [{ symbol: "BTC", direction: "up", horizon: "24h" }], ...extra,
+});
+const fc = (extra = {}) => ({ forecast_id: "f1", question: "q?", probability: 0.6, interval_low: 0.4, interval_high: 0.8, evidences: 3, sources: 2, method: "m", horizon: "24h", status: "calibrando", ...extra });
+const stats = { bucket: NOW, pressure: "normal", received: 10, hot: 2, buffer: 3, dropped: 5, reasons: { duplicate_url: 3, irrelevant: 2 } };
+
+describe("API do CORVO", () => {
+	it("recusa ingestão sem token", async () => {
+		const t = setup();
+		const r = await t.raw("/api/corvo/ingest", { method: "POST", body: "{}" });
+		expect(r.status).toBe(401);
+	});
+
+	it("grava lote e o feed devolve notícias, estatísticas, previsões e o orçamento", async () => {
+		const t = setup();
+		const post = (body: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify(body) });
+		const r = await post({ news: [news("a"), news("b", { verdict: "buffer", relevance: 0.4 })], stats: [stats], forecasts: [fc()] });
+		expect(r.status).toBe(200);
+		expect((await r.json()) as { written: number }).toMatchObject({ written: 4 });
+		const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
+		expect(feed.news).toHaveLength(2);
+		expect(feed.news[0].topics).toEqual(["banco_central"]);
+		expect(feed.stats[0].reasons.duplicate_url).toBe(3);
+		expect(feed.forecasts[0].probability).toBe(0.6);
+		expect(feed.budget.used).toBe(8); // 4 itens x 2 linhas
+		expect(feed.pressure).toBe("normal");
+	});
+
+	it("reenviar o mesmo item não duplica", async () => {
+		const t = setup();
+		const post = () => t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify({ news: [news("a")] }) });
+		await post(); await post();
+		const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
+		expect(feed.news).toHaveLength(1);
+	});
+
+	it("rejeita previsão sem método, ou com probabilidade fora do intervalo, e notícia descartada", async () => {
+		const t = setup();
+		const post = (body: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify(body) });
+		expect((await post({ forecasts: [fc({ method: "" })] })).status).toBe(400);
+		expect((await post({ forecasts: [fc({ probability: 0.9 })] })).status).toBe(400);
+		expect((await post({ news: [news("x", { verdict: "drop" })] })).status).toBe(400);
+	});
+
+	it("o Oracle lê a pressão com token; sem token, 401", async () => {
+		const t = setup();
+		expect((await t.get("/api/corvo/pressure")).status).toBe(401);
+		const r = await t.get("/api/corvo/pressure", { Authorization: "Bearer segredo-de-teste" });
+		expect(await r.json()).toMatchObject({ pressure: "normal", limit: 100000 });
+	});
+});

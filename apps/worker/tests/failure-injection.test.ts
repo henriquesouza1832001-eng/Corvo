@@ -90,7 +90,7 @@ describe("sanitização de erro do painel do operador", () => {
 });
 
 describe("CORS: só as origens configuradas recebem Access-Control-Allow-Origin", () => {
-	const SITE = "https://pulso-web.henriquesouza.workers.dev";
+	const SITE = "https://corvo-web.henriquesouza.workers.dev";
 	const ALLOWED = { ALLOWED_ORIGINS: `${SITE},http://localhost:5173` };
 	const acao = (r: Response) => r.headers.get("access-control-allow-origin");
 
@@ -101,7 +101,7 @@ describe("CORS: só as origens configuradas recebem Access-Control-Allow-Origin"
 		expect(acao(pre)).toBe(SITE);
 	});
 
-	it.each(["https://evil.example", "null", `${SITE}.evil.example`, "https://evil.example/https://pulso-web.henriquesouza.workers.dev", SITE.toUpperCase()])(
+	it.each(["https://evil.example", "null", `${SITE}.evil.example`, "https://evil.example/https://corvo-web.henriquesouza.workers.dev", SITE.toUpperCase()])(
 		"origem estranha (%s): sem Access-Control-Allow-Origin no GET nem no preflight",
 		async (origin) => {
 			const s = setup();

@@ -10,7 +10,7 @@ import urllib.request
 
 RETRY_STATUS = frozenset({500, 502, 503, 504})  # o Worker/Cloudflare trocando de versão ou sobrecarregado
 RETRY_BACKOFF_S = (2.0, 5.0)
-USER_AGENT = "pulso-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
+USER_AGENT = "corvo-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
 
 
 class WorkerUnavailable(RuntimeError):
@@ -47,11 +47,11 @@ def _get_json(path: str, key: str, base_url: str | None, token: str | None, stri
     """Lê uma lista do Worker. `strict=False` (dado opcional): qualquer falha vira lista vazia e o ciclo segue sem ele.
     `strict=True` (dado de que depende não reenviar tudo): a falha sobe, para o ciclo NÃO tratar 'Worker fora do ar' como
     'banco vazio' (o que recriaria e reenviaria todos os sinais e eventos)."""
-    base_url = base_url or os.environ.get("PULSO_API_URL", "http://localhost:8787")
-    token = token or os.environ.get("PULSO_INGEST_TOKEN")
+    base_url = base_url or os.environ.get("CORVO_API_URL", "http://localhost:8787")
+    token = token or os.environ.get("CORVO_INGEST_TOKEN")
     if not token:
         if strict:
-            raise WorkerAuthError("PULSO_INGEST_TOKEN não definido (use variável de ambiente, nunca o Git).")
+            raise WorkerAuthError("CORVO_INGEST_TOKEN não definido (use variável de ambiente, nunca o Git).")
         return []
     try:
         return _read_json(f"{base_url}{path}", token, timeout).get(key, [])
@@ -102,16 +102,16 @@ class PushError(RuntimeError):
 def push_batch(batch: dict, base_url: str | None = None, token: str | None = None, retries: int = 2) -> dict:
     """Envia um lote. A ingestão é idempotente (upsert), então repetir é seguro: falhas TRANSITÓRIAS (rede, 5xx) têm até
     `retries` novas tentativas; 4xx (lote inválido, token) não são repetidos e mostram o motivo."""
-    base_url = base_url or os.environ.get("PULSO_API_URL", "http://localhost:8787")
-    token = token or os.environ.get("PULSO_INGEST_TOKEN")
+    base_url = base_url or os.environ.get("CORVO_API_URL", "http://localhost:8787")
+    token = token or os.environ.get("CORVO_INGEST_TOKEN")
     if not token:
-        raise RuntimeError("PULSO_INGEST_TOKEN não definido (use variável de ambiente, nunca o Git).")
+        raise RuntimeError("CORVO_INGEST_TOKEN não definido (use variável de ambiente, nunca o Git).")
     data = json.dumps(batch).encode("utf-8")
     for attempt in range(retries + 1):
         req = urllib.request.Request(
             f"{base_url}/api/ingest", data=data, method="POST",
             headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}",
-                     "User-Agent": "pulso-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"},
+                     "User-Agent": "corvo-engine/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"},
         )
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - URL controlada pela configuração

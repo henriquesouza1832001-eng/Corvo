@@ -18,8 +18,7 @@ coletores (RSS, GDELT, oficiais)
 - O banco grande e barato é o da Oracle (142 GB livres). O D1 (100 mil linhas/dia) recebe só o que o portão aprova.
 - Os pesos de relevância são hipóteses a medir (ablation), não verdade.
 
-## Pendências
+## Mais
 
-- Ligar o portão ao pipeline (`pipeline.py`, reservado por claude-hen) e ler `Pressure` de `write_budget`.
-- Persistência do buffer na Oracle e contrato de entrega ao MNEME.
-- Renomeação Pulso -> Corvo feita no código; recursos de infra já implantados (Workers pulso-api/pulso-web, banco D1 pulso, segredos PULSO_*) mantêm o nome até migrarmos o deploy.
+- Arquitetura (Oracle = base, Cloudflare = painel): [ARQUITETURA.md](ARQUITETURA.md).
+- Subir junto do MNEME: [MNEME_INTEGRACAO.md](MNEME_INTEGRACAO.md).

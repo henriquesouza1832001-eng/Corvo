@@ -121,7 +121,7 @@ Brier absoluto não prova valor: com todos os desfechos negativos a referência 
 | Expected | least privilege efetivo, rate limit/WAF, audit trail e testes de abuso. |
 | Reproduction / test | `hardening.test.ts`, `auth.test.ts` e verificação local; configuração remota/WAF não auditados. |
 | Root cause | proteção de borda e criação do segredo são operacionais, não resolvidas pelo Worker. |
-| Suggested fix area | criar `ADMIN_TOKEN`/`PULSO_ADMIN_TOKEN`, confirmar `admin_token_separate=true`, configurar rate limit/WAF. |
+| Suggested fix area | criar `ADMIN_TOKEN`/`CORVO_ADMIN_TOKEN`, confirmar `admin_token_separate=true`, configurar rate limit/WAF. |
 | Do not modify | segredos e `.dev.vars`. |
 
 ### CORVO-RT-008 — métricas de clustering/provenance/performance ausentes
@@ -226,7 +226,7 @@ Não foi possível provar freshness com 200, recuperação no Turso/D1 real, `wr
 1. Testar 200 stale e propagar cobertura degradada até forecast/status.
 2. Corrigir NORMAL_DAY sem enfraquecer seu teste.
 3. Corrigir `write_budget` para resposta perdida e validar Turso/D1 reais.
-4. Criar `ADMIN_TOKEN`/`PULSO_ADMIN_TOKEN` e aplicar rate limit/WAF.
+4. Criar `ADMIN_TOKEN`/`CORVO_ADMIN_TOKEN` e aplicar rate limit/WAF.
 5. Fechar corpus temporal de positivos e hard negatives; medir V1/V2 por evento.
 6. Medir cascatas de proveniência, dedup e clustering antes de alterar pesos.
 7. Completar revisão de fontes ativas.

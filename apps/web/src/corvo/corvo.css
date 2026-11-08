@@ -88,3 +88,6 @@ main { display: grid; gap: 40px; padding-bottom: 40px; }
 footer { padding-block: 24px 48px; color: var(--mute); font-size: .85rem; border-top: 1px solid var(--line); }
 @media (max-width: 520px) { .rel-bar { flex: 1; width: auto; } }
 @media (prefers-reduced-motion: reduce) { .seg-bar { transition: none; } }
+.badge.live { border-color: var(--hot); color: var(--hot); }
+.seg button:disabled { cursor: default; }
+.seg button:disabled:not(.on) { opacity: .5; }

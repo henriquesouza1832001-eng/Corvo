@@ -63,8 +63,8 @@ def local():
 
 @pytest.fixture(autouse=True)
 def _production_like(monkeypatch):
-    monkeypatch.delenv("PULSO_ALLOW_PRIVATE_FETCH", raising=False)  # como em produção: loopback NÃO é permitido
-    monkeypatch.setenv("PULSO_API_URL", "https://pulso-api.example.workers.dev")
+    monkeypatch.delenv("CORVO_ALLOW_PRIVATE_FETCH", raising=False)  # como em produção: loopback NÃO é permitido
+    monkeypatch.setenv("CORVO_API_URL", "https://corvo-api.example.workers.dev")
 
 
 def test_direct_loopback_url_is_blocked_before_any_byte_is_read(local):
@@ -100,14 +100,14 @@ def test_nothing_is_sent_to_a_blocked_destination_not_even_a_connection_attempt(
 
 def test_redirect_to_the_cloud_metadata_endpoint_is_blocked(monkeypatch, local):
     # a 1ª perna (o servidor) é liberada de propósito para provar que é a 2ª (metadata) que o guard barra
-    monkeypatch.setenv("PULSO_API_URL", local)  # o servidor local passa a ser o "host permitido" (como o Worker em desenvolvimento)
+    monkeypatch.setenv("CORVO_API_URL", local)  # o servidor local passa a ser o "host permitido" (como o Worker em desenvolvimento)
     with pytest.raises((UnsafeURLError, urllib.error.URLError)):
         http_fetch(f"{local}/to/http://169.254.169.254/latest/meta-data/")
 
 
 @pytest.mark.parametrize("target", ["file:///etc/passwd", "file:///C:/Windows/win.ini", "ftp://example.com/x", "gopher://example.com/", "data:text/plain,oi"])
 def test_redirect_to_non_http_schemes_is_refused_never_read(monkeypatch, local, target):
-    monkeypatch.setenv("PULSO_API_URL", local)
+    monkeypatch.setenv("CORVO_API_URL", local)
     with pytest.raises((UnsafeURLError, urllib.error.URLError)):
         http_fetch(f"{local}/to/{target.replace(':', '%3A', 1)}")
 
@@ -118,14 +118,14 @@ def test_the_opener_has_no_file_ftp_or_data_handlers():
 
 
 def test_the_worker_host_itself_is_allowed_so_local_development_keeps_working(monkeypatch, local):
-    monkeypatch.setenv("PULSO_API_URL", local)
+    monkeypatch.setenv("CORVO_API_URL", local)
     assert http_fetch(f"{local}/ok").startswith(b"<rss>")
 
 
 def test_explicit_test_override_allows_loopback_and_only_when_set(monkeypatch, local):
-    monkeypatch.setenv("PULSO_ALLOW_PRIVATE_FETCH", "1")
+    monkeypatch.setenv("CORVO_ALLOW_PRIVATE_FETCH", "1")
     assert http_fetch(f"{local}/ok").startswith(b"<rss>")
-    monkeypatch.setenv("PULSO_ALLOW_PRIVATE_FETCH", "0")
+    monkeypatch.setenv("CORVO_ALLOW_PRIVATE_FETCH", "0")
     with pytest.raises(UnsafeURLError):
         http_fetch(f"{local}/ok")
 

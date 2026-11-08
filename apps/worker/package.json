@@ -8,8 +8,8 @@
     "typecheck": "wrangler types && tsc -p .",
     "test": "vitest run --passWithNoTests",
     "build": "wrangler deploy --dry-run --outdir dist",
-    "db:migrate": "wrangler d1 migrations apply pulso --local",
-    "db:seed": "wrangler d1 execute pulso --local --file ../../database/seeds/dev.sql"
+    "db:migrate": "wrangler d1 migrations apply corvo --local",
+    "db:seed": "wrangler d1 execute corvo --local --file ../../database/seeds/dev.sql"
   },
   "dependencies": {
     "@corvo/shared": "*",

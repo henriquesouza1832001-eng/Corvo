@@ -105,7 +105,7 @@ def test_strict_reads_raise_on_unavailable_or_auth_but_soft_reads_return_empty(m
     monkeypatch.setattr(client.urllib.request, "urlopen", fail(401))
     with pytest.raises(client.WorkerAuthError):
         client.fetch_event_digest(base_url="https://w", token="t", strict=True)
-    monkeypatch.delenv("PULSO_INGEST_TOKEN", raising=False)
+    monkeypatch.delenv("CORVO_INGEST_TOKEN", raising=False)
     with pytest.raises(client.WorkerAuthError):
         client.fetch_signals(base_url="https://w", strict=True)
 

@@ -1,5 +1,7 @@
 export interface Bindings {
 	DB: D1Database;
+	/** Cache de curta duração do feed do painel (KV). Opcional: sem ele, o feed vai direto ao D1. */
+	KV?: KVNamespace;
 	/** "turso" troca o D1 pelo Turso (lib/turso.ts) sem mudar as rotas; qualquer outro valor mantém o D1. */
 	DB_BACKEND?: string;
 	/** Segredos do Turso (`wrangler secret put`): URL libsql:// do banco e token DO BANCO. */

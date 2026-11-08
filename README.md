@@ -1,85 +1,57 @@
-# CORVO 🇧🇷
+# CORVO
 
-**O CORVO é um instrumento que mede o Brasil em tempo real.** Ele junta centenas de fontes públicas (imprensa nacional e local, alertas oficiais, clima, energia, câmbio, saúde, buscas) e responde, o tempo todo, a quatro perguntas:
+**CORVO é um motor preditivo para o mundo todo.** O nome vem de Hugin (pensamento) e Munin (memória), os corvos de Odin que sobrevoam os nove reinos todos os dias e voltam para contar o que viram. Aqui, eles leem o planeta e voltam com previsões.
 
-1. **O que está acontecendo?** (eventos, agrupados e localizados por estado e cidade)
-2. **Quão fora do normal está?** (anomalia contra o comportamento esperado)
-3. **Quão bem sustentado está?** (confiança: quantas fontes independentes, se há confirmação oficial)
-4. **Para onde está indo?** (previsões de curto prazo, sempre com probabilidade, incerteza e histórico de acertos)
+A ideia é prever **quase qualquer coisa que se possa medir**: política, catástrofes, conflitos, economia, câmbio, ações, cripto, commodities, energia e o que mais tiver sinal. Toda previsão sai com **probabilidade, incerteza, evidências e método**, e depois é conferida contra o que aconteceu de verdade.
 
-> A ideia é o espírito do *Pizza Index*: um sinal indireto que muda **antes** da manchete. O CORVO não é um portal de notícias. Uma notícia é só mais um sensor.
+> Inspiração: o *Pizza Index*, um sinal indireto (movimento de pizzarias perto do Pentágono) que muda **antes** da manchete. O CORVO usa notícias como um sensor entre muitos, ao lado de trânsito, metrô, voos, energia, internet e atenção pública. Como o método funciona e seus limites: [docs/corvo/SENSORES.md](docs/corvo/SENSORES.md).
 
-O CORVO mede **atividade e sinais públicos detectados**. Ele não mede a probabilidade de dano a ninguém, não afirma que algo é verdade e não rastreia pessoas.
+## O que o CORVO faz
 
-## Como funciona
+1. **Lê o mundo:** notícias de todos os países, comunicados oficiais, calendários econômicos e sensores indiretos.
+2. **Filtra antes de gravar:** um portão de admissão descarta duplicata, notícia velha, assunto irrelevante e excesso por fonte, para proteger o banco e deixar só o que importa.
+3. **Separa fato de rumor:** na dúvida é "reportagem"; só fonte oficial vira "fato". Alegação não é fato.
+4. **Descobre o que o acontecimento toca:** juntar as matérias do mesmo fato e ligar a ativos (BTC, dólar, ouro, petróleo, índices).
+5. **Prevê com honestidade:** sem histórico suficiente, diz que não sabe. Toda previsão é registrada e pontuada (Brier), e o histórico de acertos calibra as próximas.
+6. **Mostra num painel:** feed tratado, funil do portão e previsões, atualizado a cada 30 segundos.
+
+O CORVO **não envia ordens de compra ou venda** e não é recomendação de investimento. As decisões de trade ficam com o [MNEME](https://github.com/th1agx/MNEME), que mede cada resultado em simulado antes de qualquer dinheiro real.
+
+## Arquitetura
 
 ```text
- FONTES (≈280)                     MOTOR PYTHON                              PRODUTO
- imprensa nacional/local     coletar → normalizar → deduplicar        ┌──────────────────────┐
- alertas oficiais (INMET,    localizar (cidade/UF) → agrupar em       │  Corvo 0-100 do país │
- Defesa Civil, INPE...)      eventos com estado                       │  e de cada estado    │
- energia, câmbio, saúde,     → severidade + confiança + frescor       │  eventos e "por quê" │
- buscas, redes sociais       → anomalia e tendência (baseline)        │  previsões com       │
-                             → Sentinela (investiga o anormal)        │  histórico de acerto │
-                             → previsão (Brier, backtest)             └──────────────────────┘
+ MNEME / coletores            ORACLE (base e cérebro)                   CLOUDFLARE (só o painel)
+ notícias, sensores  ───────▶ portão de admissão → motor de previsão ──▶ corvo-api (D1 + KV) ──▶ corvo-web
+                              histórico grande, calibração              POST /api/corvo/ingest    GET /api/corvo/feed
 ```
 
-- **Coleta:** a cada 5 minutos, em paralelo, com limite de uso por servidor e respeito aos termos de cada fonte (`docs/COLLECTION_PROTOCOL.md`).
-- **Eventos:** notícias sobre o mesmo fato viram **um evento** com identidade estável; cópias da mesma matéria contam como **uma** fonte.
-- **O que é de agora vale mais:** cada categoria tem uma meia-vida (trânsito esfria em horas; política em dias). Uma notícia de 12 h atrás pesa menos que uma de agora.
-- **Rotina de campanha pesa pouco:** comício, carreata e agenda de candidato são eventos esperados e entram com severidade baixa, a menos que venha com violência ou vítimas.
-- **Corvo (0-100):** soma explicável de severidade, confiança, velocidade, diversidade de fontes, anomalia, recência, persistência e alcance. Todo número responde "por que 87?" ([docs/SCORING.md](docs/SCORING.md)).
-- **Severidade ≠ confiança:** um incêndio possivelmente grande com um só relato tem severidade alta e confiança baixa. Rede social **detecta, nunca confirma**.
-- **Sentinela:** quando algo foge do normal (volume, velocidade, vários tipos de fonte ao mesmo tempo, sinal oficial), abre uma **investigação** com estado, procura evidências nos sinais já coletados e vai esfriando até encerrar.
-- **Previsão honesta:** sem histórico suficiente o CORVO responde `INSUFFICIENT_DATA`; até 100 previsões resolvidas, tudo é `EXPERIMENTAL`; toda previsão registra método, versão, evidências e é pontuada depois (Brier). Probabilidade nunca vem de um modelo de linguagem ([docs/architecture/PREDICTION.md](docs/architecture/PREDICTION.md)).
+- **Oracle:** coleta, decide e guarda o histórico (roda ao lado do MNEME, [docs/corvo/MNEME_INTEGRACAO.md](docs/corvo/MNEME_INTEGRACAO.md)).
+- **Cloudflare:** guarda e exibe só o que o painel precisa, no plano gratuito (D1 de 100 mil linhas por dia, KV de cache).
+- Detalhes e rotas: [docs/corvo/ARQUITETURA.md](docs/corvo/ARQUITETURA.md).
+
+## Peças do repositório
+
+| Peça | Pasta | Tecnologia |
+|---|---|---|
+| Painel | [apps/web](apps/web) | React + TypeScript + Vite |
+| API | [apps/worker](apps/worker) | Cloudflare Worker + Hono + zod, D1 e KV |
+| Motor | [engine](engine) | Python (`corvo_engine`): portão, publicador, sentinela, previsão |
+| Contratos | [packages/shared](packages/shared) | TypeScript (espelho em `engine/corvo_engine/models.py`) |
+| Banco | [database](database) | migrations SQL do D1 |
+| Implantação no Oracle | [deploy/oracle](deploy/oracle) | Docker Compose |
 
 ## O que o CORVO nunca faz
 
 - Reconhecimento facial, rastreamento de pessoas ou perfil individual.
-- Tratar alegação política como fato, recomendar voto, ranquear candidatos ou prever vencedor de eleição.
-- Burlar login, captcha, limites ou termos de uso de qualquer fonte. Rede social entra só pela API oficial, com chave do projeto.
-- Publicar previsão sem probabilidade, incerteza e método.
+- Tratar alegação política como fato, recomendar voto ou prever vencedor de eleição como certeza.
+- Burlar login, captcha, limites ou termos de uso de qualquer fonte.
+- Publicar previsão sem probabilidade, incerteza, evidências e método.
 
-## Peças do projeto
+## Estado hoje (novembro de 2026)
 
-| Peça | Pasta | Tecnologia |
-|---|---|---|
-| Interface | [apps/web](apps/web) | React + TypeScript + Vite |
-| API / gateway | [apps/worker](apps/worker) | Cloudflare Worker + Hono + zod |
-| **Motor (a alma do CORVO)** | [engine](engine) | Python, sem dependências obrigatórias |
-| Contratos | [packages/shared](packages/shared) | TypeScript (espelho em `engine/corvo_engine/models.py`) |
-| Banco | [database](database) | migrations SQL (hoje em Turso/SQLite; ver ADR 0008) |
+- **Pronto:** renomeação, portão de admissão com testes, API `corvo-api` e painel `corvo-web` no ar, publicador do lado do Oracle, arquivos de implantação.
+- **Painel:** mostra dados de demonstração (avisa na tela) até chegar o primeiro lote real do Oracle.
+- **Herdado do Pulso:** o motor de eventos, anomalia, Sentinela e previsão foi feito para o Brasil (UFs, INMET, IBGE). A generalização para o mundo é o próximo grande passo.
+- **Falta:** fontes globais documentadas, impacto por ativo, previsões reais publicadas, catálogo de âncoras e sensores indiretos, e o adaptador do lado do MNEME.
 
-O motor roda no GitHub Actions a cada 5 minutos (disparado pelo Cron da Cloudflare), grava no banco pelo Worker e a interface lê a API. Tudo em planos gratuitos; o custo de escrita no banco é um orçamento controlado pelo próprio motor.
-
-## Estado hoje (outubro de 2026)
-
-- ≈280 fontes ativas em todos os estados, mais de 170 veículos locais; coleta completa em menos de 1 minuto.
-- Corvo nacional e por estado, eventos com "por quê", previsões de Corvo e de volume com Brier e backtest.
-- Sentinela e histórico agregado por hora em construção; baseline sazonal precisa de semanas de coleta para ficar útil.
-- Reddit, X e Bluesky: adaptadores prontos e desligados à espera de chaves ([como ativar](docs/ATIVAR_REDES_SOCIAIS.md)).
-- Câmeras: catálogo de links e de algumas prévias autorizadas ([docs/sources/CAMERAS.md](docs/sources/CAMERAS.md)).
-
-O estado detalhado, os problemas conhecidos e o roadmap estão em **[docs/BACKEND_STATUS.md](docs/BACKEND_STATUS.md)**.
-
-## Rodar localmente
-
-```bash
-npm install
-npm run dev:worker          # API em http://127.0.0.1:8787 (D1 local)
-npm run dev:web             # interface em http://localhost:5173
-cd engine
-py -m pytest                # testes do motor
-py -m corvo_engine.pipeline # uma rodada completa, sem enviar nada
-py -m corvo_engine.audit    # o que cada fonte entrega agora
-```
-
-Antes de abrir um PR: `npm run typecheck && npm test && npm run build` e `cd engine && py -m pytest`. Verifique o comportamento real (rode a fonte, chame o endpoint), não só "compilou".
-
-## Documentação
-
-[Arquitetura](docs/architecture/ARCHITECTURE.md) · [API](docs/api/API.md) · [Scoring](docs/SCORING.md) · [Previsão](docs/architecture/PREDICTION.md) · [Protocolo de coleta](docs/COLLECTION_PROTOCOL.md) · [Fontes](docs/sources/SOURCES.md) ([catálogo](docs/sources/CATALOGO_FONTES.md), [câmeras](docs/sources/CAMERAS.md)) · [Pesquisa de sensores](docs/research/PROMPT_PESQUISA_DE_SENSORES.md) · [Operação](docs/RUNBOOK.md) · [Pendências do dono](docs/PENDENCIAS_DO_DONO.md) · [Decisões (ADRs)](docs/decisions) · [Como contribuir](CONTRIBUTING.md) · [Regras para agentes](AGENTS.md)
-
-## Trabalhando em equipe (e com agentes de IA)
-
-Só existem as branches `main`, `hen`, `thig`, `art` e `isar`; **ninguém cria outra**. Mudanças entram por PR para a `main` e o merge é decisão humana. Mais de uma pessoa (ou agente) pode usar a mesma branch, desde que combinem: **um commit por vez**, `git add` sempre por nome de arquivo, e cada um só edita a sua frente. Segredos nunca vão para o repositório. Contrato público só muda com `contracts.ts`, `models.py` e `API.md` juntos, com a label `contract`. Detalhes em [AGENTS.md](AGENTS.md) e [CONTRIBUTING.md](CONTRIBUTING.md).
+Documentação para quem contribui: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CORVO_OVERVIEW.md](CORVO_OVERVIEW.md).

@@ -36,9 +36,9 @@ def test_flag_off_is_identical_to_v1_even_with_acceleration_present():
 
 
 def test_flag_on_via_environment(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_PULSE_V2", "1")
+    monkeypatch.setenv("CORVO_FLAG_PULSE_V2", "1")
     assert pulse_score(stats(extra={"acceleration": 15.0})) == pulse_score(stats(extra={"acceleration": 15.0}), v2=True)
-    monkeypatch.setenv("PULSO_FLAG_PULSE_V2", "0")
+    monkeypatch.setenv("CORVO_FLAG_PULSE_V2", "0")
     assert pulse_score(stats(extra={"acceleration": 15.0})) == pulse_score(stats(extra={"acceleration": 15.0}), v2=False)
 
 

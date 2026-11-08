@@ -53,7 +53,7 @@ Em 2026-10-03, ~01h UTC, produção:
 ## 5. Pequenos pontos no código atual
 - `level ?? 3` (TopBar, PulseIndicator): enquanto a API não responde mostra "nível 3". Preferir estado "carregando" neutro.
 - O app roda sem `VITE_DEMO` em produção (`npm run deploy`): confirmar que o badge "DEMO DATA" nunca aparece lá.
-- `ALLOWED_ORIGINS` do Worker só libera `localhost:5173` e `pulso-web.henriquesouza.workers.dev`. Domínio novo ou outra porta de dev exige o backend atualizar a lista.
+- `ALLOWED_ORIGINS` do Worker só libera `localhost:5173` e `corvo-web.henriquesouza.workers.dev`. Domínio novo ou outra porta de dev exige o backend atualizar a lista.
 - O tipo `HealthSnapshot` em `lib/api.ts` não tem o campo `collection`; pode ser acrescentado para exibir "coleta atrasada".
 
 ## 6. Como combinamos mudanças

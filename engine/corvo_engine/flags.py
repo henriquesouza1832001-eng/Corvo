@@ -3,7 +3,7 @@
 Regra: um V2 só vira padrão LIGADO depois de passar o portão de promoção (shadow, backtest, comparação com o V1). Até lá
 o padrão é DESLIGADO, exceto o que já roda em produção como SHADOW (só grava dados, nunca muda evento, Corvo, alerta ou previsão).
 
-Como ligar/desligar: variável de ambiente `PULSO_FLAG_<NOME>` (`1/true/on` liga; `0/false/off` desliga), por exemplo como
+Como ligar/desligar: variável de ambiente `CORVO_FLAG_<NOME>` (`1/true/on` liga; `0/false/off` desliga), por exemplo como
 variável do repositório no `collect.yml`. Sem variável vale o padrão abaixo. Nome desconhecido é erro (evita typo silencioso).
 """
 from __future__ import annotations
@@ -43,7 +43,7 @@ _FALSE = {"0", "false", "off", "no", "nao", "não"}
 def enabled(name: str, env: dict[str, str] | None = None) -> bool:
     if name not in FLAGS:
         raise KeyError(f"feature flag desconhecida: {name}")
-    raw = (os.environ if env is None else env).get(f"PULSO_FLAG_{name}", "").strip().lower()
+    raw = (os.environ if env is None else env).get(f"CORVO_FLAG_{name}", "").strip().lower()
     if raw in _TRUE:
         return True
     if raw in _FALSE:

@@ -22,7 +22,7 @@ def _run(title, **kw):
 
 
 def test_flag_off_changes_nothing_and_reports_the_shadow(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_GEO_V2", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_GEO_V2", raising=False)
     b = _run("Acidente grave em Itaúna deixa feridos")
     ev = b["events"][0]
     assert ev["city"] != "Itaúna" or ev["geo_precision"] != "CITY"  # V1: sem o município
@@ -30,7 +30,7 @@ def test_flag_off_changes_nothing_and_reports_the_shadow(monkeypatch):
 
 
 def test_flag_on_places_the_event_in_the_city(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_GEO_V2", "1")
+    monkeypatch.setenv("CORVO_FLAG_GEO_V2", "1")
     b = _run("Acidente grave em Itaúna deixa feridos")
     ev = b["events"][0]
     assert (ev["city"], ev["state"], ev["geo_precision"]) == ("Itaúna", "MG", "CITY")
@@ -38,7 +38,7 @@ def test_flag_on_places_the_event_in_the_city(monkeypatch):
 
 
 def test_refine_is_idempotent_and_never_touches_source_geo(monkeypatch):
-    monkeypatch.setenv("PULSO_FLAG_GEO_V2", "1")
+    monkeypatch.setenv("CORVO_FLAG_GEO_V2", "1")
     s = Signal(signal_id="s", source_id="s1", source_class="NEWS_HIGH", timestamp=T, collected_at=T, title="Acidente em Itaúna deixa feridos",
                url="https://s1.com/a", category="TRAFFIC", reliability=70, hash="h1", canonical_url="https://s1.com/a")
     once = refine_geo(s, frozenset(), {})
