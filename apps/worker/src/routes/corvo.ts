@@ -25,6 +25,9 @@ const newsSchema = z.object({
 	relevance: prob,
 	kind: z.enum(["fato", "reportagem", "rumor", "opiniao", "previsao"]),
 	topics: z.array(z.string().max(30)).max(8),
+	lat: z.number().min(-90).max(90).nullable().default(null),
+	lon: z.number().min(-180).max(180).nullable().default(null),
+	region: z.string().max(40).nullable().default(null),
 	assets: z.array(z.object({ symbol: z.string().max(20), direction: z.enum(["up", "down", "volatile"]), horizon: z.string().max(10) })).max(12),
 });
 const statsSchema = z.object({
@@ -84,11 +87,11 @@ corvo.post("/ingest", async (c) => {
 		...admitted.map((n) =>
 			db
 				.prepare(
-					`INSERT INTO corvo_news (item_id,source_id,source_reliability,title,url,published_at,ingested_at,verdict,reason,relevance,kind,topics,assets)
-					 VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)
+					`INSERT INTO corvo_news (item_id,source_id,source_reliability,title,url,published_at,ingested_at,verdict,reason,relevance,kind,topics,assets,lat,lon,region)
+					 VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16)
 					 ON CONFLICT(item_id) DO UPDATE SET verdict=excluded.verdict, reason=excluded.reason, relevance=excluded.relevance, assets=excluded.assets`,
 				)
-				.bind(n.item_id, n.source_id, n.source_reliability, n.title, n.url, n.published_at, now, n.verdict, n.reason, n.relevance, n.kind, JSON.stringify(n.topics), JSON.stringify(n.assets)),
+				.bind(n.item_id, n.source_id, n.source_reliability, n.title, n.url, n.published_at, now, n.verdict, n.reason, n.relevance, n.kind, JSON.stringify(n.topics), JSON.stringify(n.assets), n.lat, n.lon, n.region),
 		),
 		...stats.map((s) =>
 			db

@@ -16,7 +16,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from typing import Protocol
 
-from ..intake import Decision, IntakeGate, NewsItem, Pressure
+from ..intake import Decision, IntakeGate, NewsItem, Pressure, locate
 from ..intake.gate import canonical_url
 
 USER_AGENT = "corvo-oracle/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
@@ -89,6 +89,7 @@ class OraclePublisher:
                 c[f"reason:{v.reason}"] += 1
                 continue
             c["hot" if v.decision is Decision.HOT else "buffer"] += 1
+            place = locate(item.title, item.text)
             news.append({
                 "item_id": hashlib.sha1(canonical_url(item.url).encode()).hexdigest()[:32],
                 "source_id": item.source_id,
@@ -101,6 +102,9 @@ class OraclePublisher:
                 "relevance": v.relevance,
                 "kind": classify_kind(item.title, item.source_id in official_sources),
                 "topics": list(v.topics),
+                "lat": place[1] if place else None,
+                "lon": place[2] if place else None,
+                "region": place[0] if place else None,
                 "assets": [],  # impacto por ativo vem do motor de previsão (MNEME/CORVO), ainda não ligado
             })
         # Só o balde da hora atual: reenviar horas antigas custaria linhas do D1 a cada ciclo sem mudar nada.

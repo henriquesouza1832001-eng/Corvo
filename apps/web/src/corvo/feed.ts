@@ -6,6 +6,7 @@ export const API_URL: string = import.meta.env.VITE_API_URL || "https://corvo-ap
 interface ApiNews {
 	item_id: string; source_id: string; source_reliability: number; title: string; published_at: string;
 	verdict: "hot" | "buffer"; reason: string; relevance: number; kind: Kind; topics: Topic[]; assets: AssetImpact[];
+	lat: number | null; lon: number | null; region: string | null;
 }
 interface ApiForecast {
 	forecast_id: string; question: string; probability: number; interval_low: number; interval_high: number;
@@ -42,6 +43,7 @@ export function toView(f: ApiFeed): LiveView {
 			id: n.item_id, source: n.source_id, reliability: n.source_reliability, title: n.title,
 			minutesAgo: Math.max(0, Math.round((now - Date.parse(n.published_at)) / 60_000)),
 			topics: n.topics, relevance: n.relevance, kind: n.kind, assets: n.assets, verdict: n.verdict, reason: n.reason,
+			lat: n.lat, lon: n.lon, region: n.region,
 		})),
 		forecasts: f.forecasts.map((x) => ({
 			id: x.forecast_id, question: x.question, p: x.probability, lo: x.interval_low, hi: x.interval_high,
@@ -67,8 +69,11 @@ export function useLiveFeed(): LiveView | null {
 			}
 		};
 		void load();
-		const id = setInterval(load, 30_000);
-		return () => { alive = false; clearInterval(id); };
+		// Poupa leituras do banco: não consulta com a aba escondida e recarrega ao voltar.
+		const id = setInterval(() => { if (!document.hidden) void load(); }, 30_000);
+		const onVis = () => { if (!document.hidden) void load(); };
+		document.addEventListener("visibilitychange", onVis);
+		return () => { alive = false; clearInterval(id); document.removeEventListener("visibilitychange", onVis); };
 	}, []);
 	return view;
 }

@@ -30,6 +30,9 @@ export interface NewsItem {
 	/** Descarte que independe da pressão (duplicata, velha, cota, lixo). */
 	hardDrop?: DropReason;
 	assets: AssetImpact[];
+	lat?: number | null;
+	lon?: number | null;
+	region?: string | null;
 }
 
 export interface ForecastCard {
@@ -79,4 +82,24 @@ export const KIND_LABEL: Record<Kind, string> = {
 	rumor: "rumor",
 	opiniao: "opinião",
 	previsao: "previsão de terceiros",
+};
+
+/** Âncoras do método Pizza Index: lugares onde decisões acontecem. Ainda SEM sensor ligado (ver docs/corvo/SENSORES.md). */
+export const ANCHORS = [
+	{ id: "pentagono", label: "Pentágono · Casa Branca", lat: 38.87, lon: -77.05 },
+	{ id: "wallstreet", label: "Wall Street · Fed NY", lat: 40.71, lon: -74.01 },
+	{ id: "kremlin", label: "Kremlin", lat: 55.75, lon: 37.62 },
+	{ id: "bce", label: "Banco Central Europeu", lat: 50.11, lon: 8.70 },
+	{ id: "pequim", label: "Pequim", lat: 39.91, lon: 116.38 },
+	{ id: "toquio", label: "Banco do Japão", lat: 35.69, lon: 139.77 },
+	{ id: "planalto", label: "Planalto · B3", lat: -15.80, lon: -47.86 },
+] as const;
+
+export const TOPIC_COLOR: Record<Topic, string> = {
+	catastrofe: "#ff4d5e",
+	geopolitica: "#ff8a3d",
+	politica: "#b58cff",
+	banco_central: "#29d8ff",
+	cripto: "#ffb000",
+	mercado: "#39ff88",
 };

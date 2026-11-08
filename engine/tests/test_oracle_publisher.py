@@ -74,3 +74,13 @@ def test_only_current_hour_bucket_is_sent_and_empty_runs_send_nothing():
     n = len(f.sent)
     p.run([])
     assert len(f.sent) == n
+
+
+def test_geolocation_is_attached_only_when_a_place_is_recognised():
+    from corvo_engine.intake import locate
+    f = Fake()
+    pub(f).run([mk("Fed announces rate cut as inflation cools", "https://x.com/1"), mk("Earthquake and tsunami strike, blackout reported", "https://x.com/2")])
+    by = {n["url"]: n for n in f.sent[0]["news"]}
+    assert by["https://x.com/1"]["region"] == "Estados Unidos" and by["https://x.com/2"]["lat"] is None
+    assert locate("Missile strike hits Kyiv as Russia escalates")[0] == "Ucrânia"
+    assert locate("Ira e rancor no mercado") is None
