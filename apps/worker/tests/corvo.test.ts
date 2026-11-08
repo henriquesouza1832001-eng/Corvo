@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { setup } from "./helpers/ingest";
 
 const NOW = new Date().toISOString();
@@ -102,17 +102,27 @@ describe("limpeza", () => {
 	});
 
 	it("apaga tudo ou só o que passou do prazo, sem tocar nas previsões", async () => {
-		const t = setup();
-		const post = (body: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: auth, body: JSON.stringify(body) });
-		const old = new Date(Date.now() - 40 * 86_400_000).toISOString();
-		await post({ news: [news("novo"), news("velho", { published_at: old })], stats: [stats], forecasts: [fc()] });
-		const r1 = (await (await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ older_than_days: 30 }) })).json()) as any;
-		expect(r1.deleted.news).toBe(1);
-		expect(((await (await t.get("/api/corvo/feed")).json()) as any).news).toHaveLength(1);
-		await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ all: true }) });
-		const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
-		expect(feed.news).toHaveLength(0);
-		expect(feed.stats).toHaveLength(0);
-		expect(feed.forecasts).toHaveLength(1);
+		// Fixa o relógio às 03:37 UTC, a hora da retenção diária do ingest: o teste tem que passar em QUALQUER hora (o CI já falhou por isso).
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-11-08T03:37:00Z"));
+		try {
+			const t = setup();
+			const post = (body: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: auth, body: JSON.stringify(body) });
+			await post({ news: [news("novo", { published_at: new Date().toISOString() })], stats: [stats], forecasts: [fc()] });
+			// o item velho entra direto no banco: pelo ingest, a retenção das 03 UTC o apagaria antes de a purga ser testada
+			const old = new Date(Date.now() - 40 * 86_400_000).toISOString();
+			t.sqlite.exec(`INSERT INTO corvo_news (item_id,source_id,source_reliability,title,url,published_at,ingested_at,verdict,reason,relevance,kind)
+				VALUES ('velho','s',0.8,'Notícia velha',NULL,'${old}','${old}','hot','relevant',0.9,'fato')`);
+			const r1 = (await (await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ older_than_days: 30 }) })).json()) as any;
+			expect(r1.deleted.news).toBe(1);
+			expect(((await (await t.get("/api/corvo/feed")).json()) as any).news).toHaveLength(1);
+			await t.raw("/api/corvo/purge", { method: "POST", headers: auth, body: JSON.stringify({ all: true }) });
+			const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
+			expect(feed.news).toHaveLength(0);
+			expect(feed.stats).toHaveLength(0);
+			expect(feed.forecasts).toHaveLength(1);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });

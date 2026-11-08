@@ -159,9 +159,13 @@ def test_subreddit_states_must_match_config():
 
 def test_pilot_log_counts_by_state(monkeypatch, capsys):
     monkeypatch.setenv("X_BEARER_TOKEN", "test-token")
+    # data RELATIVA ao relógio real: o piloto (`main`) usa o "agora" de verdade; uma data fixa passa a ser "velha" com o tempo (STALE) e quebrava o teste
+    from datetime import datetime, timedelta, timezone
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     def fake(url, headers):
-        return {"data": [{"id": "1", "text": "Governo paulista e Alesp discutem eleição", "created_at": "2026-10-03T00:00:00Z"},
-                         {"id": "2", "text": "Senado vota PEC das eleições", "created_at": "2026-10-03T00:00:00Z"}]}
+        return {"data": [{"id": "1", "text": "Governo paulista e Alesp discutem eleição", "created_at": recent},
+                         {"id": "2", "text": "Senado vota PEC das eleições", "created_at": recent}]}
     monkeypatch.setattr("corvo_engine.collectors.social.x.request_json", fake)
     main(["--source", "x-politics"])
     out = capsys.readouterr().out
