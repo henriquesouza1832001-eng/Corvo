@@ -3,15 +3,9 @@ name: Turso schema
 # Aplica no Turso as migrations novas (database/migrations e database/pending). Idempotente: cada arquivo roda uma vez
 # (tabela _corvo_migrations) e NÃO copia dados. Roda quando as migrations mudam, na hen (antes do merge, para o Worker novo
 # nunca encontrar uma tabela ausente) e na main, ou manualmente.
+# LEGADO (era Pulso): os segredos TURSO_* do repositório apontam para o banco antigo; rodar a cada push estourava o tempo. Agora só manual.
 on:
   workflow_dispatch:
-  push:
-    branches: [hen, main]
-    paths:
-      - database/migrations/**
-      - database/pending/**
-      - engine/scripts/turso_migrate.py
-      - .github/workflows/turso-schema.yml
 
 permissions:
   contents: read

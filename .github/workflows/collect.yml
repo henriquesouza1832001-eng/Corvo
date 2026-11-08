@@ -28,19 +28,33 @@ jobs:
     env:
       DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.push != true }}
     steps:
+      - name: Conferir segredos
+        env:
+          CORVO_API_URL: ${{ secrets.CORVO_API_URL }}
+          CORVO_INGEST_TOKEN: ${{ secrets.CORVO_INGEST_TOKEN }}
+        run: |
+          if [ "$DRY" != "true" ] && { [ -z "$CORVO_API_URL" ] || [ -z "$CORVO_INGEST_TOKEN" ]; }; then
+            echo "::notice::Segredos CORVO_API_URL e CORVO_INGEST_TOKEN ausentes: coleta pulada. Configure com: gh secret set CORVO_API_URL / CORVO_INGEST_TOKEN"
+            echo "SKIP=true" >> "$GITHUB_ENV"
+          fi
       - uses: actions/checkout@v4
+        if: ${{ env.SKIP != 'true' }}
       - uses: actions/setup-python@v5
+        if: ${{ env.SKIP != 'true' }}
         with:
           python-version: "3.12"
       - run: pip install -e engine
+        if: ${{ env.SKIP != 'true' }}
       # A memória de URLs já vistas (48 h) precisa sobreviver entre execuções; o runner do GitHub começa vazio.
       - name: Restaurar memória de vistos
+        if: ${{ env.SKIP != 'true' }}
         uses: actions/cache/restore@v4
         with:
           path: engine/seen.sqlite
           key: corvo-seen-${{ github.run_id }}
           restore-keys: corvo-seen-
       - name: Coletar
+        if: ${{ env.SKIP != 'true' }}
         working-directory: engine
         env:
           CORVO_API_URL: ${{ secrets.CORVO_API_URL }}
@@ -53,7 +67,7 @@ jobs:
             python -m corvo_engine.collect --once --state seen.sqlite
           fi
       - name: Salvar memória de vistos
-        if: ${{ success() && env.DRY != 'true' }}
+        if: ${{ success() && env.DRY != 'true' && env.SKIP != 'true' }}
         uses: actions/cache/save@v4
         with:
           path: engine/seen.sqlite
