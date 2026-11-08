@@ -43,6 +43,7 @@
 |---|---|---|---|---|
 | 2026-11-08 11:13 | continuous collection + T2 proof; 0.45 cutoff not applied | 1,185 unique items (scratch corpus) | green: 484/day; 692 at 5x |
 | 2026-11-08 11:53 | collection cycle 7 + local T0 audit; M6 safeguards recorded | 1,229 unique items (scratch corpus); 904 official local URLs | green: scratch 484/day; 692 at 5x; official local 486/day; 702 at 5x |
+| 2026-11-08 12:53 | collection cycle 13 + budget checkpoint; Munin interval approximation documented | 1,289 unique items (scratch corpus) | green: normal/economy 480/day; 672 at 5x; critical 432/432 |
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
