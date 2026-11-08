@@ -297,3 +297,13 @@ Registro exigido por `AGENTS.md` antes de integrar fontes. Verificado em 2026-11
 | Exibição pública | título e link para a fonte original no painel `corvo-web` |
 | Termos | os feeds de imprensa costumam permitir uso **não comercial** de título e link com atribuição. **Rever os termos de cada veículo antes de qualquer uso comercial** (ex.: se o CORVO virar produto pago). Fontes oficiais de governo e bancos centrais: conteúdo público |
 | Excluídas | Reuters (401 sem chave), IMF (404), CBC (sem resposta), Middle East Eye (feed vazio), NYT (termos restritos a uso pessoal) |
+
+## Ficha: preços de referência (`corvo_engine/collect/prices.py`)
+Servem **só para o Munin conferir previsões** (resolução e calibração). Não são exibidos como cotação nem usados para recomendar.
+| Fonte | O que traz | Acesso | Limite e custo | Retenção | Observações |
+|---|---|---|---|---|---|
+| Binance, espelho público de dados de mercado (`data-api.binance.vision`, rota `/api/v3/klines`) | velas de 1 h de BTC, ETH, SOL, BNB, XRP (até 1000 por chamada, cerca de 41 dias) | pública, sem conta nem chave | gratuito; 6 chamadas por ciclo, muito abaixo do limite de peso | arquivo local `precos.csv`, só fechamento | **Conferir os termos de uso antes de exibir ou redistribuir os preços.** Aqui só se usa o histórico para medir acerto. |
+| Frankfurter (`api.frankfurter.dev`), taxas de referência do BCE | USD contra EUR, BRL, JPY, GBP, CNY, **diário** | pública, sem chave | gratuito, de código aberto | arquivo local, só a taxa | Dado de referência (não é preço de negociação); instante gravado às 16:00 UTC, depois da divulgação. |
+| Stooq (índices, petróleo, ouro) | **não usada** | exige verificação de navegador (JavaScript) | n/a | n/a | Não contornamos a verificação. Índices e commodities ficam sem fonte por enquanto. |
+
+**Lacunas conhecidas:** sem ações, índices, petróleo e ouro. Antes de prever esses ativos é preciso registrar uma fonte pública oficial que permita acesso automático.
