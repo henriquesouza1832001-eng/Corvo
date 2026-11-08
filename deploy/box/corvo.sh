@@ -8,6 +8,7 @@
 #   painel    painel ao vivo no terminal (feed da API: pressão do orçamento e últimas notícias); Ctrl+C sai
 #   enviar    pede o token (digitação oculta), grava em deploy/box/.env e passa a ENVIAR à API
 #   seco      volta ao modo --dry-run (decide e guarda só local; não envia nada)
+#   instalar  cria o comando curto `corvo` (depois: corvo on, corvo off, corvo status, corvo painel)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
 cd "$(dirname "$0")/../.." || exit 1
 ROOT=$(pwd); ENVF="$ROOT/deploy/box/.env"; DATA="$ROOT/engine/data/corvo_corpus"; LOG="$DATA/caixa.log"
@@ -41,6 +42,10 @@ case "$1" in
     echo "gravado em deploy/box/.env (fora do Git). Reiniciando em modo ENVIO..."; sh "$0" restart ;;
   seco)
     INT=$(grep '^CORVO_INTERVALO=' "$ENVF" 2>/dev/null | cut -d= -f2); echo "CORVO_INTERVALO=${INT:-900}" > "$ENVF"; echo "modo seco"; sh "$0" restart ;;
+  instalar)
+    printf '#!/bin/sh
+exec sh "%s/deploy/box/corvo.sh" "$@"
+' "$ROOT" > "$PREFIX/bin/corvo" && chmod +x "$PREFIX/bin/corvo" && echo "comando corvo instalado" ;;
   atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,12p' "$0" ;;
+  *) sed -n '2,13p' "$0" ;;
 esac
