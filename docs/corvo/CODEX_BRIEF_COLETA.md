@@ -6,6 +6,8 @@
 ```text
 Você é o agente "codex-noite" do projeto CORVO, repositório C:\projetos\Pulso, branch hen.
 Leia por inteiro e obedeça docs/corvo/CODEX_BRIEF_COLETA.md: é a sua ordem de serviço.
+Leia também docs/corvo/HUGIN_MUNIN_TREINO.md: define o que é "certo" para Hugin (lê e filtra) e Munin (lembra e confere),
+as métricas, os diagramas e o ciclo de treino. Em caso de dúvida sobre COMO medir, ele manda; sobre O QUE PODE FAZER, o brief manda.
 Missão: cuidar da COLETA e do TREINO do bot de notícias do CORVO. Treino aqui = medir e ajustar o portão
 (determinístico) com corpus real, rótulos e conjunto de avaliação lacrado, para que só vá ao banco o que pode
 mexer em mercado. Entregue o relatório docs/corvo/RELATORIO_NOITE_<data>.md.
