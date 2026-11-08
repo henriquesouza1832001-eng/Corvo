@@ -25,6 +25,8 @@ def test_questions_are_closed_deterministic_and_describe_the_resolution_rule():
     assert all("crypto trades continuously" in q.annulment_rule for q in first)
     assert all("30 prior same-horizon returns" in q.resolution_rule for q in first)
     assert all("retorno anormal logarítmico" in q.text and "6h" in q.text and "30 retornos de 6h" in q.text for q in first)
+    assert all("anteriores ao instante em que o evento ficou disponível" in q.text for q in first)
+    assert all("anteriores à publicação" not in q.text for q in first)
     assert all(q.direction == "down" and q.question_id.startswith("q_") for q in first)
 
 

@@ -52,7 +52,7 @@ def _question(event_id: str, topic: str, h: Hypothesis, available: frozenset[str
         raise ValueError(f"invalid hypothesis direction: {h.direction}")
     text = (
         f"Nas {hours} horas após o evento {event_id}, o retorno anormal logarítmico de {h.asset} "
-        f"{action} da média e do desvio-padrão de 30 retornos de {hours}h anteriores à publicação?"
+        f"{action} da média e do desvio-padrão de 30 retornos de {hours}h anteriores ao instante em que o evento ficou disponível?"
     )
     raw_id = "|".join((event_id, topic, h.asset, h.direction, h.horizon, PRICE_RULE_VERSION))
     qid = "q_" + hashlib.sha256(raw_id.encode("utf-8")).hexdigest()[:20]
