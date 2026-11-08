@@ -46,7 +46,7 @@ A **taxa-base** é a frequência com que algo aconteceu antes: "depois de um cor
 ## 4. O que precisa existir para isso funcionar
 
 ### 4.1 Eventos (Hugin, etapa 2)
-Seis notícias sobre o mesmo ataque são **uma amostra, não seis**: contar todas inflaria a confiança. Cada evento precisa de identificador estável, primeira vez visto (o **horário do primeiro veículo**, não o da coleta), número de fontes independentes e nível de confirmação (oficial, várias fontes, fonte única). A agrupação usa a mesma ideia da quase-duplicata, com medida de erro própria (fusão errada é pior que cópia solta).
+Seis noticias sobre o mesmo fato sao **uma amostra, nao seis**: contar todas inflaria a confianca. O ID estavel do evento fica ancorado na primeira publicacao/URL para preservar identidade. Para prever, porem, o instante disponivel (`available_at`) e o maior `cycle_at` entre as materias agrupadas: e quando todas as fontes usadas na confirmacao ja eram conhecidas localmente. Ordene o walk-forward e inicie o horizonte de preco nesse instante. Se faltar `cycle_at` em qualquer materia do grupo, exclua e conte o evento sem adivinhar pela publicacao. A agrupacao usa a mesma ideia da quase-duplicata, com medida de erro propria (fusao errada e pior que copia solta).
 
 ### 4.2 Hipóteses de impacto (Munin, etapa 3)
 Uma tabela **editável e auditável** (nada de modelo de linguagem decidindo): `banco central (decisão) → USD, BTC, ouro, índices`; `energia (corte de produção) → petróleo`; `conflito em região-chave → petróleo, ouro`; `cripto (hack de exchange) → token afetado, BTC`; `comércio (tarifa) → pares de câmbio afetados`. A **direção é hipótese**: só vira peso depois que Munin medir, com amostra mínima, que ela se sustenta. A proposta inicial está em `engine/corvo_engine/munin/impact.py`.
@@ -66,7 +66,7 @@ Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos
 | **Muitos testes, alguém acerta por sorte** | correção de múltiplos testes (Bonferroni ou Benjamini-Hochberg) e registro de quantas hipóteses foram testadas |
 | **Ajustar e provar nos mesmos dados** | ajuste no passado, prova no futuro (divisão **temporal**), conjunto lacrado |
 | **Amostra pequena parecendo acerto** | nenhum peso muda com menos de 30 resolvidos; até 100, tudo é *experimental* |
-| **Notícia que chega depois do movimento** | tempo contado do **primeiro veículo**; medir o atraso de cada fonte |
+| **Noticia que chega depois do movimento** | contar o horizonte de `cycle_at` (quando a coleta a conheceu) e medir separadamente o atraso frente a `published_at` |
 | **Confiança inflada** | erro de calibração (ECE ≤ 0,05) e Brier contra a taxa-base antes de subir de estado |
 
 ## 6. Escada de maturidade do preditivo

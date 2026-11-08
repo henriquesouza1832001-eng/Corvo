@@ -37,6 +37,26 @@
 | 7 | 2026-11-08 | T12/Munin: clarify baseline interval as normal approximation to Beta posterior | metrics unchanged; six synthetic scenarios still pass; no real forecasts | n/a | n/a | documentation corrected; M3 retained; interval coverage still needs data validation | — |
 | 8 | 2026-11-08 | T3: pair-candidate availability audit on future-only titles | 173 items; 2 cross-source pairs Jaccard>=0.40; 0 at current 0.70; no pairs labeled | n/a (insufficient pair sample; no change) | 476/652 | hold dedup threshold; gather more cross-source pairs | — |
 
+| 9 | 2026-11-08 | P1 Munin events: conservative 0.30 title overlap; 48h, same topic, complete-link | fit-only challenge: 30 labeled pairs; TP 4, FP 0, FN 8, TN 18 (precision 1.00; recall 0.33) | Hugin sealed n/a (Munin event identity) | 458/day; baseline unchanged | implemented; false merges 0/30 (challenge set, not population estimate); conservative recall remains weak | `a5afa14` |
+
+| 10 | 2026-11-08 | Closed questions + local price resolution rule; exact-symbol routing, 30 prior horizon returns, market-closure annulment | unit tests: 14 passed across event/questions/resolve; synthetic fixture only in tests | no Hugin sealed metric (Munin rules) | baseline unchanged at 458/day | missing/ambiguous prices and unfinished horizons abstain; no market outcome inferred in this block | `08c6a40` |
+
+| 11 | 2026-11-08 | Local walk-forward chain + append-only forecast registry + proof panel | real local corpus/prices: 58 events, 106 questions, 0 forecasts (all n<30), 106 abstentions; 18 resolved outcomes, 2 future-price waits, 86 missing instruments; Brier/base/skill/ECE N/A; open keys report events needed to n=30 | no Hugin sealed metric (Munin backtest) | 458/day; green | no accuracy claim; 18 outcomes are real local resolutions, none had a forecast; registry remains local/untracked | `1112aa9` |
+
+| 12 | 2026-11-08 | T9 collection robustness: reject malformed fetcher payload per source | bad feed returning `None` plus healthy feed: failed source recorded; valid item fetched, sent, and marked once; tests: 5 passed with existing runner tests | no Hugin sealed metric (collection boundary only) | baseline unchanged; budget checked before commit | malformed adapter output is isolated without dropping healthy feeds; no Hugin gate change | `ab2a42c` |
+
+| 13 | 2026-11-08 | Nota8 checkpoint: aggregate Hugin evaluation, no gate adjustment | fit n=225/keep=46; HOT precision 1.000, keep recall 0.540, stored keep 0.607, stored drop 0.049; eval n=75/keep=15; 1.000, 0.800, 0.583, 0.125 respectively (same before/after) | evaluated once, aggregate only; no eval examples opened for rule choice; no new seal (15 eval keep < 40 target) | 458/day; 562 at 5x; green | Hugin H2 unchanged; Munin M3; report checkpoint while external collection continues | ? |
+
+| 14 | 2026-11-08 | Note8 acceptance follow-up: market closure, official-source confirmation, and full proof metrics | FX weekend-window annulment; local feed catalog supplies official-source IDs; registry records source count, confirmation, and resolution rules; panel prints Brier/base/skill/ECE and remaining events per key; targeted tests 18 passed | Hugin sealed unchanged; no eval examples opened | 458/day; freio checked before commit | dashboard metrics remain N/A with zero forecast outcomes; no calibration or success claim | `c98c52d` |
+
+| 15 | 2026-11-08 | Full engine verification after note8 | 1,098 passed, 6 xfailed, 6 failed in `test_failure_injection.py` loopback-name cases | no sealed Hugin change | 458/day; freio green | failures surfaced in untouched `safe_http.py` outside allowed scope; recorded for owner/red-team follow-up | `e06e2d4` |
+
+| 16 | 2026-11-08 | P1 fit iteration: event title threshold 0.30 to 0.25 | same 30 fit-only labeled pairs: TP 4?5, FP 0?0, FN 8?7, TN 18; false merges 0/30; recall 0.333?0.417; directed suite 75 passed | no Hugin sealed metric; Munin event grouping only | 458/day; 562 at 5x; green | real approved corpus: events 58?56, multi-source 5?7; added positive pairs without challenge false merges; low recall remains | `715751a` |
+
+| 17 | 2026-11-08 | P1 fit iteration: event threshold 0.25 to 0.235; rejected 0.23 | same 30 fit pairs: at 0.235 TP 7, FP 0, FN 5, TN 18 (recall 0.583); 0.23 would yield FP 1/30 (3.3%) | no Hugin sealed metric; no eval titles opened | 458/day; 562 at 5x; green | real approved corpus: events 56?55, multi-source stays 7; local proof 100 questions, 0 forecasts, 100 abstentions | `09b4c36` |
+
+| 18 | 2026-11-08 | T9 robustness integration matrix: bad XML/empty/HTML/oversize/timeout/403/503/redirect plus healthy feed | 8 failures recorded by feed; healthy feed fetched/sent/marked once; CORVO suite 76 passed | no Hugin sealed metric; collector boundary only | 458/day; freio green | cycle survived every simulated fault; no real network calls and no source bypass | `310eb9b` |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
@@ -53,9 +73,26 @@
 | 2026-11-08 18:10 | resumed collection cycles 42–44; stopped at owner `PARE` | 1,514 unique items (scratch corpus); +14 since 17:42 | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
 | 2026-11-08 18:31 | resumed cycles 45–46; owner `PARE`, stopped after cycle 46 | 1,528 unique items (scratch corpus); +14 since 18:10 | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
 
+| 2026-11-08 19:54 | note8 Munin event-to-price chain + T9 robustness; external collection cycles 1-3 still active | 1,265 unique items (local corpus); 24 feeds queried, 1 HTTP 404 isolated | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
+
+| 2026-11-08 20:00 | nota8 acceptance follow-up: market-closure cancellation + full scoring panel; external collection cycle 4 active | 1,267 unique items (local corpus); 24 feeds, 2 new items; prices 5,220 rows | green baseline: normal/economy 458/day; 562 at 5x; critical 432/432 |
+
+| 2026-11-08 20:10 | P1 fit-only event threshold 0.25 proof + refreshed Munin panel; external collection cycle 5 active | 1,278 unique items; cycle 5: 11 received, 24 feeds healthy; prices 5,220 rows | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
+
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
 - T3: rotular pares positivos e negativos para medir fusões erradas e economia de linhas antes de mexer na deduplicação.
 - T0/T5: obter janela de ciclos por fonte e confirmar com o dono os 14 rótulos marginais do snapshot; não inferir confiabilidade a partir de um único GET.
 - Munin: esperar previsões reais resolvidas e fonte de preços registrada; manter os pesos em HOLD até cumprir os mínimos e a divisão temporal propostos.
 - Hugin continua em H2 (um único corte provado; sem platô declarado); Munin está em M3, sem resultado real.
+
+
+| 19 | 2026-11-08 | Fresh seal feasibility audit + Munin honesty scenarios | 989 previously unlabeled URLs; current gate accepts 10; stable 70/30 split gives eval 304 rows, only 4 in accepted stratum; no labels scored | Existing eval remains 15 keep; no new Hugin result or rule change | 458/day; 562 at 5x; critical 432/432; green | No inference about hidden keeps among rejected rows; seal needs human labels; synthetic Munin matrix: calibrated skill +0.353/ECE 0.014, exaggerated +0.089/0.211, base skill 0, conservative +0.262/0.132, n=12 HOLD, leakage blocked | `d68e976` |
+
+| 20 | 2026-11-08 | Cycle 6 + refreshed local Munin proof panel | 24 feeds healthy, 10 new items, prices unchanged at 5,220 rows; 55 events, 100 questions, 0 forecasts, 100 abstentions | 18 local price resolutions without forecasts; 2 await future prices, 80 await instruments; Brier/base/skill/ECE N/A | 458/day; 562 at 5x; critical 432/432; green | Collection process remains active; no accuracy claim; idempotent panel rerun | `572b596` |
+
+| 21 | 2026-11-08 | T12 temporal leakage guard: event availability from cycle_at | Before: 18 resolved, 2 awaiting future; after: 8 resolved, 12 awaiting future, 80 awaiting instrument; 55 events, 100 abstentions, 0 forecasts | 22 Munin event/backtest/question/resolve tests passed; 0 corpus rows missing cycle_at | 458/day; 562 at 5x; critical 432/432; green | Forecast time now waits for the last clustered article arrival; missing cycle_at events are skipped and counted; no hit/calibration claim | `61fd78d` |
+
+| 22 | 2026-11-08 | M6 independent-sample guard: exclude overlapping outcome windows | 6 resolved windows excluded from baseline as overlapping; BTC/ETH keys now have 1 independent result (29 more needed), not 4 | 23 Munin tests passed; panel remains 0 forecasts/100 abstentions; resolution counts unchanged at 8/12/80 | 458/day; 562 at 5x; critical 432/432; green | Added per-key non-overlap rule to M6 protocol; no accuracy claim | `ce891d7` |
+
+| 23 | 2026-11-08 | Local price-file integrity audit | 5,220 rows; 5,220 unique asset/timestamp keys; 0 invalid rows, nonpositive closes, duplicate keys, conflicting duplicates, or future closes | Crypto series end 2026-11-08 23:00 UTC; FX daily series end 2026-11-06 16:00 UTC | 458/day; 562 at 5x; critical 432/432; green | No price data modified; source provenance still requires owner/source documentation before stronger calibration claims | this checkpoint commit |

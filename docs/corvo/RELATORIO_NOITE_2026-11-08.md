@@ -1,5 +1,7 @@
 # Relatório da noite — 2026-11-08
 
+> **Checkpoint nota8 ? 2026-11-08 19:30?20:00 BRT:** cadeia Munin e tarefa T9 conclu?das; a coleta externa de tr?s horas continua ativa. Detalhes e pend?ncias na se??o 9.13.
+
 **Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 17:42 BRT (encerrado por `PARE`) · **Commit inicial:** `4df88e6` · **Último checkpoint:** parada solicitada pelo dono
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
@@ -334,3 +336,129 @@ O freio final do corpus temporário marcou volume 24 h 845, aceitos 19 e HOT ent
 Para a amostra fresca posterior ao lacre anterior, foram excluídas as 258 URLs já lacradas; o pool tinha 365 URLs de 17 fontes no último recálculo. Rotulei somente o lado `fit` (248 itens: 14 keep, 6 marginal, 228 drop; pesos 1 por ser o censo disponível). Com o corte BUFFER normal 0,50, recall keep ponderado 0,143, keep entre gravadas 0,667 e drop gravado 0. Uma hipótese única, ainda somente em memória e escolhida pelo fit, acrescentou o termo específico `Aramco` ao tema energia: no fit, recall 0,214, keep entre gravadas 0,750 e drop gravado 0. São apenas 14 keep; o resultado é instável e a alteração não foi aplicada ao código.
 
 O `eval` fresco permaneceu sem rótulos e seus títulos não foram consultados. Não houve prova lacrada da hipótese, promoção nem mudança de nível: Hugin H2; Munin M3, sem previsões reais avaliadas. Resultado desta sessão é evidência preliminar de ajuste, não melhora confirmada. Próxima etapa: ampliar o corpus fresco, terminar a rotulagem `fit`, congelar a hipótese antes de abrir/rotular `eval` e fazer a prova lacrada uma única vez. Pergunta ao dono: para a próxima retomada, mantém autorização para completar essa prova depois de mais dados?
+
+### 9.13 Rodada nota8 ? checkpoint 19:30?20:00 BRT (coleta externa ainda ativa)
+
+Esta rodada come?ou na `hen` em `b2c1508`. O preflight retornou **PRONTO** (55 testes); o freio inicial marcou 1.260 itens ?nicos, volume 24 h de 528, 458 linhas/dia e 562 a 5?; cr?tico 432/432, tudo verde. ?s 19:54 BRT, o corpus local tinha 1.265 itens ?nicos e 527 itens nas ?ltimas 24 h; o freio continuou em 458/562 (normal e economia) e 432/432 (cr?tico), verde. O processo externo de coleta permaneceu ativo em `--dry-run`: ciclos 1?3 entre 19:30 e 19:50, 24 feeds por ciclo; um HTTP 404 de `fed-press` no ciclo 2 foi isolado, sem interromper a coleta. O arquivo local de pre?os tinha 5.215 linhas para BNB, BTC, ETH, SOL, XRP e cinco pares USD/FX. N?o reiniciei nem encerrei esse processo.
+
+O avaliador Hugin foi executado uma vez e s? seus agregados foram consultados; nenhum exemplo `eval` foi aberto para escolher regra. O port?o n?o mudou nesta rodada, portanto os agregados antes/depois s?o iguais:
+
+| M?trica ponderada | Fit (225; 46 keep) | Eval lacrado existente (75; 15 keep) | Antes ? depois |
+|---|---:|---:|---|
+| Precis?o HOT | 1,000 | 1,000 | igual |
+| Recall keep | 0,540 | 0,800 | igual |
+| Keep descartado | 0,460 | 0,200 | igual |
+| Drop gravado | 0,049 | 0,125 | igual |
+| Keep entre gravadas | 0,607 | 0,583 | igual |
+| HOT entre aceitos | 0,082 | 0,083 | igual |
+| Linhas/dia (normal; 5?) | 458; 562 | ? | or?amento verde antes/depois |
+
+N?o foi poss?vel gerar um novo lacre com 40+ casos `keep`: o conjunto existente tem 15 `keep` no `eval`, e n?o havia r?tulos humanos novos. N?o abri os itens lacrados. Assim Hugin permanece **H2**; H3 n?o ? alegado. A m?trica de eventos ? uma adjudica??o manual de desafio no `fit`, separada do port?o Hugin: em 30 pares entre fontes, 4 merges corretos, 0 falsos, 8 pares positivos perdidos e 18 negativos separados (precis?o 1,00, recall 0,33). ? uma amostra pequena e selecionada, n?o estimativa populacional.
+
+Blocos entregues nesta rodada:
+
+| Bloco | Prova | Commit |
+|---|---|---|
+| Eventos Munin: Jaccard ?0,30, mesmo t?pico, at? 48 h, complete-link | teste novo; pares `fit` 0/30 fus?es erradas, recall baixo explicitado | `a5afa14` |
+| Perguntas fechadas e resolu??o local | teste novo; regra usa 30 retornos anteriores do mesmo horizonte e fecha por pre?o local; sint?tico s? nos testes | `08c6a40` |
+| Walk-forward, absten??o, registro `previsoes.jsonl` e painel | teste novo; corpus/pre?os reais locais: 58 eventos, 106 perguntas, **0 previs?es** por `n<30`, 106 abstencoes; resolu??o: 18 resolvidas, 2 sem fechamento futuro, 86 sem instrumento; Brier N/A | `1112aa9` |
+| T9 robustez da coleta | teste novo; payload `None` de uma fonte foi registrado como falha, enquanto fonte saud?vel completou ciclo e foi marcada uma vez; 72 testes da bateria passaram no commit T9; a su?te final ap?s o complemento teve 74 aprovados | `ab2a42c` |
+
+As 18 resolu??es usaram pre?os locais existentes, n?o sint?ticos; nenhuma era resultado de previs?o. Os 86 casos sem instrumento foram `OURO` (32), `PETROLEO` (32), `SP500` (13) e `USD` sem escolha de par (9); permanecem aguardando fonte/mapeamento. Os dois casos adicionais BTC/ETH aguardam pre?o posterior ao horizonte. Munin permanece **M3**; M4 n?o ? alegado porque o painel n?o produziu previs?es resolvidas nem uma avalia??o independente de calibra??o. A taxa-base exige 30 eventos resolvidos anteriores por chave (incluindo dire??o); a divis?o walk-forward n?o usa resultado futuro; corre??o Benjamini?Hochberg `q=0,05` e regra de 100 resolvidas/ECE ?0,05 continuam como protocolo, n?o como resultado emp?rico.
+
+T0 (leitura de banco remoto) e T10 (verifica??o de novas fontes) n?o foram executados; nenhuma fonte foi adicionada. A coleta e o pre?o local vieram do processo externo; n?o houve POST, deploy ou acesso a `.env`. `previsoes.jsonl` foi escrito localmente e n?o entrou no Git. O teste sint?tico ficou restrito aos testes e cada linha de fixture est? marcada `synthetic`.
+
+**Perguntas para o dono (uma por linha):**
+- Qual par USD/FX deve representar as hip?teses de `USD` (por exemplo, USDBRL ou USDEUR), e qual ser? a refer?ncia registrada em `SOURCES.md`?
+- O limite de agrupamento (Jaccard 0,30 / 48 h) ? aceit?vel como ponto inicial, dado recall de 0,33 no desafio manual?
+- Pode fornecer/anotar um novo conjunto lacrado com pelo menos 40 `keep`; o `eval` atual tem apenas 15?
+- A fonte/termos dos pre?os locais deve ser formalmente registrada em `SOURCES.md` antes de qualquer alega??o M4?
+
+**Pr?ximos passos:** manter o processo externo de coleta intocado; quando houver r?tulos novos, congelar uma amostra sem URLs vistas e executar o `eval` agregado uma vez; acumular 30+ eventos independentes resolvidos por chave antes de emitir previs?es; confirmar proxy USD e proveni?ncia de pre?os antes de resolver hip?teses n?o cobertas.
+
+### 9.14 Fechamento dos crit?rios preditivos expl?citos (20:00 BRT)
+
+A tabela `impact.py` foi exercitada com os 58 eventos aprovados agrupados: 53 eventos t?m uma fonte, 4 t?m duas e 1 tem tr?s. O cat?logo local marca explicitamente 5 fontes oficiais; 4 eventos foram confirmados por fonte oficial, 5 por cobertura de m?ltiplas fontes e 49 ficaram como fonte ?nica. N?o mudei os candidatos porque os dados ainda n?o permitem validar dire??o/ativo: o tema `conflito_chave` gerou 28 eventos e suas hip?teses PETROLEO/OURO n?o t?m s?rie local; os candidatos SP500 tamb?m n?o t?m pre?o, e `USD` n?o determina qual dos cinco pares FX usar. S?o hip?teses audit?veis, n?o efeitos provados. `catastrofe ? SP500 volatile` e `infraestrutura ? PETROLEO volatile` parecem amplos demais sem evento sist?mico/choque de oferta; ficam como perguntas para aprova??o e futura contagem, sem peso aprendido.
+
+Ajustei a regra de `questions.py`/`resolve.py` para declarar anula??o e horizonte; o registro inclui IDs de fonte, contagem, n?vel de confirma??o e as regras usadas. Cripto ? cont?nuo; para FX com instrumento exato, uma janela que intersecta o fechamento de fim de semana (aproxima??o UTC de sexta 22:00 a domingo 22:00) ? `cancelled_market_closed`; calend?rios desconhecidos n?o s?o adivinhados e sem s?rie o estado continua `awaiting_price`. Testes novos cobrem cancelamento FX e n?o cancelamento por calend?rio para cripto. Feriados e hor?rio de ver?o n?o est?o modelados; o intervalo ? uma aproxima??o expl?cita a confirmar com o dono.
+
+O painel de prova agora imprime Brier, Brier da taxa-base ponto-no-tempo, skill, ECE e, por chave aberta, quantas resolu??es independentes faltam para `n=30`. O arquivo local cont?m tr?s snapshots determin?sticos (318 linhas no total); a execu??o mais recente tem 106 entradas e ? identificada por `run_id`, sem gravar corpus ou dados sint?ticos. No snapshot local atual n?o h? nenhuma previs?o, logo as quatro m?tricas s?o **N/A**, n?o zero. H? 17 chaves abertas: BTC/ETH cripto t?m 6 resultados resolvidos anteriores e faltam 24; BTC volatilidade de banco central tem 2 e faltam 28; todas as demais t?m 0 e faltam 30. A taxa-base ? o ?nico previsor, ent?o, quando houver previs?es, a r?gua de taxa-base ? a mesma probabilidade e o skill contra essa r?gua ser? zero por defini??o; qualquer ganho exige outro m?todo futuro e prova temporal separada.
+
+A coleta externa continuou sem rein?cio: o ciclo 4 concluiu ?s 20:00 BRT, 24 feeds sem falhas, 2 itens novos; a renova??o local acrescentou 5 linhas de pre?o (5.220 totais). O painel foi repetido ap?s as altera??es e manteve 58 eventos, 106 perguntas, 0 previs?es e 106 abstencoes, sem mudan?a de status de resolu??o. O processo continua ativo em `--dry-run`. Nenhuma nova avalia??o lacrada foi consultada.
+
+### 9.15 Verifica??o completa do engine (20:09 BRT)
+
+`py -m pytest -q` terminou com **1.098 passed, 6 xfailed, 6 failed** em 150,03 s. As seis falhas s?o os casos parametrizados de formas num?ricas de loopback em `tests/test_failure_injection.py`; `socket.getaddrinfo` lan?ou `socket.gaierror` em `corvo_engine/safe_http.py` antes da exce??o `UnsafeURLError` esperada. Esses arquivos est?o fora do escopo permitido e n?o foram alterados; n?o atribuo as falhas a esta rodada nem as escondo. A bateria direcionada ao CORVO continuou verde: **74 passed**. A su?te completa tamb?m emitiu avisos de conformidade pendente para 279 fontes ativas; ficam registrados para an?lise do propriet?rio dos coletores.
+
+O freio p?s-commit de `c98c52d` ficou verde: 1.267 itens ?nicos, 529 nas ?ltimas 24 h, 458 linhas/dia (562 a 5?) em normal/economia e 432/432 em cr?tico. Branch `hen`, ?rvore limpa, trava livre. O PID 13596 continua ativo; n?o encerrei a coleta solicitada por tr?s horas.
+
+Pergunta adicional ao dono: as seis falhas de `safe_http.py` devem ser encaminhadas ao agente Codex/red-team respons?vel por esse m?dulo?
+
+### 9.16 Segunda prova P1 no conjunto fit (20:10 BRT)
+
+Com os mesmos 30 pares manualmente rotulados no `fit` (sem tocar no `eval`), alterei s? o limiar lexical de 0,30 para 0,25. O desafio passou de TP=4, FP=0, FN=8, TN=18 para TP=5, FP=0, FN=7, TN=18: fus?es falsas 0/30 (0%) e recall 0,333?0,417. A amostra ? um desafio selecionado, n?o uma estimativa populacional; o recall continua baixo e a regra ainda precisa de mais pares.
+
+No corpus local aprovado, o agrupamento passou de 58 para 56 eventos; cobertura multifuente subiu de 5 para 7 eventos; distribui??o final de fontes por evento: 49 eventos com 1 fonte, 6 com 2 e 1 com 3. Confirma??o final: 4 eventos com fonte oficial, 7 multifuente e 45 com fonte ?nica. O painel real atualizado ficou em 56 eventos, 102 perguntas, zero previs?es, 102 abstencoes por `n<30`; 18 pre?os locais resolveram perguntas sem previs?o, 2 aguardam pre?o futuro e 82 aguardam instrumento. Brier/taxa-base/skill/ECE seguem N/A. O registro local tem 420 linhas em quatro `run_id`s; a execu??o atual tem 102 linhas e repeti??o idempotente n?o criou c?pia.
+
+O ciclo externo 5 terminou ?s 20:10 BRT: 24 feeds saud?veis, 11 itens recebidos e nenhuma altera??o de pre?o; corpus com 1.278 itens ?nicos. Freio: volume 24 h 514, 458 linhas/dia (562 a 5?), cr?tico 432/432, verde. Hugin permaneceu H2; a altera??o foi no agrupador de eventos Munin e n?o na relev?ncia Hugin. Nenhum lacre foi aberto para decidir o limiar.
+
+
+A mudan?a de limiar e seu teste de fronteira foram commitados em `715751a`; a bateria direcionada final teve 75 aprovados, e o freio permaneceu verde antes e depois do commit (1.278 itens, 458/562 linhas e 432/432 cr?tico).
+Pergunta ao dono: aceita manter 0,25 como limiar provis?rio enquanto se coletam mais pares fit independentes, dado recall de 0,417 e 0/30 fus?es falsas no desafio atual?
+
+### 9.17 Terceira prova P1 no fit e corte rejeitado (20:10 BRT)
+
+Mantive os mesmos 30 pares do `fit` e testei 0,235. Em rela??o a 0,25, TP subiu 5?7, FP ficou 0, FN caiu 7?5, TN ficou 18; recall 0,417?0,583 e fus?es falsas 0/30. O candidato 0,23 capturaria os mesmos 7 positivos, mas faria 1 fus?o falsa em 30 (3,3%); foi rejeitado e n?o entrou no c?digo. O corte padr?o fica 0,235, com limite inferior ainda incerto pela amostra pequena.
+
+No corpus aprovado real, 0,25?0,235 reduziu grupos de 56 para 55; cobertura multifuente ficou em 7 eventos; distribui??o final: 48 com uma fonte, 5 com duas e 2 com tr?s; confirma??o: 4 oficiais, 7 multifuente, 44 de fonte ?nica. O painel final tem 55 eventos, 100 perguntas, 0 previs?es, 100 abstencoes, 18 resolu??es de pre?o local sem previs?o, 2 aguardando pre?o futuro e 80 sem instrumento; Brier, base, skill e ECE N/A. Registro local: 520 linhas em cinco snapshots idempotentes; execu??o atual com 100 linhas (`run_id=run_71e39f445d40751646a5`).
+
+Essa itera??o usa somente `fit` para ajustar a identidade de eventos; n?o abriu o lacre nem mudou o port?o Hugin. Hugin H2, Munin M3. O novo conjunto de avalia??o Hugin segue indispon?vel: eval existente tem 15 `keep`, abaixo dos 40 pedidos.
+
+### 9.18 T9: ciclo resiliente a falhas distintas por fonte (20:10 BRT)
+
+Ampliei o teste de integra??o do `run_cycle` com oito fontes simuladas: XML quebrado, corpo vazio, HTML inesperado, corpo excessivo, timeout, HTTP 403, HTTP 503 e erro de redirecionamento. Cada falha foi registrada pelo ID da fonte; a fonte saud?vel completou envio local `dry-run` e foi marcada uma vez; nenhum acesso de rede ocorreu. A su?te direcionada final ficou em **76 passed**; matriz T9 commit `310eb9b`. O c?digo de agrupamento 0,235 est? no commit `09b4c36`; o freio antes deste commit T9 permaneceu verde (1.278 itens, 458/562 normal/economia, 432/432 cr?tico).
+
+
+### 9.19 Checagem de lacre fresco e honestidade Munin (20:23 BRT)
+
+Sem abrir exemplos do lacre existente, comparei apenas URLs ja rotuladas com o corpus local para estimar se havia pool fresco suficiente. Restaram 989 URLs ineditas (988 unicas validas no snapshot); o portao atual aceita 10. A divisao estavel 70/30 coloca 304 itens frescos no `eval`, dos quais 4 estao no estrato atualmente aceito. Isso **nao** diz quantos itens rejeitados sao `keep`: eles nao foram rotulados nem pontuados. Nao ha base para afirmar um lacre de 40+ `keep`; nenhum rotulo foi inventado e nenhuma regra Hugin foi escolhida com esse pool. O conjunto avaliado disponivel continua com 15 `keep`, abaixo da exigencia. Hugin segue H2.
+
+Rodei novamente `corvo_munin_eval.py --synthetic`; os seis cenarios foram explicitamente sinteticos, sem resultados reais: calibrado (`n=3000`, skill +0.353, ECE 0.014, confiavel); exagerado (`n=3000`, skill +0.089, ECE 0.211, calibrando); taxa-base (`n=3000`, skill 0); conservador (`n=3000`, skill +0.262, ECE 0.132, calibrando); pouca amostra (`n=12`, estado experimental e atualizacao HOLD); vazamento temporal foi bloqueado antes da pontuacao. Isso testa os freios da bancada, nao mede a qualidade de previsoes reais. Munin segue M3, sem previsao real avaliada.
+
+O freio do corpus local antes deste registro ficou verde: 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica. Nenhum arquivo de dados foi alterado; o snapshot temporario ficou fora do repositorio. Nenhuma regra foi promovida neste checkpoint.
+
+
+### 9.20 Ciclo 6 e repeticao do painel local (20:20 BRT)
+
+O processo externo nao foi reiniciado: o ciclo 6 terminou em 20:20:08, com 24 feeds sem falhas e 10 itens novos; a coleta de precos terminou em 20:20:20 sem linhas novas (5.220 no total). O freio apos o ciclo marcou 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica, dentro dos limites.
+
+Reexecutei `corvo_munin_backtest.py --dry-run` com os arquivos locais. Resultado: 55 eventos, 100 perguntas, 0 previsoes e 100 abstencoes; 18 perguntas resolvidas por precos locais sem previsoes, 2 aguardam preco futuro e 80 aguardam instrumento. Brier, Brier da taxa-base, skill e ECE seguem N/A porque nao ha previsoes resolvidas. A chave de registro foi idempotente (`run_id` existente), sem duplicar entradas. O processo de coleta segue ativo, PID 13596; nenhuma afirmacao de acerto foi feita.
+
+
+### 9.21 Correcao do relogio temporal Munin (20:29 BRT)
+
+A revisao do fluxo encontrou uma fonte de vazamento: o backtest usava `published_at` como hora da pergunta, embora as linhas locais tenham `cycle_at`, a hora em que o coletor conheceu a noticia. Alem disso, o agrupamento contava fontes que podiam ter chegado depois da primeira publicacao. As 1.290 linhas brutas atuais possuem `cycle_at`; nao usei exemplos do lacre Hugin.
+
+Corrigi a disponibilidade do evento para o maior `cycle_at` entre as materias agrupadas (a primeira hora em que todas as fontes usadas sao conhecidas), ordenei o walk-forward por essa hora, gravei `observation_time_basis=cycle_at` e passei a omitir e contar eventos sem essa informacao, sem adivinhar pela publicacao. Testes novos cobrem a chegada tardia de uma fonte, reordenacao temporal e omissao de evento sem `cycle_at`.
+
+A bateria Munin direcionada ficou em **22 passed**. No painel real local, os 55 eventos continuam produzindo 100 perguntas, 0 previsoes e 100 abstencoes por `n<30`; nenhum evento foi omitido por falta de `cycle_at`. Resolucoes locais sem previsao cairam de 18 para 8, enquanto `awaiting_future_price` subiu de 2 para 12 e `awaiting_price` permaneceu 80. Esta mudanca reduz resultados historicos aparentes porque inicia o horizonte quando a informacao realmente estava disponivel; nao e ganho de precisao. Brier, skill e ECE seguem N/A, Munin M3 sem avaliacao preditiva real.
+
+Freio antes deste commit: 1288 URLs unicas, volume 24 h 522, 458 linhas/dia (562 a 5x), pressao critica 432/432; dentro dos limites. A coleta externa permanece ativa em `--dry-run`.
+
+
+### 9.22 Janelas independentes no baseline (20:30 BRT)
+
+A regra M6 pedia 30 eventos independentes, mas o replay ainda podia contar duas resolucoes da mesma chave cujas janelas de preco se sobrepunham. Acrescentei um filtro conservador por `(tema, ativo, direcao, horizonte)`: uma resolucao so entra no baseline se a janela dela comecar no fechamento da ultima janela aceita. Resultados sobrepostos continuam registrados como resolvidos, mas nao aumentam `n`.
+
+Teste sintetico marcado `synthetic` usa eventos a cada 3 horas com horizonte de 6 horas: janelas sobrepostas nao levam uma chave de `n=1` a `n=2`; o replay informa a exclusao. A bateria direcionada Munin ficou em **23 passed**. No corpus local, 6 resultados sobrepostos foram retirados das contagens de amostra; BTC e ETH cripto ficam com 1 resultado independente cada e precisam de mais 29 para `n=30` (antes, o painel contava 4). As resolucoes de preco permanecem 8 `resolved`, 12 `awaiting_future_price` e 80 `awaiting_price`; previsoes continuam 0, abstencoes 100 e Brier/ECE N/A.
+
+Atualizei o protocolo M6 e a documentacao preditiva para definir independencia como janelas nao sobrepostas por chave; atualizei tambem a nota 8 para separar ID ancorado na publicacao da hora local de disponibilidade (`cycle_at`). Esta e uma regra de amostragem mais cautelosa, nao uma melhora de acerto. Munin segue M3, Hugin H2.
+
+O ciclo 7 terminou as 20:30:07 com 24 feeds sem falhas e 1 item novo; precos sem novas linhas (5.220). Freio antes do commit: 1.289 URLs unicas, volume 24 h 520, 458 linhas/dia (562 a 5x), pressao critica 432/432; verde. A coleta permanece ativa.
+
+
+### 9.23 Integridade do arquivo local de precos (20:33 BRT)
+
+Auditei `precos.csv` local sem alterar linhas: 5.220 registros, 5.220 chaves ativo/horario unicas, zero linhas invalidas, fechamento nao positivo, duplicata, duplicata conflitante ou fechamento futuro. As series cripto chegam ate 2026-11-08 23:00 UTC; as cinco series FX diarias, ate 2026-11-06 16:00 UTC, coerente com a janela de fim de semana desta coleta. Nenhum preco foi sintetizado.
+
+A checagem valida apenas a estrutura temporal local; nao comprova licenca/proveniencia da fonte nem cria previsoes resolvidas. Os resultados do painel permanecem os do ciclo 7: 0 previsoes, 100 abstencoes, 8 resolucoes de preco sem forecast e metricas preditivas N/A. Hugin H2 e Munin M3.

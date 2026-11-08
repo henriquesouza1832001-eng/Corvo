@@ -32,7 +32,10 @@ def run_cycle(
 
     def one(feed: dict):
         try:
-            return feed["id"], fetcher(feed), None
+            fetched = fetcher(feed)
+            if not isinstance(fetched, list) or any(not isinstance(item, NewsItem) for item in fetched):
+                raise TypeError("fetcher must return a list of NewsItem records")
+            return feed["id"], fetched, None
         except Exception as exc:  # noqa: BLE001 - uma fonte fora do ar nunca derruba o ciclo
             return feed["id"], [], f"{type(exc).__name__}: {str(exc)[:120]}"
 
