@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.processing.cluster_refine import entities, haversine_km, pair_score, refine_clusters
-from pulso_engine.processing.clustering import cluster_signals
+from corvo_engine.models import Signal
+from corvo_engine.processing.cluster_refine import entities, haversine_km, pair_score, refine_clusters
+from corvo_engine.processing.clustering import cluster_signals
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 

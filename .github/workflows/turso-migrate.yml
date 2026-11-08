@@ -28,6 +28,6 @@ jobs:
           python-version: "3.12"
       - name: Exportar os dados do D1 (leitura)
         working-directory: apps/worker
-        run: npx wrangler d1 export pulso --remote --no-schema --output ../../dump.sql
+        run: npx wrangler d1 export corvo --remote --no-schema --output ../../dump.sql
       - name: Copiar para o Turso
         run: python engine/scripts/turso_migrate.py dump.sql

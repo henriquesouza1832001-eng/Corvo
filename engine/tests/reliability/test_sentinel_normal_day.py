@@ -1,8 +1,8 @@
 """Ataque de operação: volume normal e fontes diversas não devem parecer incidente."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.radar import analyze
+from corvo_engine.models import Signal
+from corvo_engine.radar import analyze
 
 
 NOW = datetime(2026, 10, 3, 16, tzinfo=timezone.utc)
@@ -42,13 +42,13 @@ def _routine_burst() -> list[Signal]:
     ]
 
 
-def test_normal_high_volume_three_source_types_currently_opens_two_false_investigations():
-    """Caracterização P1: diversidade é gatilho mesmo com anomalia zero.
+def test_normal_high_volume_three_source_types_opens_no_investigation():
+    """RT-003 corrigido: diversidade de tipos de fonte com atividade ESPERADA (baseline válido, anomalia 0) não abre investigação.
 
-    A correção deve mudar esta expectativa para nenhuma investigação e manter
-    o cenário como regressão de falso positivo operacional.
+    O cenário (dataset) é o mesmo da caracterização original, que abria 2 investigações com motivo "3 tipos de fonte". A causa era o
+    gatilho medir diversidade/atividade bruta, não o inesperado. Regressão permanente de falso positivo operacional.
     """
     result = analyze(_routine_burst(), _normal_history("BR") + _normal_history("UF:MG"), [], NOW)
     assert {candidate.score for candidate in result["candidates"]} == {0.0}
-    assert {(item.scope, item.category) for item in result["investigations"]} == {("BR", "WEATHER"), ("UF:MG", "WEATHER")}
-    assert all(item.reasons == ("3 tipos de fonte",) for item in result["investigations"])
+    assert {candidate.expectedness for candidate in result["candidates"]} == {"EXPECTED"}
+    assert result["investigations"] == [] and result["triggered"] == []

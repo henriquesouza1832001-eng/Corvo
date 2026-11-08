@@ -1,9 +1,9 @@
 """Achados da revisão focada em processing/ (nível máximo, 2026-10-03)."""
 import pytest
 
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.importance import assess
-from pulso_engine.processing.normalizer import is_broadcast_listing
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.importance import assess
+from corvo_engine.processing.normalizer import is_broadcast_listing
 
 
 @pytest.mark.parametrize("text", [

@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import type { PulseSnapshot } from "@pulso/shared";
+import type { PulseSnapshot } from "@corvo/shared";
 import type { AppEnv } from "../env";
 import { cacheControl } from "../lib/cache";
 
@@ -70,7 +70,7 @@ const historyQuery = z.object({
 	hours: z.coerce.number().int().min(1).max(168).default(24),
 });
 
-/** Série do Pulso para o gráfico "últimas 24 h" (pontos reais; lacunas ficam como lacunas). */
+/** Série do Corvo para o gráfico "últimas 24 h" (pontos reais; lacunas ficam como lacunas). */
 pulse.get("/history", async (c) => {
 	const q = historyQuery.safeParse(c.req.query());
 	if (!q.success) return c.json({ error: "invalid_query" }, 400);
@@ -84,7 +84,7 @@ pulse.get("/history", async (c) => {
 	return c.json({ scope: q.data.scope, hours: q.data.hours, points: results });
 });
 
-/** Pulso mais recente de cada UF com atividade (snapshots com mais de 30 min são descartados). */
+/** Corvo mais recente de cada UF com atividade (snapshots com mais de 30 min são descartados). */
 pulse.get("/states", async (c) => {
 	const since = new Date(Date.now() - 30 * 60_000).toISOString();
 	const { results } = await c.env.DB.prepare(

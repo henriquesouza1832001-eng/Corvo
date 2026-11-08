@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.collectors.news.rss import RssAdapter
-from pulso_engine.pipeline import chunks, run_once
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.normalizer import canonical_url, content_hash
+from corvo_engine.collectors.news.rss import RssAdapter
+from corvo_engine.pipeline import chunks, run_once
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.normalizer import canonical_url, content_hash
 
 NOW = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)
 

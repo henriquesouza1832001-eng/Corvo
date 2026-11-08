@@ -1,11 +1,11 @@
 """Simulação de VÁRIOS ciclos seguidos contra um "Worker de mentira" que guarda o que recebe (como o D1 real).
 
 Prova de uma vez o encaixe das peças: agrupamento com estado (id de evento estável), orçamento de escrita (só o novo é
-reenviado), descarte de matéria velha, frescor (o Pulso cai com o tempo) e reação a uma fonte nova sobre o mesmo fato.
+reenviado), descarte de matéria velha, frescor (o Corvo cai com o tempo) e reação a uma fonte nova sobre o mesmo fato.
 """
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import run_once
+from corvo_engine.pipeline import run_once
 
 T0 = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
 
@@ -83,7 +83,7 @@ def test_story_lifecycle_across_cycles():
     assert [e["event_id"] for e in b3["events"]] == [eid]
     assert b3["events"][0]["signal_count"] == 3 and b3["events"][0]["source_count"] == 3 and len(b3["signals"]) == 1
 
-    # 4) horas depois, sem nada novo: o evento fica, mas o Pulso CAI (frescor) e só é reescrito quando muda >= 3 pontos
+    # 4) horas depois, sem nada novo: o evento fica, mas o Corvo CAI (frescor) e só é reescrito quando muda >= 3 pontos
     later = T0 + timedelta(hours=7)
     b4 = cycle(w, feeds, later, srcs)
     assert b4["events_total"] == 1
@@ -119,7 +119,7 @@ def test_two_unrelated_stories_from_the_same_sources_stay_separate_and_slow_cate
     b1 = cycle(w, feeds, T0, srcs)
     assert len(b1["events"]) == 2 and {e["category"] for e in b1["events"]} == {"WEATHER", "POLITICS"}
     ids1 = {e["event_id"] for e in b1["events"]}
-    # categorias lentas (clima 6 h, política 12 h): 15 min depois o Pulso quase não mexe -> nada é reescrito e os ids ficam
+    # categorias lentas (clima 6 h, política 12 h): 15 min depois o Corvo quase não mexe -> nada é reescrito e os ids ficam
     b2 = cycle(w, feeds, T0 + timedelta(minutes=15), srcs)
     assert b2["events"] == [] and {e["event_id"] for e in w.events.values()} == ids1
 

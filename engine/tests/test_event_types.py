@@ -1,4 +1,4 @@
-from pulso_engine.processing.event_types import active_precursors, classify
+from corvo_engine.processing.event_types import active_precursors, classify
 
 EVENTS = [
     {"title": "Chuva forte causa alagamento em Recife", "state": "PE", "alert_level": 3},
@@ -27,7 +27,7 @@ def test_precursor_never_changes_probability():
     """O catálogo é só evidência: a probabilidade sai do histórico, com ou sem eventos ativos."""
     from tests.test_drivers import NOW, to_rows, weather_leads_traffic
 
-    from pulso_engine.forecast_surge import make_surge_forecasts
+    from corvo_engine.forecast_surge import make_surge_forecasts
 
     weather, traffic = weather_leads_traffic()
     rows = to_rows(weather, "WEATHER") + to_rows(traffic, "TRAFFIC")

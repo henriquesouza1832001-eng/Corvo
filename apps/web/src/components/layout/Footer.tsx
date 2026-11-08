@@ -39,21 +39,21 @@ export function Footer({
 				</div>
 				<div>
 					<span className="kicker">CONECTAR</span>
-					<a href="https://github.com/henriquesouza1832001-eng/Pulso" target="_blank" rel="noreferrer">GitHub</a>
+					<a href="https://github.com/henriquesouza1832001-eng/Corvo" target="_blank" rel="noreferrer">GitHub</a>
 					<a href="/api/pulse/br">API pública</a>
 					<a href="/api/events">Eventos (JSON)</a>
 				</div>
 			</div>
 
 			<div className="foot-base">
-				<span className="foot-mark" aria-hidden>PULSO</span>
+				<span className="foot-mark" aria-hidden>CORVO</span>
 				<div className="foot-meta">
 					<span>
 						<i className={`dot ${apiOnline ? "" : "err"}`} /> {apiOnline ? "OPERACIONAL" : "DEGRADADO"}
 					</span>
 					<span>{sourcesCount || "--"} FONTES REGISTRADAS</span>
 					<span>{clock.date} · {clock.br} UTC-3</span>
-					<span>© 2026 PULSO · DADOS PÚBLICOS · INDEPENDENTE</span>
+					<span>© 2026 CORVO · DADOS PÚBLICOS · INDEPENDENTE</span>
 					{demo && <span style={{ color: "var(--amb)" }}>MODO DEMO: DADOS FICTÍCIOS INTERCALADOS</span>}
 				</div>
 			</div>

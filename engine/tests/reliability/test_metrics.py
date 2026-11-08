@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.validation.metrics import (abstention_rate, base_rate_reference, brier, brier_skill, calibration_error,
+from corvo_engine.validation.metrics import (abstention_rate, base_rate_reference, brier, brier_skill, calibration_error,
                                              classification, coverage, detection_delay, false_negative_rate, lead_time,
                                              lead_time_summary, log_loss)
 

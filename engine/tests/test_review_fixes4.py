@@ -3,14 +3,14 @@ derrubar o coletor inteiro; cada um vira um teste que falha sem a correção."""
 import json
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.collectors.news.gdelt import GdeltAdapter
-from pulso_engine.collectors.official.bcb_ptax import BcbPtaxAdapter
-from pulso_engine.collectors.official.idap_cap import IdapCapAdapter
-from pulso_engine.collectors.official.inmet import InmetAdapter
-from pulso_engine.collectors.official.infodengue import CAPITALS, InfoDengueAdapter
-from pulso_engine.collectors.official.inpe_fires import InpeFiresAdapter
-from pulso_engine.collectors.official.usgs import UsgsAdapter
-from pulso_engine.collectors.social.mastodon import MastodonAdapter
+from corvo_engine.collectors.news.gdelt import GdeltAdapter
+from corvo_engine.collectors.official.bcb_ptax import BcbPtaxAdapter
+from corvo_engine.collectors.official.idap_cap import IdapCapAdapter
+from corvo_engine.collectors.official.inmet import InmetAdapter
+from corvo_engine.collectors.official.infodengue import CAPITALS, InfoDengueAdapter
+from corvo_engine.collectors.official.inpe_fires import InpeFiresAdapter
+from corvo_engine.collectors.official.usgs import UsgsAdapter
+from corvo_engine.collectors.social.mastodon import MastodonAdapter
 
 NOW = datetime(2026, 10, 3, 15, 0, tzinfo=timezone.utc)
 

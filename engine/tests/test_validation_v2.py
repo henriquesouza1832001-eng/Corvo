@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 
-from pulso_engine.intelligence.driver_validator import (affects_forecast, correlation_is_credible, evaluate, next_state,
+from corvo_engine.intelligence.driver_validator import (affects_forecast, correlation_is_credible, evaluate, next_state,
                                                         registry_row)
-from pulso_engine.validation import forecast_registry as reg
-from pulso_engine.validation.metrics import (base_rate_reference, brier, calibration_error, classification,
+from corvo_engine.validation import forecast_registry as reg
+from corvo_engine.validation.metrics import (base_rate_reference, brier, calibration_error, classification,
                                              lead_time_summary, log_loss)
-from pulso_engine.validation.shadow_compare import promotion_gate, shadow_row
+from corvo_engine.validation.shadow_compare import promotion_gate, shadow_row
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 

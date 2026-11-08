@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.official.idap_cap import IdapCapAdapter, iter_alerts
+from corvo_engine.collectors.official.idap_cap import IdapCapAdapter, iter_alerts
 
 NOW = datetime(2026, 10, 3, 3, 30, tzinfo=timezone.utc)
 SRC = {"id": "defesa-civil-idap", "adapter": "idap_cap", "source_class": "OFFICIAL", "url": "https://idap/rss/cap"}

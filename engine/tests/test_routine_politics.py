@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
-from pulso_engine.events import ROUTINE_SEVERITY_CAP, stats_for
-from pulso_engine.models import Signal
-from pulso_engine.processing.importance import assess
+from corvo_engine.events import ROUTINE_SEVERITY_CAP, stats_for
+from corvo_engine.models import Signal
+from corvo_engine.processing.importance import assess
 
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
 

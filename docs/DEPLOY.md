@@ -4,10 +4,10 @@ Conta: a do e-mail henriquesouza1832001@gmail.com (login via `wrangler login`).
 
 | Recurso | Nome | URL / ID |
 |---|---|---|
-| Worker (API) | `pulso-api` | https://pulso-api.henriquesouza.workers.dev |
-| Worker com assets (front React) | `pulso-web` | https://pulso-web.henriquesouza.workers.dev |
+| Worker (API) | `corvo-api` | https://corvo-api.henriquesouza.workers.dev |
+| Worker com assets (front React) | `corvo-web` | https://corvo-web.henriquesouza.workers.dev |
 | D1 | `pulso` | `c0added6-9187-434a-a1d0-559857107e1b` (identificador, não é segredo) |
-| Secret | `INGEST_TOKEN` (no Worker `pulso-api`) | só na Cloudflare; **nunca** no Git |
+| Secret | `INGEST_TOKEN` (no Worker `corvo-api`) | só na Cloudflare; **nunca** no Git |
 
 `preview_urls` está desativado nos dois Workers, para não existirem URLs paralelas sem controle.
 
@@ -18,7 +18,7 @@ cd apps/worker && npx wrangler deploy
 # Front (compila e publica)
 cd apps/web && npm run deploy
 # Migrations novas, sempre versionadas em database/migrations
-cd apps/worker && npx wrangler d1 migrations apply pulso --remote
+cd apps/worker && npx wrangler d1 migrations apply corvo --remote
 ```
 Nunca aplicar `database/seeds/dev.sql` em produção (dados fictícios).
 
@@ -28,7 +28,7 @@ O Python Engine envia lotes com `Authorization: Bearer <INGEST_TOKEN>`. Para ger
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 npx wrangler secret put INGEST_TOKEN      # em apps/worker; cole o valor
 ```
-No ambiente do Engine, exporte `PULSO_API_URL` e `PULSO_INGEST_TOKEN`. Guarde o valor num gerenciador de senhas. O token em uso foi guardado fora do repositório, na máquina de quem fez o deploy.
+No ambiente do Engine, exporte `CORVO_API_URL` e `CORVO_INGEST_TOKEN`. Guarde o valor num gerenciador de senhas. O token em uso foi guardado fora do repositório, na máquina de quem fez o deploy.
 
 ## CORS
 `ALLOWED_ORIGINS` (em `apps/worker/wrangler.jsonc`) lista as origens do front. Ao trocar o domínio do front, atualize e faça novo deploy da API.
@@ -48,21 +48,21 @@ Secrets do repositório necessários:
 |---|---|
 | `CLOUDFLARE_ACCOUNT_ID` | já configurado |
 | `CLOUDFLARE_API_TOKEN` | criado no painel (modelo "Editar Cloudflare Workers" + D1 Editar), restrito à conta; `gh secret set CLOUDFLARE_API_TOKEN` |
-| `PULSO_API_URL`, `PULSO_INGEST_TOKEN` | usados pela coleta agendada (`collect.yml`) |
+| `CORVO_API_URL`, `CORVO_INGEST_TOKEN` | usados pela coleta agendada (`collect.yml`) |
 
 Rotação: gerar novo token no painel, atualizar o secret e revogar o antigo. Migration que falha interrompe o deploy antes de publicar código novo.
 
 ## Agendamento da coleta (Cron Trigger da Cloudflare)
-O agendador do GitHub (`schedule`) atrasa de forma imprevisível, então o disparo vem da Cloudflare: o Worker `pulso-api` tem `triggers.crons = ["*/5 * * * *"]` e, a cada 5 min, chama a API do GitHub (`workflow_dispatch` de `collect.yml`). O GitHub só executa o Python Engine. O `schedule` do `collect.yml` fica como reserva.
+O agendador do GitHub (`schedule`) atrasa de forma imprevisível, então o disparo vem da Cloudflare: o Worker `corvo-api` tem `triggers.crons = ["*/5 * * * *"]` e, a cada 5 min, chama a API do GitHub (`workflow_dispatch` de `collect.yml`). O GitHub só executa o Python Engine. O `schedule` do `collect.yml` fica como reserva.
 
-Necessário (uma vez): um token **fino** do GitHub, só para o repositório Pulso, com permissão **Actions: leitura e escrita**, guardado no Worker:
+Necessário (uma vez): um token **fino** do GitHub, só para o repositório Corvo, com permissão **Actions: leitura e escrita**, guardado no Worker:
 ```
 cd apps/worker && npx wrangler secret put GH_DISPATCH_TOKEN
 ```
-Saúde: `GET /api/health` mostra `collection.age_seconds`, `stale` (sem Pulso novo há mais de 15 min) e `scheduler_configured`. Falha de disparo aparece nos logs do Worker (`falha ao acionar coleta`).
+Saúde: `GET /api/health` mostra `collection.age_seconds`, `stale` (sem Corvo novo há mais de 15 min) e `scheduler_configured`. Falha de disparo aparece nos logs do Worker (`falha ao acionar coleta`).
 
 ## Prévia por branch (antes do merge)
-Cada push em `art`, `hen`, `thig` ou `isar` que mexa em `apps/web/**` ou `packages/shared/**` roda `.github/workflows/preview.yml` e publica o front da branch em `https://pulso-web-<branch>.henriquesouza.workers.dev`.
+Cada push em `art`, `hen`, `thig` ou `isar` que mexa em `apps/web/**` ou `packages/shared/**` roda `.github/workflows/preview.yml` e publica o front da branch em `https://corvo-web-<branch>.henriquesouza.workers.dev`.
 - Worker próprio (`apps/web/preview/worker.js`, `apps/web/wrangler.preview.jsonc`): serve o build e repassa **só** `GET /api/*` público para a API de produção, do lado do servidor (a API não precisa liberar CORS para a prévia). `POST` e `/api/admin/*` respondem 403.
 - O front mostra a faixa "PRÉVIA DA BRANCH …" (`VITE_PREVIEW_BRANCH`).
-- Usa os mesmos segredos do deploy (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`). Para remover uma prévia: `npx wrangler delete --name pulso-web-<branch>`.
+- Usa os mesmos segredos do deploy (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`). Para remover uma prévia: `npx wrangler delete --name corvo-web-<branch>`.

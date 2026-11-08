@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { SourceHealth } from "@pulso/shared";
+import type { SourceHealth } from "@corvo/shared";
 import type { AppEnv } from "../env";
 import { assess } from "../lib/status";
 
@@ -20,7 +20,7 @@ health.get("/", async (c) => {
 	)
 		.all<SourceHealth>()
 		.catch(() => ({ results: [] as SourceHealth[] }));
-	// Atraso da coleta: sem Pulso novo há mais de 15 min (3 ciclos), o sistema está "velho".
+	// Atraso da coleta: sem Corvo novo há mais de 15 min (3 ciclos), o sistema está "velho".
 	const last = await c.env.DB.prepare("SELECT MAX(timestamp) AS t FROM pulse_history WHERE scope = 'BR'")
 		.first<{ t: string | null }>()
 		.catch(() => null);

@@ -5,7 +5,7 @@ CREATE TABLE forecasts (
   kind            TEXT NOT NULL CHECK (kind IN ('NOWCAST','EVENT','QUANTITY','OPEN')),
   question        TEXT NOT NULL,
   scope           TEXT NOT NULL,                 -- BR | UF:MG
-  metric          TEXT NOT NULL,                 -- ex.: pulse (Pulso do escopo)
+  metric          TEXT NOT NULL,                 -- ex.: pulse (Corvo do escopo)
   comparator      TEXT NOT NULL CHECK (comparator IN ('gte','lte')),
   threshold       REAL NOT NULL,
   method          TEXT NOT NULL,

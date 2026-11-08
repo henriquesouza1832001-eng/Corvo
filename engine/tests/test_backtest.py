@@ -1,6 +1,6 @@
 import random
 
-from pulso_engine.backtest import walk_forward
+from corvo_engine.backtest import walk_forward
 
 
 def bursty_series(n=400, seed=7):

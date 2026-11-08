@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.backtest_events import backtest_event, dataset_rows, false_positive_rate
-from pulso_engine.calibration import calibration_report
-from pulso_engine.models import Signal
+from corvo_engine.backtest_events import backtest_event, dataset_rows, false_positive_rate
+from corvo_engine.calibration import calibration_report
+from corvo_engine.models import Signal
 
 T0 = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 

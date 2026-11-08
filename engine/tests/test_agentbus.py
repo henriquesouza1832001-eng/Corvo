@@ -46,10 +46,10 @@ def test_stale_lock_does_not_block_forever(monkeypatch):
 
 
 def test_claims_detect_overlap_between_agents(capsys):
-    assert bus.claim("codex", ["engine/pulso_engine/pipeline.py", "docs/research/"]) == 0
+    assert bus.claim("codex", ["engine/corvo_engine/pipeline.py", "docs/research/"]) == 0
     assert bus.claim("claude-hen", ["docs/research/SPEC_01.md"]) == 1  # dentro de uma pasta reservada pelo outro
-    assert bus.claim("claude-hen", ["engine/pulso_engine/flags.py"]) == 0
-    assert bus.claim("codex", ["engine/pulso_engine/pipeline.py"]) == 0  # o próprio dono repetir não conflita
+    assert bus.claim("claude-hen", ["engine/corvo_engine/flags.py"]) == 0
+    assert bus.claim("codex", ["engine/corvo_engine/pipeline.py"]) == 0  # o próprio dono repetir não conflita
     bus.unclaim("codex", [])
     assert bus.claim("claude-hen", ["docs/research/SPEC_01.md"]) == 0
     assert "CONFLITO" in capsys.readouterr().err
@@ -78,15 +78,15 @@ def test_claim_keeps_the_dot_of_hidden_folders_and_ignores_dot_slash():
 
 
 def test_check_staged_blocks_without_the_lock_and_on_files_owned_by_others(capsys):
-    bus.claim("claude-motor", ["engine/pulso_engine/forecast_v2.py"])
-    bus.claim("claude-hen", ["engine/pulso_engine/pipeline.py"])
+    bus.claim("claude-motor", ["engine/corvo_engine/forecast_v2.py"])
+    bus.claim("claude-hen", ["engine/corvo_engine/pipeline.py"])
     # sem trava: bloqueia
-    assert bus.check_staged("claude-hen", ["engine/pulso_engine/pipeline.py"]) == 1
+    assert bus.check_staged("claude-hen", ["engine/corvo_engine/pipeline.py"]) == 1
     assert "NÃO tem a trava" in capsys.readouterr().err
     bus.lock_acquire("claude-hen", "x")
-    assert bus.check_staged("claude-hen", ["engine/pulso_engine/pipeline.py"]) == 0
+    assert bus.check_staged("claude-hen", ["engine/corvo_engine/pipeline.py"]) == 0
     # arquivo reservado por outro agente: bloqueia mesmo com a trava
-    assert bus.check_staged("claude-hen", ["engine/pulso_engine/pipeline.py", "engine/pulso_engine/forecast_v2.py"]) == 1
+    assert bus.check_staged("claude-hen", ["engine/corvo_engine/pipeline.py", "engine/corvo_engine/forecast_v2.py"]) == 1
     assert "reservado por claude-motor" in capsys.readouterr().err
     # nada em git add: bloqueia; arquivo sem dono: só avisa
     assert bus.check_staged("claude-hen", []) == 1

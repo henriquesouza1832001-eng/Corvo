@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Forecast, PulsoEvent, PulseSnapshot } from "@pulso/shared";
+import type { Forecast, CorvoEvent, PulseSnapshot } from "@corvo/shared";
 import type { HealthSnapshot, PulsePoint, StatsSnapshot, TrackRecord } from "../../lib/api";
 import { ago, CATEGORY_PT, LEVEL_PT } from "../../lib/format";
 import { CAT_ICON, catColor, Icon } from "../ui/Icon";
@@ -8,7 +8,7 @@ import { SourceMonitor } from "../system/SourceMonitor";
 /* Cartões do painel. Regra: só dado real da API; o que ainda não existe aparece como vazio honesto. */
 
 const LVC = ["", "var(--lv1)", "var(--lv2)", "var(--lv3)", "var(--lv4)", "var(--lv5)"];
-const place = (e: PulsoEvent) =>
+const place = (e: CorvoEvent) =>
 	[e.city, e.state].filter(Boolean).join(" - ") || (e.category === "INTERNATIONAL" ? "internacional" : "nacional");
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
@@ -40,12 +40,12 @@ export function Card({
 	);
 }
 
-/** PULSO BRASIL: número, variação real em 2 h e escala 1–5. */
+/** CORVO BRASIL: número, variação real em 2 h e escala 1–5. */
 export function PulseCard({ pulse }: { pulse: PulseSnapshot | null }) {
 	const lv = pulse?.alert_level ?? 0;
 	const d = pulse?.delta_2h;
 	return (
-		<Card title="PULSO BRASIL" className="dpulse">
+		<Card title="CORVO BRASIL" className="dpulse">
 			<div className="dpulse-main">
 				<span className="dpulse-n" style={{ color: LVC[lv] || "var(--tx2)" }}>
 					{pulse ? pulse.score : "--"}
@@ -97,7 +97,7 @@ export function TrendCard({ points, forecasts }: { points: PulsePoint[]; forecas
 			{points.length < 2 ? (
 				<p className="state">COLETANDO HISTÓRICO…</p>
 			) : (
-				<svg viewBox={`0 0 ${w} ${h}`} className="dtrend-svg" role="img" aria-label="Pulso Brasil nas últimas 6 horas">
+				<svg viewBox={`0 0 ${w} ${h}`} className="dtrend-svg" role="img" aria-label="Corvo Brasil nas últimas 6 horas">
 					{[0, 50, 100].map((v) => (
 						<g key={v}>
 							<line x1={pad} x2={w} y1={y(v)} y2={y(v)} stroke="var(--ln0)" />
@@ -120,7 +120,7 @@ export function TrendCard({ points, forecasts }: { points: PulsePoint[]; forecas
 				<div className="dtrend-fc">
 					<b style={{ color: "var(--org)" }}>{pct(nowcast.probability)}</b>
 					<span>
-						chance de o Pulso BR ficar {nowcast.comparator === "gte" ? "≥" : "≤"} {nowcast.threshold} em{" "}
+						chance de o Corvo BR ficar {nowcast.comparator === "gte" ? "≥" : "≤"} {nowcast.threshold} em{" "}
 						{nowcast.horizon_minutes} min
 						<small className="dim">
 							{" "}
@@ -136,10 +136,10 @@ export function TrendCard({ points, forecasts }: { points: PulsePoint[]; forecas
 	);
 }
 
-/** Cidades em alerta: agregadas dos eventos ativos (maior Pulso e nível por cidade). */
-export function CitiesCard({ events, onSelect }: { events: PulsoEvent[]; onSelect: (id: string) => void }) {
+/** Cidades em alerta: agregadas dos eventos ativos (maior Corvo e nível por cidade). */
+export function CitiesCard({ events, onSelect }: { events: CorvoEvent[]; onSelect: (id: string) => void }) {
 	const rows = useMemo(() => {
-		const m = new Map<string, { label: string; pulse: number; level: number; n: number; top: PulsoEvent }>();
+		const m = new Map<string, { label: string; pulse: number; level: number; n: number; top: CorvoEvent }>();
 		for (const e of events) {
 			if (!e.city || !e.state) continue;
 			const k = `${e.city}|${e.state}`;
@@ -162,7 +162,7 @@ export function CitiesCard({ events, onSelect }: { events: PulsoEvent[]; onSelec
 					<thead>
 						<tr>
 							<th>Cidade</th>
-							<th>Pulso</th>
+							<th>Corvo</th>
 							<th>Nível</th>
 							<th>Eventos</th>
 						</tr>
@@ -189,8 +189,8 @@ export function CitiesCard({ events, onSelect }: { events: PulsoEvent[]; onSelec
 	);
 }
 
-/** Eventos em destaque: maior nível primeiro, depois Pulso. */
-export function HighlightsCard({ events, onSelect }: { events: PulsoEvent[]; onSelect: (id: string) => void }) {
+/** Eventos em destaque: maior nível primeiro, depois Corvo. */
+export function HighlightsCard({ events, onSelect }: { events: CorvoEvent[]; onSelect: (id: string) => void }) {
 	const top = useMemo(
 		() => [...events].sort((a, b) => b.alert_level - a.alert_level || b.pulse - a.pulse).slice(0, 4),
 		[events],
@@ -201,7 +201,7 @@ export function HighlightsCard({ events, onSelect }: { events: PulsoEvent[]; onS
 			{top.map((e) => (
 				<article key={e.event_id} className="dhl" onClick={() => onSelect(e.event_id)}>
 					<span className="dhl-lv" style={{ background: LVC[e.alert_level] }}>
-						PULSO {e.pulse}
+						CORVO {e.pulse}
 						<small>N{e.alert_level}</small>
 					</span>
 					<div>
@@ -227,7 +227,7 @@ export function HighlightsCard({ events, onSelect }: { events: PulsoEvent[]; onS
 }
 
 /** Atividade por categoria: sinais dos eventos atualizados nas últimas 2 h (e 24 h, para comparar). */
-export function CategoryCard({ events }: { events: PulsoEvent[] }) {
+export function CategoryCard({ events }: { events: CorvoEvent[] }) {
 	const rows = useMemo(() => {
 		const now = Date.now();
 		const m = new Map<string, { h2: number; h24: number }>();
@@ -386,7 +386,7 @@ export function ForecastCard({
 }
 
 /** Feeds recentes: os eventos atualizados por último. */
-export function RecentCard({ events, onSelect }: { events: PulsoEvent[]; onSelect: (id: string) => void }) {
+export function RecentCard({ events, onSelect }: { events: CorvoEvent[]; onSelect: (id: string) => void }) {
 	const list = useMemo(
 		() => [...events].sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at)).slice(0, 6),
 		[events],

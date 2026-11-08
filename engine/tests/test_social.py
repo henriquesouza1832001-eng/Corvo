@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, urlsplit
 import pytest
-from pulso_engine.collectors.social.reddit import RedditAdapter, subreddit_path
-from pulso_engine.collectors.social.x import XAdapter
-from pulso_engine.collectors.social.common import SocialAPIError
-from pulso_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
-from pulso_engine.events import status_for
-from pulso_engine.models import EventStats
-from pulso_engine.pipeline import is_due, main, run_once
+from corvo_engine.collectors.social.reddit import RedditAdapter, subreddit_path
+from corvo_engine.collectors.social.x import XAdapter
+from corvo_engine.collectors.social.common import SocialAPIError
+from corvo_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
+from corvo_engine.events import status_for
+from corvo_engine.models import EventStats
+from corvo_engine.pipeline import is_due, main, run_once
 NOW = datetime(2026, 10, 3, tzinfo=timezone.utc)
 
 
@@ -86,7 +86,7 @@ def test_api_errors_map_to_health(monkeypatch, code, status):
     monkeypatch.setenv("X_BEARER_TOKEN", "test-token")
     def failing(url, headers):
         raise SocialAPIError(code)
-    monkeypatch.setattr("pulso_engine.collectors.social.x.request_json", failing)
+    monkeypatch.setattr("corvo_engine.collectors.social.x.request_json", failing)
     batch = run_once([sources()["x"]], now=NOW)
     assert batch["source_health"][0]["status"] == status
 
@@ -122,7 +122,7 @@ def test_pilot_log_shows_only_counts(monkeypatch, capsys):
     monkeypatch.setenv("X_BEARER_TOKEN", "test-token")
     def fake(url, headers):
         return {"data": [{"id": "9", "text": "Protesto em Brasília contra o Senado", "created_at": "2026-10-03T00:00:00Z"}]}
-    monkeypatch.setattr("pulso_engine.collectors.social.x.request_json", fake)
+    monkeypatch.setattr("corvo_engine.collectors.social.x.request_json", fake)
     assert main(["--source", "x-politics"]) == 0
     out = capsys.readouterr().out
     assert "categorias:" in out and "Brasília" not in out  # logs do Actions são públicos
@@ -159,10 +159,14 @@ def test_subreddit_states_must_match_config():
 
 def test_pilot_log_counts_by_state(monkeypatch, capsys):
     monkeypatch.setenv("X_BEARER_TOKEN", "test-token")
+    # data RELATIVA ao relógio real: o piloto (`main`) usa o "agora" de verdade; uma data fixa passa a ser "velha" com o tempo (STALE) e quebrava o teste
+    from datetime import datetime, timedelta, timezone
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     def fake(url, headers):
-        return {"data": [{"id": "1", "text": "Governo paulista e Alesp discutem eleição", "created_at": "2026-10-03T00:00:00Z"},
-                         {"id": "2", "text": "Senado vota PEC das eleições", "created_at": "2026-10-03T00:00:00Z"}]}
-    monkeypatch.setattr("pulso_engine.collectors.social.x.request_json", fake)
+        return {"data": [{"id": "1", "text": "Governo paulista e Alesp discutem eleição", "created_at": recent},
+                         {"id": "2", "text": "Senado vota PEC das eleições", "created_at": recent}]}
+    monkeypatch.setattr("corvo_engine.collectors.social.x.request_json", fake)
     main(["--source", "x-politics"])
     out = capsys.readouterr().out
     assert "estados:" in out and "SP=1" in out and "sem_UF=1" in out and "paulista" not in out

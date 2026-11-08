@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from pulso_engine.intelligence.signatures import best_signature, load_signatures, match_signature, sensor_graph, sensor_of
-from pulso_engine.models import Signal
+from corvo_engine.intelligence.signatures import best_signature, load_signatures, match_signature, sensor_graph, sensor_of
+from corvo_engine.models import Signal
 
 TS = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 

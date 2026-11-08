@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { ago, brTime, CATEGORY_PT, evtId } from "../../lib/format";
 import { identicon } from "../../lib/identicon";
 import { LevelTag } from "../ui/LevelTag";
@@ -30,9 +30,9 @@ const SRC_CLASS: Record<string, string> = {
 	INFRASTRUCTURE: "OFICIAL",
 };
 
-function sourceFor(e: PulsoEvent, demo: boolean): string {
+function sourceFor(e: CorvoEvent, demo: boolean): string {
 	if (!demo) return `agregado·${e.source_count}fontes`;
-	return CAT_SOURCE[e.category] ?? "@pulso";
+	return CAT_SOURCE[e.category] ?? "@corvo";
 }
 
 const PAGE = 10;
@@ -51,7 +51,7 @@ export function OsintFeed({
 	onUfChange,
 	onDossier,
 }: {
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	onSelect: (id: string) => void;
 	selectedId: string | null;
 	demo: boolean;
@@ -89,7 +89,7 @@ export function OsintFeed({
 
 	const filtered = useMemo(() => {
 		const list = cat === "ALL" ? [...inScope] : inScope.filter((e) => e.category === cat);
-		// Nível mais alto sempre primeiro; dentro do nível, AO VIVO = mais recente, TOP = maior Pulso.
+		// Nível mais alto sempre primeiro; dentro do nível, AO VIVO = mais recente, TOP = maior Corvo.
 		list.sort(
 			(a, b) =>
 				b.alert_level - a.alert_level ||
@@ -169,7 +169,7 @@ export function OsintFeed({
 		.slice(0, 2);
 
 	// Item = sanfona: clicar abre o resumo ali mesmo, clicar de novo fecha (quem alterna é o App, via onSelect).
-	const renderItem = (e: PulsoEvent) => {
+	const renderItem = (e: CorvoEvent) => {
 		const open = e.event_id === selectedId;
 		return (
 			<article

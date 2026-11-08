@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.circuit_breaker import (CLOSED, FAILURE_THRESHOLD, HALF_OPEN, MAX_OPEN_MIN, OPEN, BreakerState, allow_request, record)
+from corvo_engine.circuit_breaker import (CLOSED, FAILURE_THRESHOLD, HALF_OPEN, MAX_OPEN_MIN, OPEN, BreakerState, allow_request, record)
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)
 

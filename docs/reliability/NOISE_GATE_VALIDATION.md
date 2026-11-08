@@ -3,14 +3,14 @@
 Autor: `claude-art`. Base: `origin/main` em `d85edd4`, já contida na `art` (o `AGENTS.md` proíbe trabalhar na `main` e criar
 branches; a entrega vai no PR da `art`). **A flag `NOISE_GATE` continua DESLIGADA por padrão.** Nada aqui a liga.
 
-Reproduzir: `cd engine && py -m pulso_engine.validation.noise_gate_corpus` (tabela abaixo, ~1 min) e
+Reproduzir: `cd engine && py -m corvo_engine.validation.noise_gate_corpus` (tabela abaixo, ~1 min) e
 `py -m pytest tests/test_noise_gate_validation.py` (invariantes, ~30 s).
 
 ## Veredito
 
 **READY_FOR_EXTENDED_SHADOW.** Não é `CANDIDATE_FOR_PROMOTION`.
 
-- No corpus, o gate reduz o ruído sem cegar o PULSO: hard negatives com N2+ caem de **95 para 0** (50/50 cenários), e o recall
+- No corpus, o gate reduz o ruído sem cegar o CORVO: hard negatives com N2+ caem de **95 para 0** (50/50 cenários), e o recall
   dos positivos **sobe** de 16/21 para 20/21. Nenhum positivo que passa com a flag desligada falha com ela ligada. As
   investigações do Sentinela são idênticas nos dois modos (o gate atua em eventos, não em sinais).
 - Por que não é candidato a promoção:

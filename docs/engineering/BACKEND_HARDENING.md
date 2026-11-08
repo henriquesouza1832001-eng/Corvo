@@ -9,7 +9,7 @@ Rodada iniciada em `hen` com `origin/main` = `217ee42` (PR #74). Worker com auth
 RT-002 (200 mascara conteúdo estagnado), RT-005 (storage sem ensaio de falha), RT-007 (admin/abuso), mais os de engine (RT-003, RT-008) que são do Claude A.
 
 ## 3. Reproduzidos
-- RT-002 (parte plataforma): reproduzido localmente. Com a base local sem Pulso novo há 251 min, `/api/health` seguia "ONLINE" sem veredito de prontidão.
+- RT-002 (parte plataforma): reproduzido localmente. Com a base local sem Corvo novo há 251 min, `/api/health` seguia "ONLINE" sem veredito de prontidão.
 - RT-007: confirmado por leitura (sem limite de corpo; sem id de requisição; admin usa o token do ingest).
 - RT-005: reproduzido por falha induzida (`storage-chaos.test.ts`). Achado: reenvio idêntico regravava `events`, `series`, `forecasts` e `pulse_history` (idempotência fraca + custo de orçamento).
 
@@ -33,7 +33,7 @@ Saúde era medida só por transporte (o banco responde), nunca por prontidão/fr
 `apps/worker/tests/hardening.test.ts` (12): envelope (request_id igual ao cabeçalho, sucesso intocado, id hostil descartado, corpo não-objeto intacto, sem vazamento de stack), limite de corpo (200 dentro, 413 fora), veredito (ok, banco fora = not_ready, coleta atrasada ou inexistente = degraded e não ok, economia/crítico, degradação não rebaixa not_ready, enxurrada). `apps/worker/tests/auth.test.ts` (+6): matriz de menor privilégio por rota e pelo app real (ingest-token = 401 em `/engine-status`, mas passa em `/observations`). `apps/worker/tests/storage-chaos.test.ts` (6, mais helper `tests/helpers/hrana.ts` com injeção de falha): lote limpo; rede cai antes; HTTP 500; resposta perdida depois do commit; limitação do orçamento (visível); falha no meio do lote. Verificação no Worker local: live 200, ready 200 `degraded` com o motivo, 401 e 400 com `request_id`, 9 MB = 413.
 
 ## 7. Garantias temporais
-Inalteradas nesta rodada (núcleo é do Claude A/Codex). A idade da coleta usa o Pulso nacional mais recente, nunca o relógio da coleta.
+Inalteradas nesta rodada (núcleo é do Claude A/Codex). A idade da coleta usa o Corvo nacional mais recente, nunca o relógio da coleta.
 
 ## 8. Proveniência · 9. Geo
 Sem mudança nesta rodada (engine).

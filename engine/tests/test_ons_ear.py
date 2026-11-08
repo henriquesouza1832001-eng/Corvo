@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.official.ons_ear import OnsEarAdapter
+from corvo_engine.collectors.official.ons_ear import OnsEarAdapter
 
 SRC = {"id": "ons-ear", "adapter": "ons_ear", "source_class": "OFFICIAL", "url": "https://ons/EAR_{year}.csv"}
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.forecast import MIN_PAIRS
-from pulso_engine.forecast_scopes import make_scope_nowcasts, resolve_scope_due
+from corvo_engine.forecast import MIN_PAIRS
+from corvo_engine.forecast_scopes import make_scope_nowcasts, resolve_scope_due
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 
@@ -18,7 +18,7 @@ def test_only_scopes_with_history_and_relevant_pulse_forecast():
     data = {"BR": points(40), "UF:MG": points(50), "UF:SP": points(5), "UF:RJ": points(60, n=10)}
     fc = make_scope_nowcasts(data, NOW)
     scopes = {f["scope"] for f in fc}
-    assert scopes == {"BR", "UF:MG"}  # SP: Pulso baixo; RJ: histórico curto
+    assert scopes == {"BR", "UF:MG"}  # SP: Corvo baixo; RJ: histórico curto
     assert all(f["status"] == "open" and 0 < f["probability"] < 1 for f in fc)
     assert len({f["forecast_id"] for f in fc}) == len(fc)
 
@@ -44,4 +44,4 @@ def test_each_forecast_resolves_with_its_own_scope_series():
     data = {"UF:MG": [{"timestamp": NOW.strftime("%Y-%m-%dT%H:%M:%SZ"), "score": 70}],
             "UF:SP": [{"timestamp": NOW.strftime("%Y-%m-%dT%H:%M:%SZ"), "score": 10}]}
     res = {f["forecast_id"]: f for f in resolve_scope_due(open_fc, data, NOW)}
-    assert res["a"]["outcome"] == 1 and res["b"]["outcome"] == 0  # MG não resolve com o Pulso de SP
+    assert res["a"]["outcome"] == 1 and res["b"]["outcome"] == 0  # MG não resolve com o Corvo de SP

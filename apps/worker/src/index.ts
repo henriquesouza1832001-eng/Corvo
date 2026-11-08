@@ -11,7 +11,7 @@ import { admin } from "./routes/admin";
 import { forecasts } from "./routes/forecasts";
 import { stats } from "./routes/stats";
 import { history } from "./routes/history";
-import { cameras } from "./routes/cameras";
+import { corvo } from "./routes/corvo";
 import type { AppEnv, Bindings } from "./env";
 import { TursoDatabase } from "./lib/turso";
 import { dispatchCollection, dispatchHealthcheck, isHealthcheckSlot } from "./lib/dispatch";
@@ -28,8 +28,11 @@ app.use(
 
 // Troca o banco por requisição: com DB_BACKEND="turso" as rotas continuam usando `c.env.DB`, agora sobre o Turso.
 app.use("*", async (c, next) => {
-	if (c.env.DB_BACKEND === "turso" && c.env.TURSO_URL && c.env.TURSO_TOKEN) {
-		c.env = { ...c.env, DB: new TursoDatabase({ url: c.env.TURSO_URL, token: c.env.TURSO_TOKEN }) as unknown as D1Database };
+	// trim: segredo colado com quebra de linha ou espaço no fim não pode derrubar a API
+	const tursoUrl = c.env.TURSO_URL?.trim();
+	const tursoToken = c.env.TURSO_TOKEN?.trim().replace(/^["']|["']$/g, "");
+	if (c.env.DB_BACKEND === "turso" && tursoUrl && tursoToken) {
+		c.env = { ...c.env, DB: new TursoDatabase({ url: tursoUrl, token: tursoToken }) as unknown as D1Database };
 	}
 	await next();
 });
@@ -46,7 +49,7 @@ app.route("/api/map", map);
 app.route("/api/forecasts", forecasts);
 app.route("/api/stats", stats);
 app.route("/api/history", history);
-app.route("/api/cameras", cameras);
+app.route("/api/corvo", corvo);
 app.route("/api/ingest", ingest);
 app.route("/api/admin", admin);
 

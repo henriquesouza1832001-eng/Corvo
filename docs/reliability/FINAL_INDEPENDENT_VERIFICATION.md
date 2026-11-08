@@ -1,4 +1,4 @@
-# PULSO — Independent Reliability & Predictive Verification
+# CORVO — Independent Reliability & Predictive Verification
 
 Data da auditoria: 2026-10-03. Ambiente: Windows, Python 3.14.4, pytest 9.1.1, Node/npm, Worker local e endpoints públicos. Auditoria de código e harness; não houve acesso a segredos nem alteração de produção.
 
@@ -124,14 +124,14 @@ O red-team reproduziu promoção por volume de conteúdo esportivo/editorial (in
 
 Forecast V2: **REPROVADO para promoção**. Exige corpus positivo/negativo real, unidade por evento, holdout temporal, Brier Skill positivo contra baseline, calibração com N suficiente, FPR/recall/lead time, shadow resolvido, rollback e nenhuma regressão por escopo. `UNKNOWN`, abstention e ausência de amostra não são negativos.
 
-## Decisão sobre PULSO 1.0
+## Decisão sobre CORVO 1.0
 
 - **CORE SITUATIONAL INTELLIGENCE:** `PARTIAL` — funcional e defensável em vários invariantes, mas RT-003 e clustering/proveniência sem evidência completa impedem declarar pronto sem ressalvas.
 - **OPERATIONAL RELIABILITY:** `PARTIAL` — hardening, health, source runtime, breaker e chaos local existem; WAF, SLO histórico, bancos remotos e compliance permanecem abertos.
 - **EXPERIMENTAL FORECAST INFRASTRUCTURE:** `PARTIAL` — infraestrutura de honestidade está funcional e atrás de shadow.
 - **REAL PREDICTIVE EVIDENCE:** `UNVERIFIED` / `INSUFFICIENT_DATA` — não há demonstração estatística de skill.
 
-Conclusão: o código suporta um **PULSO 1.0 limitado como inteligência situacional com motor preditivo experimental**, desde que a comunicação pública preserve as ressalvas acima. Não suporta declarar que o PULSO prevê corretamente.
+Conclusão: o código suporta um **CORVO 1.0 limitado como inteligência situacional com motor preditivo experimental**, desde que a comunicação pública preserve as ressalvas acima. Não suporta declarar que o CORVO prevê corretamente.
 
 ## BLOCKED_EXTERNAL e próximos ataques
 

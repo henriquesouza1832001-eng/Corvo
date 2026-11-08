@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { forecastSchema } from "../src/routes/ingest";
 
 const base = {
-	forecast_id: "fc-pulse-br-gte-50-h60-2026100312", kind: "NOWCAST", question: "O Pulso do Brasil será >= 50?", scope: "BR", metric: "pulse",
+	forecast_id: "fc-pulse-br-gte-50-h60-2026100312", kind: "NOWCAST", question: "O Corvo do Brasil será >= 50?", scope: "BR", metric: "pulse",
 	comparator: "gte", threshold: 50, method: "pulse_empirical_delta", method_version: "1", probability: 0.3, interval_low: 0.2,
 	interval_high: 0.4, horizon_minutes: 60, created_at: "2026-10-03T12:00:00Z", resolves_at: "2026-10-03T13:00:00Z", evidence: {},
 	status: "open", outcome: null, observed_value: null, resolved_at: null, brier: null,

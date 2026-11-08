@@ -12,8 +12,8 @@ data = json.loads((ROOT / "engine/config/cameras.json").read_text(encoding="utf-
 q = lambda x: json.dumps(x, ensure_ascii=False)  # noqa: E731
 lines = [
     "// GERADO por engine/scripts/gen_cameras_ts.py a partir de engine/config/cameras.json. Não edite à mão.",
-    "// O PULSO é apenas o placeholder: mostra a prévia do próprio provedor (quando ele permite) e leva o clique à página de origem.",
-    'import type { CameraFeed } from "@pulso/shared";',
+    "// O CORVO é apenas o placeholder: mostra a prévia do próprio provedor (quando ele permite) e leva o clique à página de origem.",
+    'import type { CameraFeed } from "@corvo/shared";',
     "",
     "export const CAMERAS: CameraFeed[] = [",
 ]

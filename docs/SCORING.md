@@ -1,6 +1,6 @@
 # Scoring
 
-Código: `engine/pulso_engine/scoring/`. O score mede **atividade e sinais públicos detectados**, nunca probabilidade de dano nem veracidade.
+Código: `engine/corvo_engine/scoring/`. O score mede **atividade e sinais públicos detectados**, nunca probabilidade de dano nem veracidade.
 
 ## Severidade ≠ Confiança
 Um incêndio possivelmente grande com um só relato: severidade 92, confiança 31. Um acidente pequeno confirmado por PRF + imprensa + trânsito: severidade 35, confiança 98. São medidas independentes.
@@ -9,7 +9,7 @@ Um incêndio possivelmente grande com um só relato: severidade 92, confiança 3
 `10` base `+ min(30, 10·(fontes independentes−1)) + min(20, 7·(tipos de fonte−1)) + 25 se confirmação oficial + 10·consistência geográfica + 5·consistência temporal − 30·contradição − 20·proporção de duplicatas`.
 Só redes sociais ("sensor social"): teto de **40**, e o status do evento fica `DETECTED` (nunca `CONFIRMED`, por mais perfis que repitam). Cópias da mesma matéria contam como uma fonte (dedup).
 
-## Pulso Score (0–100) — `pulse.py`
+## Corvo Score (0–100) — `pulse.py`
 Soma de pontos = peso × componente (0–1). A lista de pontos é o "POR QUE 87?".
 
 | Componente | Peso |
@@ -25,11 +25,11 @@ Soma de pontos = peso × componente (0–1). A lista de pontos é o "POR QUE 87?
 
 Avisos do INMET: "Grande Perigo" entra como `EMERGENCY` (base 70) e "Perigo" como `WEATHER` (base 55); "Perigo Potencial" não entra por padrão (ADR 0004).
 
-## Pulso V2 (atrás da flag `PULSE_V2`, padrão DESLIGADO)
+## Corvo V2 (atrás da flag `PULSE_V2`, padrão DESLIGADO)
 `scoring/pulse.py` tem `WEIGHTS` (V1, o que roda em produção, intacto) e `WEIGHTS_V2`: **aceleração** (5; sinais/hora a mais que na hora anterior, queda não pontua) e **diversidade de tipos de sensor** (5; oficial, imprensa, social... pesa mais que volume bruto) tiram 5 de velocidade (15→10) e 5 de diversidade de fontes (15→10); a soma continua 100 e o "POR QUE N?" continua somando o score. Só liga depois do portão de promoção (shadow + backtest V1×V2, `docs/engineering/ENGINE_V2_PLAN.md`). **Contradição**: `stats_for`/`build_event` aceitam `contradiction` (0-1, vem da validação do Sentinela); reduz a confiança (30 × contradição) e aparece no "POR QUE?" como item de 0 pontos ("Fontes divergem") só quando > 0. Com a flag desligada e contradição 0 o resultado é idêntico ao V1 (teste de igualdade).
 
 ## Frescor: o que é de agora vale mais que o de ontem
-O Pulso de um evento é multiplicado por um **fator de frescor** de 0,25 a 1, calculado a partir da idade do sinal mais recente e de uma **meia-vida que depende da categoria** (`HALF_LIFE_BY_CATEGORY` em `scoring/pulse.py`):
+O Corvo de um evento é multiplicado por um **fator de frescor** de 0,25 a 1, calculado a partir da idade do sinal mais recente e de uma **meia-vida que depende da categoria** (`HALF_LIFE_BY_CATEGORY` em `scoring/pulse.py`):
 
 | Categoria | Meia-vida |
 |---|---|
@@ -53,7 +53,7 @@ O Pulso de um evento é multiplicado por um **fator de frescor** de 0,25 a 1, ca
 - **Severidade** (`events.stats_for`): base da categoria + corroboração (4 pontos por fonte extra, até 20) + **impacto do texto** (0,3 × a importância de `processing/importance.py`, ou seja, até ~18 pontos para mortes e desabamentos). Um relato de rotina e um com vítimas na mesma categoria deixam de ter a mesma severidade; entretenimento nunca sobe.
 - **Feed regional**: sem lugar no texto, a notícia herda o estado da fonte (`state`), com confiança 35.
 
-## Nível PULSO 1–5
+## Nível CORVO 1–5
 1 Normal · 2 Atenção (score ≥ 30) · 3 Elevado (≥ 55 e confiança ≥ 40) · 4 Crítico (≥ 75, confiança ≥ 70, ≥ 2 fontes independentes) · 5 Emergência (≥ 90, confiança ≥ 85, **fonte oficial** e ≥ 3 fontes independentes). Social isolado nunca passa do nível 3.
 
 **Piso para alerta oficial extremo.** Se o evento contém um alerta de uma **fonte de alerta oficial** (`"alert_source": true` em `sources.json`: hoje o INMET e a Defesa Civil/IDAP) classificado como `EMERGENCY` (INMET "Grande Perigo", Defesa Civil "Extreme"), o nível nunca fica abaixo de **3 (Elevado)**: o próprio órgão já declarou o perigo e o score ainda não o enxerga (a anomalia só existe com 12 h de histórico). O piso **não altera o score**; aparece no "POR QUE?" como um item de 0 pontos ("Alerta oficial de risco extremo (piso nível 3)") e a soma dos pontos continua igual ao score. Comunicado de órgão que não é fonte de alerta, severidade menor e notícia não recebem o piso. O nível 4 e o 5 continuam exigindo confirmação por 2+ e 3+ fontes independentes.
@@ -61,9 +61,9 @@ O Pulso de um evento é multiplicado por um **fator de frescor** de 0,25 a 1, ca
 Os limiares são ponto de partida: calibrar com dados reais (ADR a cada mudança).
 
 ## Anomalia e baseline (implementado)
-`engine/pulso_engine/baseline.py` e `anomaly.py`. O histórico vem de `series` (contagens de 5 min). O baseline é a média e o desvio exponencialmente ponderados (EWMA) das contagens **por hora** do mesmo escopo e categoria, excluindo a hora corrente. Anomalia = `z / 4` limitada a 0–1, com `z` em desvios acima do normal.
+`engine/corvo_engine/baseline.py` e `anomaly.py`. O histórico vem de `series` (contagens de 5 min). O baseline é a média e o desvio exponencialmente ponderados (EWMA) das contagens **por hora** do mesmo escopo e categoria, excluindo a hora corrente. Anomalia = `z / 4` limitada a 0–1, com `z` em desvios acima do normal.
 
-Regra de honestidade: com menos de **12 horas** de histórico o baseline é **inválido** e a anomalia vale 0. Também é inválido quando o histórico é **esparso**: é preciso haver sinal em ao menos 6 horas e em 1/3 das horas, porque a hora sem linha vira 0 e um 0 pode ser calmaria **ou** lacuna de coleta (o sistema não distingue). Um "normal" feito quase só de zeros faria 4 sinais parecerem uma anomalia enorme. O sistema nunca afirma que algo é anormal sem saber o que é normal. A anomalia entra no Pulso com peso 15 e aparece no "POR QUE N?".
+Regra de honestidade: com menos de **12 horas** de histórico o baseline é **inválido** e a anomalia vale 0. Também é inválido quando o histórico é **esparso**: é preciso haver sinal em ao menos 6 horas e em 1/3 das horas, porque a hora sem linha vira 0 e um 0 pode ser calmaria **ou** lacuna de coleta (o sistema não distingue). Um "normal" feito quase só de zeros faria 4 sinais parecerem uma anomalia enorme. O sistema nunca afirma que algo é anormal sem saber o que é normal. A anomalia entra no Corvo com peso 15 e aparece no "POR QUE N?".
 
 Limitações conhecidas: o baseline ainda não separa hora do dia e dia da semana (precisa de semanas de dados); e a clusterização é recalculada a cada rodada, então o `event_id` de uma história pode mudar quando a notícia mais antiga sai dos feeds (a solução é clusterização com estado, a próxima etapa).
 

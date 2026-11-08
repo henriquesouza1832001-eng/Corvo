@@ -1,8 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
 
-from pulso_engine.anomaly import window_anomaly
-from pulso_engine.baseline import BR_TZ, seasonal_baseline
-from pulso_engine.intelligence.context_engine import (contextual_baseline, day_context, effective_weekday, fetch_holidays,
+from corvo_engine.anomaly import window_anomaly
+from corvo_engine.baseline import BR_TZ, seasonal_baseline
+from corvo_engine.intelligence.context_engine import (contextual_baseline, day_context, effective_weekday, fetch_holidays,
                                                       parse_holidays)
 
 SAMPLE = b'[{"date":"2026-10-12","name":"Nossa Senhora Aparecida","type":"national"},{"date":"2026-11-02","name":"Finados","type":"national"}]'

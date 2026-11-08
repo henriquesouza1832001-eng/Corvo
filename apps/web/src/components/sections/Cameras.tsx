@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { CameraFeeds } from "./CameraFeeds";
-import type { CameraFeed } from "@pulso/shared";
+import type { CameraFeed } from "@corvo/shared";
 
 export interface CameraDef {
 	id: string;

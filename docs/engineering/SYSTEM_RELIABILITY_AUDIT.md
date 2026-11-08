@@ -10,7 +10,7 @@ Data: 2026-10-03. Escopo: revisão estática, testes locais e ataques reprodutí
 
 ## Reliability Lab e métricas
 
-O laboratório isolado existe em `engine/pulso_engine/validation/`. Brier, log loss, ECE, classificação, cobertura e lead time têm testes de borda. A campanha reproduziu Brier `2.25` para probabilidade `1.5`; o reparo agora rejeita probabilidade não finita/fora de `[0,1]`, outcome fora de `{0,1}`, bins/cutoff inválidos e diferencia F1 zero de ausência de denominador.
+O laboratório isolado existe em `engine/corvo_engine/validation/`. Brier, log loss, ECE, classificação, cobertura e lead time têm testes de borda. A campanha reproduziu Brier `2.25` para probabilidade `1.5`; o reparo agora rejeita probabilidade não finita/fora de `[0,1]`, outcome fora de `{0,1}`, bins/cutoff inválidos e diferencia F1 zero de ausência de denominador.
 
 ## Replay e leakage
 

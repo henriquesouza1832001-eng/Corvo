@@ -1,6 +1,6 @@
 /**
- * CONTRATOS DO PULSO — fonte única da verdade entre Engine (Python), Worker e Web.
- * Os espelhos em Python vivem em engine/pulso_engine/models.py.
+ * CONTRATOS DO CORVO — fonte única da verdade entre Engine (Python), Worker e Web.
+ * Os espelhos em Python vivem em engine/corvo_engine/models.py.
  * Mudança aqui é mudança de contrato: abra PR com label `contract` e atualize docs/api/API.md.
  */
 
@@ -32,7 +32,7 @@ export const SOURCE_HEALTH = [
 ] as const;
 export type SourceHealthStatus = (typeof SOURCE_HEALTH)[number];
 
-/** PULSO 1–5. O nível 5 exige fonte oficial + múltiplas fontes independentes. */
+/** CORVO 1–5. O nível 5 exige fonte oficial + múltiplas fontes independentes. */
 export type AlertLevel = 1 | 2 | 3 | 4 | 5;
 
 /** Um item do score explicável ("POR QUE 87?"). `points` somados = `pulso`. */
@@ -78,7 +78,7 @@ export interface SourceDef {
 }
 
 /** Evento normalizado (cluster de sinais). Severidade e confiança são independentes. */
-export interface PulsoEvent {
+export interface CorvoEvent {
 	event_id: string;
 	title: string;
 	summary: string | null;
@@ -169,7 +169,7 @@ export interface IngestBatch {
 	sources: SourceDef[];
 	/** true = `sources` é o catálogo completo de fontes ativas; o Worker desativa as ausentes. Padrão false. */
 	catalog_complete?: boolean;
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	signals: Signal[];
 	pulses: PulseSnapshot[];
 	source_health: SourceHealth[];
@@ -313,7 +313,7 @@ export interface ObservationPoint {
 	duplicates: number; // cópias descartadas na deduplicação
 }
 
-/** Prévia ao vivo de uma câmera, servida pelo PRÓPRIO provedor (o PULSO não copia nem retransmite o vídeo). */
+/** Prévia ao vivo de uma câmera, servida pelo PRÓPRIO provedor (o CORVO não copia nem retransmite o vídeo). */
 export interface CameraPreview {
 	type: "iframe" | "hls";
 	url: string;

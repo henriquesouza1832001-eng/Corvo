@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.official.inmet import InmetAdapter
-from pulso_engine.config import DEFAULT_SOURCES_PATH, load_sources
-from pulso_engine.pipeline import run_once
+from corvo_engine.collectors.official.inmet import InmetAdapter
+from corvo_engine.config import DEFAULT_SOURCES_PATH, load_sources
+from corvo_engine.pipeline import run_once
 
 NOW = datetime(2026, 10, 3, 15, 0, tzinfo=timezone.utc)  # 12h em Brasília
 

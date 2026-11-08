@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.forecast_v2_features import (MISSING, NOT_APPLICABLE, STALE, UNAVAILABLE, VALUE, VALUE_ZERO, build_snapshot,
+from corvo_engine.forecast_v2_features import (MISSING, NOT_APPLICABLE, STALE, UNAVAILABLE, VALUE, VALUE_ZERO, build_snapshot,
                                                family_agreement, sensor_coverage, visible_signals)
-from pulso_engine.models import Signal
+from corvo_engine.models import Signal
 
 CUTOFF = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)
 

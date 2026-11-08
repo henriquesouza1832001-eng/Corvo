@@ -33,7 +33,7 @@
 | Bruto do feed (conteúdo de terceiros) | **não guardado** além do sinal normalizado; título + link com atribuição | `display: headline_link` |
 | Sinais (`signals`) | 90 dias (`retention_days` por fonte) | só o estritamente necessário |
 | Séries e observações agregadas (`series`, `signal_observations`) | observações 90 dias; séries mais longas (só contagens) | agregação sempre preferida |
-| Eventos / Pulso (`events`, `pulse_history`) | o histórico útil para baseline/backtest é preservado | |
+| Eventos / Corvo (`events`, `pulse_history`) | o histórico útil para baseline/backtest é preservado | |
 | Investigações | 30 dias após fechadas | |
 | Previsões e registro (`forecasts`, `forecast_registry`, `shadow_results`) | previsões preservadas (base do Brier); registro 180 dias; shadow 90 | imutáveis |
 | Saúde de fonte | só o estado atual + detalhe curto; sem série por item | evita cardinalidade |
@@ -63,4 +63,4 @@ Aplicação: declarada nas migrations/rotas do Worker; **não verificada em prod
 ## 5. BLOCKED_EXTERNAL e desconhecidos restantes
 - **BLOCKED_EXTERNAL:** revisão humana das fontes (F-5); criar `ADMIN_TOKEN` e regra de rate limit/WAF na Cloudflare (dono); validação em Turso/D1 remotos (credenciais); renovar `GH_DISPATCH_TOKEN` (vence 31/12/2026).
 - **Desconhecido:** latência real da API e série histórica de disponibilidade; custo e bytes por fonte/dia (não medidos); desempenho com 100–100k observações (sem benchmark: não publicar números); auditoria de dependências Python; histórico do git não varrido por segredos.
-- **Princípio:** *um sistema só é confiável se percebe quando a própria visão do mundo está degradada*: o ganho desta campanha é o PULSO distinguir "a fonte falou e nada mudou", "a fonte calou" e "não sei", em vez de tratar os três como calmaria.
+- **Princípio:** *um sistema só é confiável se percebe quando a própria visão do mundo está degradada*: o ganho desta campanha é o CORVO distinguir "a fonte falou e nada mudou", "a fonte calou" e "não sei", em vez de tratar os três como calmaria.

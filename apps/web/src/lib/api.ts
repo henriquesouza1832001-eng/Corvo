@@ -1,9 +1,9 @@
-import type { CameraFeed, Forecast, PulsoEvent, PulseSnapshot, SourceHealth } from "@pulso/shared";
+import type { CameraFeed, Forecast, CorvoEvent, PulseSnapshot, SourceHealth } from "@corvo/shared";
 
 /** Em produção defina VITE_API_BASE (URL pública do Worker). Nunca coloque segredos aqui. */
 const BASE: string =
 	import.meta.env.VITE_API_BASE ??
-	(import.meta.env.PROD ? "https://pulso-api.henriquesouza.workers.dev" : "");
+	(import.meta.env.PROD ? "https://corvo-api.henriquesouza.workers.dev" : "");
 
 async function get<T>(path: string): Promise<T> {
 	const res = await fetch(`${BASE}${path}`);
@@ -25,7 +25,7 @@ export interface SignalRow {
 }
 
 export interface EventDetail {
-	event: PulsoEvent;
+	event: CorvoEvent;
 	signals: SignalRow[];
 }
 
@@ -59,7 +59,7 @@ export interface TrackRecord {
 
 export const api = {
 	pulseBR: () => get<PulseSnapshot>("/api/pulse/br"),
-	events: (limit = 50) => get<{ events: PulsoEvent[] }>(`/api/events?limit=${limit}`),
+	events: (limit = 50) => get<{ events: CorvoEvent[] }>(`/api/events?limit=${limit}`),
 	event: (id: string) => get<EventDetail>(`/api/events/${encodeURIComponent(id)}`),
 	health: () => get<HealthSnapshot>("/api/health"),
 	cameras: () => get<{ cameras: CameraFeed[] }>("/api/cameras"),
@@ -68,5 +68,5 @@ export const api = {
 	forecasts: () => get<{ notice: string; forecasts: Forecast[] }>("/api/forecasts?limit=30"),
 	trackRecord: () => get<TrackRecord>("/api/forecasts/track-record"),
 	/** Até 100 eventos (limite da API): mais base para os agregados do painel. */
-	events100: () => get<{ events: PulsoEvent[] }>("/api/events?limit=100"),
+	events100: () => get<{ events: CorvoEvent[] }>("/api/events?limit=100"),
 };

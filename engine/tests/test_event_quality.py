@@ -1,9 +1,9 @@
 """Qualidade dos eventos: sem encadeamento de matérias, estado por maioria, publicação criteriosa."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.events import event_place, is_publishable
-from pulso_engine.models import Signal
-from pulso_engine.processing.clustering import cluster_signals
+from corvo_engine.events import event_place, is_publishable
+from corvo_engine.models import Signal
+from corvo_engine.processing.clustering import cluster_signals
 
 NOW = datetime(2026, 10, 2, 18, 0, tzinfo=timezone.utc)
 
@@ -53,7 +53,7 @@ def test_event_state_is_the_majority_or_none_for_national_topics():
 
 
 def test_publishability_policy():
-    from pulso_engine.processing.clustering import Cluster
+    from corvo_engine.processing.clustering import Cluster
 
     def cl(*signals):
         c = Cluster()
@@ -82,7 +82,7 @@ def test_inherited_source_state_does_not_place_a_national_story():
 
 
 def test_title_decides_the_category_before_the_summary():
-    from pulso_engine.collectors.news.rss import RssAdapter
+    from corvo_engine.collectors.news.rss import RssAdapter
     xml = ("<rss><channel><item><title>AGU pede ao STF que declare leis das bets inconstitucionais</title>"
            "<link>https://x/d</link><description>Em ato no tribunal, o advogado-geral falou do bloqueio.</description>"
            "<pubDate>Fri, 02 Oct 2026 17:00:00 GMT</pubDate></item></channel></rss>")
@@ -92,7 +92,7 @@ def test_title_decides_the_category_before_the_summary():
 
 
 def test_text_impact_raises_severity_within_the_same_category():
-    from pulso_engine.events import stats_for
+    from corvo_engine.events import stats_for
     routine = [sig(1, "Chuva forte molha a cidade nesta sexta-feira", cat="WEATHER")]
     deadly = [sig(2, "Enchente deixa 3 mortos e desabrigados na cidade", cat="WEATHER")]
     gossip = [sig(3, "Famosos comentam o casamento da novela e a fofoca do BBB", cat="WEATHER")]
@@ -114,7 +114,7 @@ def test_explicit_state_sigla_counts_as_well_located_so_different_states_never_m
 
 
 def test_idap_alert_with_only_state_known_gets_full_state_confidence():
-    from pulso_engine.collectors.official.idap_cap import IdapCapAdapter
+    from corvo_engine.collectors.official.idap_cap import IdapCapAdapter
     xml = ("<feed xmlns='http://www.w3.org/2005/Atom'><entry><content type='text/xml'>"
            "<alert xmlns='urn:oasis:names:tc:emergency:cap:1.2'><identifier>1/2026</identifier><sent>2026-10-03T00:10:00-03:00</sent>"
            "<status>Actual</status><msgType>Alert</msgType><info><event>INUNDAÇÕES</event><severity>Extreme</severity>"

@@ -31,7 +31,7 @@ O plano gratuito do D1 aceita **100 mil linhas escritas por dia** (zera às 00:0
 ## Decisão (custo zero, em ordem)
 1. **Escrever só o que mudou.** `ON CONFLICT DO UPDATE ... WHERE <algo mudou>` em `sources`, `signals` e `event_sources`: linha idêntica não custa escrita (o D1 só conta linhas realmente alteradas).
 2. **Remover índices sem uso** (`idx_events_state`, `idx_events_status`; nenhuma consulta do Worker os usa): cada atualização de evento deixa de gravar 2 linhas a mais. Mantivemos `idx_signals_source`, que as contagens por fonte do painel admin usam.
-3. **Eventos só reenviados quando relevante** (Engine): Pulso muda >= 8 pontos ou contagem sobe >= 2 e >= 25%.
+3. **Eventos só reenviados quando relevante** (Engine): Corvo muda >= 8 pontos ou contagem sobe >= 2 e >= 25%.
 4. **Governador** (`apps/worker/src/lib/budget.ts`, tabela `write_budget`): o Worker soma `meta.rows_written` de cada ingestão e, conforme o dia, descarta antes de gravar:
    - `normal` (< 60 mil): tudo.
    - `economy` (>= 60 mil): só eventos nível >= 2 (e os sinais deles), série só nacional, saúde só de fontes com problema, sem catálogo.

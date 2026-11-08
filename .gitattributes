@@ -1,0 +1,9 @@
+
+# scripts executados em contêiner Linux precisam de fim de linha LF
+*.sh text eol=lf
+
+# git-crypt: tudo abaixo é criptografado no repositório (público). Ver docs/corvo/GITCRYPT.md
+secrets/** filter=git-crypt diff=git-crypt
+docs/private/** filter=git-crypt diff=git-crypt
+*.secret filter=git-crypt diff=git-crypt
+*.secret.* filter=git-crypt diff=git-crypt

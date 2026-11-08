@@ -28,4 +28,4 @@ jobs:
         working-directory: engine
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m pulso_engine.healthcheck
+        run: python -m corvo_engine.healthcheck

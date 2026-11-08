@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.baseline import BR_TZ
-from pulso_engine.forecast import make_nowcasts, resolve_due
-from pulso_engine.forecast_v2 import MIN_PAIRS, annotate_shadow, hour_deltas, shadow_rows, v2_probability
-from pulso_engine.validation.shadow_compare import promotion_gate
+from corvo_engine.baseline import BR_TZ
+from corvo_engine.forecast import make_nowcasts, resolve_due
+from corvo_engine.forecast_v2 import MIN_PAIRS, annotate_shadow, hour_deltas, shadow_rows, v2_probability
+from corvo_engine.validation.shadow_compare import promotion_gate
 
 NOW = datetime(2026, 10, 4, 21, 0, tzinfo=timezone.utc)  # 18:00 em Brasília
 
 
 def pts(days=6, step=10):
-    """Pulso com ciclo diário: sobe de 10 a 40 entre 17h e 19h locais; no resto fica em 10."""
+    """Corvo com ciclo diário: sobe de 10 a 40 entre 17h e 19h locais; no resto fica em 10."""
     out, t = [], NOW - timedelta(days=days)
     while t <= NOW:
         h = t.astimezone(BR_TZ).hour

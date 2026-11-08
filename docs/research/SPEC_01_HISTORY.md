@@ -37,7 +37,7 @@ Sem índice secundário (cada índice dobra o custo de escrita). Leitura sempre 
 Zod no Worker: `.optional()`, máximo por lote definido (sugestão 2.000). Worker antigo ignora o campo.
 
 ## 5. Onde o código novo entra
-- Função pura nova, testável sem rede: `build_observations(signals, duplicates_by_hash, now) -> list[dict]` (arquivo novo, ex.: `engine/pulso_engine/research/history.py`; **a ser chamado** em `pipeline.run_once` logo após `build_series`, por quem é dono do pipeline).
+- Função pura nova, testável sem rede: `build_observations(signals, duplicates_by_hash, now) -> list[dict]` (arquivo novo, ex.: `engine/corvo_engine/research/history.py`; **a ser chamado** em `pipeline.run_once` logo após `build_series`, por quem é dono do pipeline).
 - `duplicate_ratio` real: contar descartes em `signals.setdefault(s.hash, s)` do `run_once` (hoje o descarte é silencioso). **Pedido ao dono do pipeline:** devolver essa contagem por hash/fonte.
 - Leitura: rota interna `GET /api/admin/observations?scope=&category=&since=` (zod, limite, mais novos primeiro, como `/api/admin/series`).
 

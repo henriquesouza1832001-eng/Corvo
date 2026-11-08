@@ -1,14 +1,14 @@
 """Trilha de auditoria no pipeline: toda previsão NOVA ganha snapshot imutável; reenvio e flag desligada não geram nada."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import chunks, run_once
-from pulso_engine.validation.forecast_registry import reproduces, verify
+from corvo_engine.pipeline import chunks, run_once
+from corvo_engine.validation.forecast_registry import reproduces, verify
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)
 
 
 def _points():
-    # 6 h de Pulso nacional a cada 5 min (o previsor de Pulso exige ~3,5 h de histórico)
+    # 6 h de Corvo nacional a cada 5 min (o previsor de Corvo exige ~3,5 h de histórico)
     return [{"timestamp": (T - timedelta(minutes=5 * k)).strftime("%Y-%m-%dT%H:%M:%SZ"), "score": 40 + (k % 7)} for k in range(72, 0, -1)]
 
 
@@ -17,7 +17,7 @@ def _run(**kw):
 
 
 def test_every_new_forecast_gets_an_immutable_auditable_snapshot(monkeypatch):
-    monkeypatch.delenv("PULSO_FLAG_FORECAST_REGISTRY", raising=False)
+    monkeypatch.delenv("CORVO_FLAG_FORECAST_REGISTRY", raising=False)
     b = _run()
     new = [f for f in b["forecasts"] if f["status"] == "open"]
     assert new and len(b["forecast_registry"]) == len(new)
@@ -32,7 +32,7 @@ def test_already_open_forecasts_are_not_registered_again_and_flag_off_means_noth
     b = _run()
     already = [dict(f) for f in b["forecasts"] if f["status"] == "open"]
     assert _run(open_forecasts=already)["forecast_registry"] == []  # imutável: só o que ainda não existe
-    monkeypatch.setenv("PULSO_FLAG_FORECAST_REGISTRY", "0")
+    monkeypatch.setenv("CORVO_FLAG_FORECAST_REGISTRY", "0")
     assert _run()["forecast_registry"] == []
 
 

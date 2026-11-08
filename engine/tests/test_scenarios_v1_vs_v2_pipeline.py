@@ -2,15 +2,15 @@
 desligadas e ligadas e compara. O V1 é a referência: o V2 só pode acrescentar informação, nunca criar alarme num dia normal."""
 import pytest
 
-from pulso_engine.pipeline import run_once, signal_dict
-from pulso_engine.simulation import SCENARIOS
+from corvo_engine.pipeline import run_once, signal_dict
+from corvo_engine.simulation import SCENARIOS
 
 V2_FLAGS = ("SEASONAL_BASELINE_V2", "CLUSTER_REFINE")
 
 
 def run(sc, monkeypatch, v2):
     for f in V2_FLAGS:
-        monkeypatch.setenv(f"PULSO_FLAG_{f}", "1" if v2 else "0")
+        monkeypatch.setenv(f"CORVO_FLAG_{f}", "1" if v2 else "0")
     stored = [signal_dict(s) for s in sc.signals]
     return run_once([], now=sc.t0, stored=stored, obs_rows=sc.obs_rows, active_investigations=[])
 
