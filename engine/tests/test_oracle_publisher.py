@@ -61,3 +61,16 @@ def test_classify_kind_defaults_to_report_and_official_is_fact():
     assert classify_kind("Bitcoin could reach 200k") == "previsao"
     assert classify_kind("Press release", official=True) == "fato"
     assert classify_kind("Press release") == "reportagem"
+
+
+def test_only_current_hour_bucket_is_sent_and_empty_runs_send_nothing():
+    f = Fake()
+    clock = [NOW]
+    p = OraclePublisher(f, IntakeGate(clock=lambda: clock[0]), clock=lambda: clock[0])
+    p.run([mk("Earthquake hits Tokyo", "https://x.com/q1")])
+    clock[0] += 3 * 3600
+    p.run([NewsItem("a", "https://x.com/q2", "Tsunami warning after quake", clock[0] - 60, "", 0.9)])
+    assert len(f.sent[1]["stats"]) == 1
+    n = len(f.sent)
+    p.run([])
+    assert len(f.sent) == n

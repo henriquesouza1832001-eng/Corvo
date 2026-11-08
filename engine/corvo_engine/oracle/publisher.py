@@ -103,9 +103,14 @@ class OraclePublisher:
                 "topics": list(v.topics),
                 "assets": [],  # impacto por ativo vem do motor de previsão (MNEME/CORVO), ainda não ligado
             })
+        # Só o balde da hora atual: reenviar horas antigas custaria linhas do D1 a cada ciclo sem mudar nada.
+        for old in [k for k in self._buckets if k != bucket]:
+            del self._buckets[old]
+        if not items:
+            return {"pressure": pressure.value, "sent_news": 0, "received": 0, "api": None}
         stats = [{
-            "bucket": b, "pressure": pressure.value, "received": k["received"], "hot": k["hot"], "buffer": k["buffer"], "dropped": k["dropped"],
-            "reasons": {n.removeprefix("reason:"): v for n, v in k.items() if n.startswith("reason:")},
-        } for b, k in self._buckets.items()]
-        result = self.transport.request("POST", "/api/corvo/ingest", {"news": news, "stats": stats[-48:]})
+            "bucket": bucket, "pressure": pressure.value, "received": c["received"], "hot": c["hot"], "buffer": c["buffer"], "dropped": c["dropped"],
+            "reasons": {n.removeprefix("reason:"): v for n, v in c.items() if n.startswith("reason:")},
+        }]
+        result = self.transport.request("POST", "/api/corvo/ingest", {"news": news, "stats": stats})
         return {"pressure": pressure.value, "sent_news": len(news), "received": len(items), "api": result}
