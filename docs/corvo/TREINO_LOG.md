@@ -34,6 +34,7 @@
 | 4 | 2026-11-08 | T2: BUFFER cutoff normal 0.50 to candidate 0.45 (simulation; not applied) | fit: recall_keep 0.176 to 0.471; keep_stored 0.375 to 0.533; drop_stored 0.125 to 0.133 | sealed: recall_keep 0 to 0.571; keep_stored 0 to 0.571; drop_stored 0 to 0; 63 items, only 7 keep | 484/692 | not promoted: sealed set unstable and fit worsened drop_stored; collect another sealed set | — |
 | 5 | 2026-11-08 | T12/M6: operational learning protocol (temporal walk-forward, BH q=0.05, n>=30 independent events) | 6 synthetic scenarios rerun; no real forecast outcomes | n/a (no real outcomes) | n/a | protocol clarified; M3 retained, no empirical M4 claim | — |
 | 6 | 2026-11-08 | T0: read-only structural audit of local corpus | 906 rows, 904 unique URLs, 2 duplicate rows, 23 sources; current-title gate accepts 86 (7 HOT) | existing fit labels only: recall_keep 0.540; keep_stored 0.607; drop_stored 0.049 | 486/702 | partial: no production/remote DB read; no sealed titles opened | — |
+| 7 | 2026-11-08 | T12/Munin: clarify baseline interval as normal approximation to Beta posterior | metrics unchanged; six synthetic scenarios still pass; no real forecasts | n/a | n/a | documentation corrected; M3 retained; interval coverage still needs data validation | — |
 
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
