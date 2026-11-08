@@ -59,7 +59,9 @@ export function CorvoApp() {
 	}, [live, rows]);
 	const total = live ? live.totals.received : rows.length;
 	const shown = rows.filter((r) => (filter === "all" ? true : r.verdict === filter));
-	const ticker = rows.filter((r) => r.verdict === "hot");
+	const ticker = rows.filter((r) => r.verdict === "hot").slice(0, 20);
+	// velocidade constante (~45 px/s): a duração cresce com o tamanho do texto, em vez de correr mais rápido quando há mais manchetes
+	const tickerSecs = Math.max(90, Math.round(ticker.reduce((n, r) => n + r.n.title.length + 24, 0) * 0.17));
 	const usedPct = Math.min(100, (budget.used / budget.limit) * 100);
 	const sources = live ? live.sources : DEMO_SOURCES;
 	const sourceList = Object.entries(sources).sort((x, y) => y[1] - x[1]);
@@ -83,7 +85,7 @@ export function CorvoApp() {
 
 			{ticker.length > 0 && (
 				<div className="ticker" aria-label="Últimas notícias gravadas">
-					<div className="ticker-track">
+					<div className="ticker-track" style={{ animationDuration: `${tickerSecs}s` }}>
 						{[...ticker, ...ticker].map(({ n }, i) => (
 							<span key={`${n.id}-${i}`} aria-hidden={i >= ticker.length}>
 								<b style={{ color: TOPIC_COLOR[n.topics[0]] ?? "var(--g)" }}>[{(n.topics[0] ? TOPIC_LABEL[n.topics[0]] : "geral").toUpperCase()}]</b> {n.title}
