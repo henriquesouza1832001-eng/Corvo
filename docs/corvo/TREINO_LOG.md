@@ -51,6 +51,8 @@
 
 | 15 | 2026-11-08 | Full engine verification after note8 | 1,098 passed, 6 xfailed, 6 failed in `test_failure_injection.py` loopback-name cases | no sealed Hugin change | 458/day; freio green | failures surfaced in untouched `safe_http.py` outside allowed scope; recorded for owner/red-team follow-up | report commit |
 
+| 16 | 2026-11-08 | P1 fit iteration: event title threshold 0.30 to 0.25 | same 30 fit-only labeled pairs: TP 4?5, FP 0?0, FN 8?7, TN 18; false merges 0/30; recall 0.333?0.417 | no Hugin sealed metric; Munin event grouping only | 458/day; 562 at 5x; green | real approved corpus: events 58?56, multi-source 5?7; added positive pairs without challenge false merges; low recall remains | pending |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
@@ -70,6 +72,8 @@
 | 2026-11-08 19:54 | note8 Munin event-to-price chain + T9 robustness; external collection cycles 1-3 still active | 1,265 unique items (local corpus); 24 feeds queried, 1 HTTP 404 isolated | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
 
 | 2026-11-08 20:00 | nota8 acceptance follow-up: market-closure cancellation + full scoring panel; external collection cycle 4 active | 1,267 unique items (local corpus); 24 feeds, 2 new items; prices 5,220 rows | green baseline: normal/economy 458/day; 562 at 5x; critical 432/432 |
+
+| 2026-11-08 20:10 | P1 fit-only event threshold 0.25 proof + refreshed Munin panel; external collection cycle 5 active | 1,278 unique items; cycle 5: 11 received, 24 feeds healthy; prices 5,220 rows | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.

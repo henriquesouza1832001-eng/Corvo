@@ -54,6 +54,15 @@ def test_complete_link_prevents_transitive_chaining():
     assert sorted(len(event.articles) for event in events) == [1, 2]
 
 
+def test_default_fit_threshold_accepts_boundary_pair_but_stricter_threshold_does_not():
+    a = article("a", "Market shock alpha beta", "https://a.test", "2026-11-01T12:00:00Z", ("mercado",))
+    b = article("b", "Market shock gamma delta epsilon zeta", "https://b.test", "2026-11-01T13:00:00Z", ("mercado",))
+
+    assert title_similarity(a["title"], b["title"]) == 0.25
+    assert len(build_events([a, b])) == 1
+    assert len(build_events([a, b], min_similarity=0.30)) == 2
+
+
 def test_invalid_time_and_empty_titles_are_not_grouped():
     invalid = article("a", "Some market event", "https://a.test", "not-a-time", ("mercado",))
     missing = article("b", "Some market event", "https://b.test", "2026-11-01T12:00:00Z", ("mercado",))

@@ -393,3 +393,13 @@ A coleta externa continuou sem rein?cio: o ciclo 4 concluiu ?s 20:00 BRT, 24 fee
 O freio p?s-commit de `c98c52d` ficou verde: 1.267 itens ?nicos, 529 nas ?ltimas 24 h, 458 linhas/dia (562 a 5?) em normal/economia e 432/432 em cr?tico. Branch `hen`, ?rvore limpa, trava livre. O PID 13596 continua ativo; n?o encerrei a coleta solicitada por tr?s horas.
 
 Pergunta adicional ao dono: as seis falhas de `safe_http.py` devem ser encaminhadas ao agente Codex/red-team respons?vel por esse m?dulo?
+
+### 9.16 Segunda prova P1 no conjunto fit (20:10 BRT)
+
+Com os mesmos 30 pares manualmente rotulados no `fit` (sem tocar no `eval`), alterei s? o limiar lexical de 0,30 para 0,25. O desafio passou de TP=4, FP=0, FN=8, TN=18 para TP=5, FP=0, FN=7, TN=18: fus?es falsas 0/30 (0%) e recall 0,333?0,417. A amostra ? um desafio selecionado, n?o uma estimativa populacional; o recall continua baixo e a regra ainda precisa de mais pares.
+
+No corpus local aprovado, o agrupamento passou de 58 para 56 eventos; cobertura multifuente subiu de 5 para 7 eventos; distribui??o final de fontes por evento: 49 eventos com 1 fonte, 6 com 2 e 1 com 3. Confirma??o final: 4 eventos com fonte oficial, 7 multifuente e 45 com fonte ?nica. O painel real atualizado ficou em 56 eventos, 102 perguntas, zero previs?es, 102 absten??es por `n<30`; 18 pre?os locais resolveram perguntas sem previs?o, 2 aguardam pre?o futuro e 82 aguardam instrumento. Brier/taxa-base/skill/ECE seguem N/A. O registro local tem 420 linhas em quatro `run_id`s; a execu??o atual tem 102 linhas e repeti??o idempotente n?o criou c?pia.
+
+O ciclo externo 5 terminou ?s 20:10 BRT: 24 feeds saud?veis, 11 itens recebidos e nenhuma altera??o de pre?o; corpus com 1.278 itens ?nicos. Freio: volume 24 h 514, 458 linhas/dia (562 a 5?), cr?tico 432/432, verde. Hugin permaneceu H2; a altera??o foi no agrupador de eventos Munin e n?o na relev?ncia Hugin. Nenhum lacre foi aberto para decidir o limiar.
+
+Pergunta ao dono: aceita manter 0,25 como limiar provis?rio enquanto se coletam mais pares fit independentes, dado recall de 0,417 e 0/30 fus?es falsas no desafio atual?
