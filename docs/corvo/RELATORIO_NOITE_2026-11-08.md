@@ -312,3 +312,14 @@ Revisão do resultado: Hugin permanece H2 porque o candidato BUFFER 0,45 não pa
 - [x] Branch `hen`; commits locais sem push; trava liberada após os commits técnicos.
 - [x] Nenhum arquivo de `apps/worker`, `database`, `packages/shared` ou `.github/workflows` ficou alterado.
 - [x] Incidente de comando registrado: `npm run typecheck` acionou `wrangler types`; `npm run build` acionou `wrangler deploy --dry-run`. Ambos saíram com código 0; o segundo encerrou em dry-run sem deploy. Esses scripts não serão executados novamente nesta tarefa.
+
+
+### 9.11 Retomada curta e parada solicitada pelo dono (18:10 BRT)
+
+Após a retomada autorizada, a coleta local continuou em `--dry-run` nos ciclos 42–44, concluídos às 17:45:32, 17:55:39 e 18:05:45 BRT. Entraram 6, 6 e 2 itens novos (14 no trecho); o corpus temporário passou de 1.500 para 1.514 itens únicos, e o acumulado desde o começo da sessão chegou a 609 itens novos. O ciclo 43 registrou `fed-press` com HTTP 404; os outros 23 feeds responderam. Os ciclos 42 e 44 tiveram 24 feeds saudáveis. `collect_exit=0` e `budget_exit=0` nos três ciclos. No ciclo 44, `sent_news=1` foi contador simulado: `dry_run=true`, sem POST ou envio à API.
+
+Freio final, conferido após a parada às 18:10 BRT: corpus temporário com volume 24 h 845, aceitos 19 e HOT entre aceitos 0,053; normal/economia 470 linhas/dia e 622 a 5×; crítico 432/432. Corpus oficial local: volume 24 h 465, aceitos 27 e HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos verdes. O processo de coleta foi encerrado após o ciclo 44; nenhum processo do coletor permaneceu ativo.
+
+Nenhuma regra foi ajustada nesta retomada e nenhum conjunto lacrado foi aberto. Portanto Hugin segue H2 e Munin M3, sem previsão real avaliada. A rodada de avaliação fresca ficou pendente; não se afirma melhora de qualidade a partir do volume raspado. O dono pediu `PARE` e revisão às 18:10 BRT. Os artefatos temporários e os commits permanecem locais, sem push.
+
+Pergunta para o dono: ao retomar em outra sessão, autoriza completar a avaliação lacrada fresca a partir de dados posteriores ao lacre anterior?

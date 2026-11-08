@@ -50,6 +50,7 @@
 | 2026-11-08 15:53 | continuous collection, cycle 31; all 24 feeds healthy | 1,439 unique items (scratch corpus) | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
 | 2026-11-08 16:53 | continuous collection, cycle 37; all 24 feeds healthy | 1,471 unique items (scratch corpus) | green: normal/economy 468/day; 612 at 5x; critical 432/432 |
 | 2026-11-08 17:42 | owner `PARE`; stopped after cycle 41 at 17:33 | 1,500 unique items (scratch corpus) | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
+| 2026-11-08 18:10 | resumed collection cycles 42–44; owner `PARE`, stopped after cycle 44 | 1,514 unique items (scratch corpus); +14 since 17:42 | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
