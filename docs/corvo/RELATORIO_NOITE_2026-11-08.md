@@ -417,3 +417,12 @@ Essa itera??o usa somente `fit` para ajustar a identidade de eventos; n?o abriu 
 ### 9.18 T9: ciclo resiliente a falhas distintas por fonte (20:10 BRT)
 
 Ampliei o teste de integra??o do `run_cycle` com oito fontes simuladas: XML quebrado, corpo vazio, HTML inesperado, corpo excessivo, timeout, HTTP 403, HTTP 503 e erro de redirecionamento. Cada falha foi registrada pelo ID da fonte; a fonte saud?vel completou envio local `dry-run` e foi marcada uma vez; nenhum acesso de rede ocorreu. A su?te direcionada final ficou em **76 passed**; matriz T9 commit `310eb9b`. O c?digo de agrupamento 0,235 est? no commit `09b4c36`; o freio antes deste commit T9 permaneceu verde (1.278 itens, 458/562 normal/economia, 432/432 cr?tico).
+
+
+### 9.19 Checagem de lacre fresco e honestidade Munin (20:23 BRT)
+
+Sem abrir exemplos do lacre existente, comparei apenas URLs ja rotuladas com o corpus local para estimar se havia pool fresco suficiente. Restaram 989 URLs ineditas (988 unicas validas no snapshot); o portao atual aceita 10. A divisao estavel 70/30 coloca 304 itens frescos no `eval`, dos quais 4 estao no estrato atualmente aceito. Isso **nao** diz quantos itens rejeitados sao `keep`: eles nao foram rotulados nem pontuados. Nao ha base para afirmar um lacre de 40+ `keep`; nenhum rotulo foi inventado e nenhuma regra Hugin foi escolhida com esse pool. O conjunto avaliado disponivel continua com 15 `keep`, abaixo da exigencia. Hugin segue H2.
+
+Rodei novamente `corvo_munin_eval.py --synthetic`; os seis cenarios foram explicitamente sinteticos, sem resultados reais: calibrado (`n=3000`, skill +0.353, ECE 0.014, confiavel); exagerado (`n=3000`, skill +0.089, ECE 0.211, calibrando); taxa-base (`n=3000`, skill 0); conservador (`n=3000`, skill +0.262, ECE 0.132, calibrando); pouca amostra (`n=12`, estado experimental e atualizacao HOLD); vazamento temporal foi bloqueado antes da pontuacao. Isso testa os freios da bancada, nao mede a qualidade de previsoes reais. Munin segue M3, sem previsao real avaliada.
+
+O freio do corpus local antes deste registro ficou verde: 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica. Nenhum arquivo de dados foi alterado; o snapshot temporario ficou fora do repositorio. Nenhuma regra foi promovida neste checkpoint.

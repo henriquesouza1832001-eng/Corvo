@@ -85,3 +85,6 @@
 - T0/T5: obter janela de ciclos por fonte e confirmar com o dono os 14 rótulos marginais do snapshot; não inferir confiabilidade a partir de um único GET.
 - Munin: esperar previsões reais resolvidas e fonte de preços registrada; manter os pesos em HOLD até cumprir os mínimos e a divisão temporal propostos.
 - Hugin continua em H2 (um único corte provado; sem platô declarado); Munin está em M3, sem resultado real.
+
+
+| 19 | 2026-11-08 | Fresh seal feasibility audit + Munin honesty scenarios | 989 previously unlabeled URLs; current gate accepts 10; stable 70/30 split gives eval 304 rows, only 4 in accepted stratum; no labels scored | Existing eval remains 15 keep; no new Hugin result or rule change | 458/day; 562 at 5x; critical 432/432; green | No inference about hidden keeps among rejected rows; seal needs human labels; synthetic Munin matrix: calibrated skill +0.353/ECE 0.014, exaggerated +0.089/0.211, base skill 0, conservative +0.262/0.132, n=12 HOLD, leakage blocked | recorded below |
