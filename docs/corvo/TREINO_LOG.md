@@ -6,7 +6,7 @@
 ## Nível atual
 | | Nível | Evidência |
 |---|---|---|
-| 🧠 Hugin | **H2** (meta: H3) | pré-ajuste v3; auditoria dos 52 gravados: keep 35% → 62% (otimista, ajustado olhando esses itens) |
+| 🧠 Hugin | **H2** (meta: H3) | T1 elevou precisão HOT lacrada para 1,000 e baixou HOT entre aceitos para 0,083; recall 0,800 e keep entre gravadas 0,583 ainda abaixo das metas, com só 15 keep no lacre |
 | 🗃️ Munin | **M2** (meta: M3) | bancada testada (18 testes); cenários simulados básicos (calibrado x exagerado) |
 
 ## Placar
@@ -15,19 +15,19 @@
 | Precisão do HOT | ≥ 0,85 | a medir | | lacrado |
 | Recall do keep | ≥ 0,90 | a medir | | lacrado |
 | Keep entre as gravadas | ≥ 0,85 | 0,62 (otimista) | | lacrado / auditoria |
-| HOT entre os aceitos | ≤ 0,25 | ~0,75 | | corpus |
+| HOT entre os aceitos | ≤ 0,25 | ~0,75 | 0,083 | lacrado |
 | Drop gravado | mínimo | a medir | | lacrado |
 | Fusões erradas (dedup) | ≤ 2% | a medir | | pares rotulados |
 | Cobertura do mapa / acerto do local | ≥ 85% / ≥ 95% | a medir | | aprovados / amostra |
-| Linhas de banco/dia (projeção) | ≤ 5.000 | **~490** | | corpus |
-| Linhas de banco/dia com 5× volume | ≤ 25.000 | ~710 | | corpus |
+| Linhas de banco/dia (projeção) | ≤ 5.000 | **~490** | 484 | corpus |
+| Linhas de banco/dia com 5× volume | ≤ 25.000 | ~710 | 692 | corpus |
 | Munin: cenários simulados cobertos | ≥ 6 | 2 | | testes |
 
 ## Rodadas
 | # | Data | Alavanca (uma por rodada) | Ajuste: antes → depois | **Lacrado**: antes → depois | Banco (linhas/dia) | Resultado | Commit |
 |---|---|---|---|---|---|---|---|
 | 0 | 2026-11-08 | pré-ajuste v3 (conflito regional, fala de banco central, resumo) | n/d | n/d (ainda sem rótulos) | 486 | mantido | `4df88e6` |
-| 1 | | | | | | | |
+| 1 | 2026-11-08 | T1: corte HOT 0,75/0,85/0,95 → 0,91/0,95/0,95 | fit: P_HOT 0,617→1,000; R_keep 0,540→0,540; keep gravado 0,607→0,607; HOT 0,770→0,082 | lacrado: P_HOT 0,632→1,000; R_keep 0,800→0,800; keep gravado 0,583→0,583; HOT 0,792→0,083 | 484 (5×: 692) | mantido; lacre tem 75 itens e só 15 keep, métricas instáveis; H3 não atingido | `pendente` |
 
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: parar e registrar o que falta).
 

@@ -33,14 +33,14 @@ def test_measure_applies_stratum_weights():
         {"title": "Fed announces surprise rate cut as inflation cools", "label": "keep", "w": 1.0},  # keep aceito (hot)
         {"title": "Celebrity perfume launch", "label": "keep", "w": 10.0},  # keep rejeitado, peso 10: recall tem que cair muito
         {"title": "Celebrity perfume launch", "label": "drop", "w": 10.0},
-        {"title": "Earthquake hits Tokyo", "label": "drop", "w": 1.0},  # drop gravado (hot)
+        {"title": "Earthquake hits Tokyo", "label": "drop", "w": 1.0},  # drop gravado (buffer)
     ]
     r = measure(rows)
-    assert r["precisao_hot"] == pytest.approx(0.5)  # 1 keep + 1 drop no HOT, ambos de peso 1
+    assert r["precisao_hot"] == pytest.approx(1.0)  # Earthquake fica em BUFFER com o corte HOT calibrado
     assert r["recall_keep"] == pytest.approx(1 / 11)  # 1 de peso 1 gravado; 10 de peso perdido
     assert r["keep_descartado"] == pytest.approx(10 / 11)
     assert r["drop_gravado"] == pytest.approx(0.5)
-    assert r["hot_entre_aceitos"] == pytest.approx(1.0)
+    assert r["hot_entre_aceitos"] == pytest.approx(0.5)
 
 
 def test_measure_handles_empty_sets():

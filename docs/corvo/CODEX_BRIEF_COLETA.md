@@ -85,7 +85,7 @@ Em uma revisão manual das 818 notícias reais:
 - **Janela de frescor por fonte** (`max_age_h` no `catalog.json`): oficiais 72 h, imprensa 24 h.
 - **Léxico v2** (`intake/gate.py`, `TOPICS` e `_NOISE`): termos específicos (commodity só com contexto de preço, "troops" só em deslocamento, política monetária e não rotina de banco central), 11 temas de mercado, incluindo `conflito_chave` (exige região-chave E ação). **O título decide**; tema só no resumo vale 60%.
 - **Ruído** (esporte, celebridade, opinião, "price prediction", rotina regulatória, ajuda humanitária).
-- Corte BUFFER normal 0,50 e HOT 0,75; pressão aperta (economia 0,60/0,85; crítico 0,95/0,95).
+- Cortes de BUFFER da linha de base v3: normal 0,50, economia 0,60, crítico 0,95. Após T1 (2026-11-08), HOT passou de 0,75/0,85/0,95 para 0,91/0,95/0,95 (normal/economia/crítico); prova no lacre tem apenas 15 keep.
 
 Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **666 `irrelevant`, 71 `stale`, 29 `below_threshold`, 32 HOT, 20 BUFFER**. Com o pré-ajuste v3 (commit desta sessão) a relevância aceita 89 de 816 únicos (só título, sem idade nem duplicata), contra 110 antes.
 
@@ -230,7 +230,7 @@ chegou um item
   └─ senão                                  → BUFFER (grava, entra em lote)
 descarte = só contador por motivo + hash da URL (48 h). Nunca o texto.
 ```
-Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a 85%), **crítico** (>85%). Cortes em `GateConfig`: HOT 0,75 / 0,85 / 0,95; BUFFER 0,50 / 0,60 / 0,95. São palpites a medir.
+Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a 85%), **crítico** (>85%). Cortes atuais em `GateConfig`: HOT 0,91 / 0,95 / 0,95; BUFFER 0,50 / 0,60 / 0,95. O corte normal veio do fit; o lacre atingiu precisão HOT 1,000 e HOT ≤25%, mas tem só 15 keep e não satisfaz as metas de recall/keep armazenado.
 
 **Custo dos erros:** deixar passar uma notícia que mexe em mercado (keep descartado) é o pior erro; mas o dono quer banco enxuto, então o drop gravado também é erro e é o que mais polui o painel. Mostre a troca nos números.
 

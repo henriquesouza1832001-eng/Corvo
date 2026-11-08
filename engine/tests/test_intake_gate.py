@@ -45,8 +45,8 @@ def test_source_quota_does_not_burn_on_junk():
     g = gate(config=GateConfig(per_source_per_hour=2))
     for i in range(10):
         g.admit(item(f"Celebrity gossip {i}", f"https://x.com/j{i}"))
-    assert g.admit(item("Earthquake hits Tokyo", "https://x.com/q1")).decision is Decision.HOT
-    assert g.admit(item("Tsunami warning issued after quake", "https://x.com/q2")).decision is Decision.HOT
+    assert g.admit(item("Earthquake hits Tokyo", "https://x.com/q1")).decision is Decision.BUFFER
+    assert g.admit(item("Tsunami warning issued after quake", "https://x.com/q2")).decision is Decision.BUFFER
     assert g.admit(item("Hurricane makes landfall in Florida", "https://x.com/q3")).reason == "source_quota"
 
 
@@ -57,6 +57,12 @@ def test_pressure_tightens_gate():
     assert gate().admit(item(t), Pressure.CRITICAL).decision is Decision.DROP
     t2 = "Fed announces surprise rate cut as inflation cools"  # banco central, alta relevância
     assert gate().admit(item(t2), Pressure.ECONOMY).decision is Decision.HOT
+
+
+def test_hot_cut_is_calibrated_and_monotonic_under_pressure():
+    cuts = GateConfig().hot_min
+    assert cuts == {Pressure.NORMAL: 0.91, Pressure.ECONOMY: 0.95, Pressure.CRITICAL: 0.95}
+    assert cuts[Pressure.NORMAL] < cuts[Pressure.ECONOMY] <= cuts[Pressure.CRITICAL]
 
 
 def test_only_market_moving_news_is_kept():
