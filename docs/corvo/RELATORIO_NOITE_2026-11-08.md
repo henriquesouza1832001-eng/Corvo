@@ -1,6 +1,6 @@
 # Relatório da noite — 2026-11-08
 
-**Agente:** codex-noite · **Início:** não registrado · **Fim:** 2026-11-08 01:12 BRT · **Commit inicial:** `4df88e6` · **Último commit técnico:** `61961de`
+**Agente:** codex-noite · **Início:** não registrado · **Atualização:** 2026-11-08 01:30 BRT · coleta em andamento até 07:19 BRT · **Commit inicial:** `4df88e6` · **Último commit técnico:** `61961de`
 
 ## 1. Resumo para o dono
 
@@ -19,8 +19,9 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta no corpus | Nenhum iniciado por mim; corpus local cresceu durante a rodada |
-| Itens únicos no corpus / fontes | 847 / 23 no último freio |
+| Ciclos de coleta nesta continuação | 3 ciclos: 36 novos, 0 novos, 19 novos; 24 feeds, sem falhas; laço local ainda ativo |
+| Corpus da continuação / feeds | 903 itens únicos / 24 feeds consultados; freio verde |
+| Destino da coleta contínua | `%TEMP%\corvo-codex-noite\corpus.jsonl` e `ciclos.log`; área separada porque `engine/data/` está reservada por `claude-hen` |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
 | Semente da amostra | 20261108; divisão estável por URL |
 | Keep no lacre | 15 de 75; menos de 30, aviso de instabilidade do avaliador |
