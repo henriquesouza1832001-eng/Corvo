@@ -32,6 +32,7 @@
 | 3 | 2026-11-08 | T12: cenários e invariantes de Munin | 2 cenários (calibrado/exagerado) → 6 (inclui base, conservador, n pequeno e vazamento) | n/a (dados só sintéticos) | n/a | M3 atingido; nenhum acerto real alegado | `61961de` |
 
 | 4 | 2026-11-08 | T2: BUFFER cutoff normal 0.50 to candidate 0.45 (simulation; not applied) | fit: recall_keep 0.176 to 0.471; keep_stored 0.375 to 0.533; drop_stored 0.125 to 0.133 | sealed: recall_keep 0 to 0.571; keep_stored 0 to 0.571; drop_stored 0 to 0; 63 items, only 7 keep | 484/692 | not promoted: sealed set unstable and fit worsened drop_stored; collect another sealed set | — |
+| 5 | 2026-11-08 | T12/M6: operational learning protocol (temporal walk-forward, BH q=0.05, n>=30 independent events) | 6 synthetic scenarios rerun; no real forecast outcomes | n/a (no real outcomes) | n/a | protocol clarified; M3 retained, no empirical M4 claim | — |
 
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
