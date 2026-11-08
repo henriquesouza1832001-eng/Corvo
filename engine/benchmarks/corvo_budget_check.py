@@ -8,7 +8,7 @@ Rode ANTES DE CADA COMMIT que mexa em `intake/gate.py`, no catálogo de feeds ou
 
 Como estima (conservador, propositalmente pessimista):
   1. Volume por dia = itens únicos com `published_at` nas últimas 24 h do corpus (o histórico do 1º ciclo não conta como volume diário).
-  2. Aceitos por dia = volume x fração aceita só pela RELEVÂNCIA do portão atual (ignora idade, duplicata e cota, que só reduzem).
+  2. Aceitos por dia = volume x fração aceita só pela RELEVÂNCIA do portão atual em cada pressão (ignora idade, duplicata e cota, que só reduzem).
   3. Linhas por dia = 2 x aceitos (registro + índice, como o Worker conta) + 144 x 3 (um ciclo a cada 10 min atualiza estatística da hora,
      orçamento e contador).
   4. Cenário 5x: volume 5 vezes maior (fonte nova, dia de notícia pesada), a parte fixa não escala.
@@ -41,7 +41,6 @@ def _ts(v: str) -> datetime:
 
 def project(rows: list[dict], cfg: GateConfig | None = None) -> dict:
     cfg = cfg or GateConfig()
-    cut, hot = cfg.buffer_min[Pressure.NORMAL], cfg.hot_min[Pressure.NORMAL]
     uniq: dict[str, dict] = {}
     for r in rows:
         uniq.setdefault(r["url"], r)
@@ -49,30 +48,50 @@ def project(rows: list[dict], cfg: GateConfig | None = None) -> dict:
         raise ValueError("corpus vazio")
     latest = max(_ts(r["published_at"]) for r in uniq.values())
     window = [r for r in uniq.values() if _ts(r["published_at"]) >= latest - timedelta(hours=24)]
-    accepted = hot_n = 0
-    for r in window:
-        rel, _ = score(NewsItem(r["source_id"], r["url"], r["title"], 0, "", 0.75))
-        if rel >= cut:
-            accepted += 1
-            hot_n += rel >= hot
     volume = len(window)
-    rate = accepted / volume if volume else 0.0
     fixed = CYCLES_PER_DAY * FIXED_ROWS_PER_CYCLE
-    rows_normal = 2 * accepted + fixed
-    rows_5x = 2 * accepted * 5 + fixed
+    scenarios = {}
+    for pressure in Pressure:
+        accepted = hot_n = 0
+        for r in window:
+            rel, _ = score(NewsItem(r["source_id"], r["url"], r["title"], 0, "", 0.75))
+            if rel >= cfg.buffer_min[pressure]:
+                accepted += 1
+                hot_n += rel >= cfg.hot_min[pressure]
+        rate = accepted / volume if volume else 0.0
+        rows_normal = 2 * accepted + fixed
+        rows_5x = 2 * accepted * 5 + fixed
+        checks = {
+            "linhas_por_dia": rows_normal <= LIMIT_NORMAL,
+            "linhas_por_dia_5x": rows_5x <= LIMIT_5X,
+            "fracao_aceita": rate <= LIMIT_ACCEPT_RATE,
+            "abaixo_do_teto_do_worker": rows_5x <= HARD_CAP,
+        }
+        scenarios[pressure.value] = {
+            "aceitos_24h": accepted,
+            "hot_entre_aceitos": round(hot_n / accepted, 3) if accepted else None,
+            "fracao_aceita": round(rate, 4),
+            "fracao_aceita_ok": rate <= LIMIT_ACCEPT_RATE,
+            "linhas_por_dia": rows_normal,
+            "linhas_por_dia_5x": rows_5x,
+            "ok": all(checks.values()),
+        }
+
+    normal = scenarios[Pressure.NORMAL.value]
     checks = {
-        "linhas_por_dia": (rows_normal, LIMIT_NORMAL, rows_normal <= LIMIT_NORMAL),
-        "linhas_por_dia_5x": (rows_5x, LIMIT_5X, rows_5x <= LIMIT_5X),
-        "fracao_aceita": (round(rate, 4), LIMIT_ACCEPT_RATE, rate <= LIMIT_ACCEPT_RATE),
-        "abaixo_do_teto_do_worker": (rows_5x, HARD_CAP, rows_5x <= HARD_CAP),
+        "linhas_por_dia": (normal["linhas_por_dia"], LIMIT_NORMAL, normal["linhas_por_dia"] <= LIMIT_NORMAL),
+        "linhas_por_dia_5x": (normal["linhas_por_dia_5x"], LIMIT_5X, normal["linhas_por_dia_5x"] <= LIMIT_5X),
+        "fracao_aceita": (normal["fracao_aceita"], LIMIT_ACCEPT_RATE, normal["fracao_aceita_ok"]),
+        "abaixo_do_teto_do_worker": (normal["linhas_por_dia_5x"], HARD_CAP, normal["linhas_por_dia_5x"] <= HARD_CAP),
     }
     return {
         "itens_unicos_no_corpus": len(uniq),
         "volume_24h": volume,
-        "aceitos_24h": accepted,
-        "hot_entre_aceitos": round(hot_n / accepted, 3) if accepted else None,
+        "aceitos_24h": normal["aceitos_24h"],
+        "hot_entre_aceitos": normal["hot_entre_aceitos"],
+        "cenarios_pressao": scenarios,
         "limites": {k: {"valor": v[0], "limite": v[1], "ok": v[2]} for k, v in checks.items()},
-        "ok": all(v[2] for v in checks.values()),
+        "ok": all(v[2] for v in checks.values()) and all(s["ok"] for s in scenarios.values()),
     }
 
 
@@ -91,6 +110,10 @@ def main() -> int:
               f"| HOT entre aceitos: {res['hot_entre_aceitos']}")
         for k, v in res["limites"].items():
             print(f"  [{'OK   ' if v['ok'] else 'ESTOURA'}] {k:26} {v['valor']}  (limite {v['limite']})")
+        for pressure, scenario in res["cenarios_pressao"].items():
+            status = "OK" if scenario["ok"] else "ESTOURA"
+            print(f"  [{status:7}] pressão {pressure:8} {scenario['linhas_por_dia']} linhas/dia; "
+                  f"{scenario['linhas_por_dia_5x']} a 5×; aceitos {scenario['aceitos_24h']}/{res['volume_24h']}")
         print("RESULTADO:", "dentro dos limites seguros" if res["ok"] else "FORA DOS LIMITES: NÃO FAÇA COMMIT desta mudança")
     return 0 if res["ok"] else 1
 

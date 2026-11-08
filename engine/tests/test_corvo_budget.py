@@ -24,6 +24,14 @@ def test_normal_day_is_within_limits():
     assert res["limites"]["linhas_por_dia"]["valor"] == 2 * 40 + 144 * 3
 
 
+def test_budget_projects_normal_economy_and_critical_for_24h_and_five_x():
+    res = project(corpus(900, 40))
+    scenarios = res["cenarios_pressao"]
+    assert set(scenarios) == {"normal", "economy", "critical"}
+    assert scenarios["normal"]["aceitos_24h"] >= scenarios["economy"]["aceitos_24h"] >= scenarios["critical"]["aceitos_24h"]
+    assert all(s["ok"] and s["linhas_por_dia_5x"] <= 25_000 for s in scenarios.values())
+
+
 def test_a_loosened_filter_that_accepts_everything_is_caught():
     res = project(corpus(0, 900))  # tudo vira aceito: o freio tem que pegar pela fração aceita
     assert not res["ok"]
