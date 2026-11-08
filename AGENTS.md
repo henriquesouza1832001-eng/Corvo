@@ -45,3 +45,7 @@ Verificar e documentar em `docs/sources/SOURCES.md`: API oficial, termos de uso,
 | `engine/` | Python: coleta, NLP, geolocalização, clustering, scoring |
 | `engine/corvo_engine/collectors/<fonte>` | uma pasta por fonte, uma branch `collector/<fonte>` |
 | `packages/shared` | contratos (alterar com cuidado) |
+
+
+## CORVO: coleta e treino do bot (agente `codex-noite`)
+Trabalho noturno de medir e ajustar o portão de notícias (Hugin) e a bancada de prova (Munin). **Ordem de serviço:** `docs/corvo/CODEX_BRIEF_COLETA.md`; **o que é "certo" e como medir:** `docs/corvo/HUGIN_MUNIN_TREINO.md`; **instruções curtas do engine:** `engine/AGENTS.md`. Comece por `py scripts/corvo_codex_preflight.py`. Esse agente trabalha **local, em `--dry-run`**, e só edita `engine/corvo_engine/{intake,collect,munin,oracle}`, `engine/benchmarks`, `engine/tests` e `docs/corvo`.

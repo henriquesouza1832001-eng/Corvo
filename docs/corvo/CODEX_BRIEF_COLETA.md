@@ -15,6 +15,11 @@ Proibido: deploy, wrangler, segredos, escrita na API de produção, mudança de 
 Comece pela Fase 0 e registre-se: py scripts/agentbus.py register codex-noite --role "coleta e treino do portao CORVO".
 ```
 
+## 0. Prontidão e ambiente (leia antes de tudo)
+- **Prontidão:** `cd C:\projetos\Pulso` e `py scripts/corvo_codex_preflight.py`. Ele confere branch, testes, corpus e amostra, reserva as suas pastas no quadro e imprime o prompt acima. Só comece com **PRONTO**. As instruções curtas que o Codex lê sozinho estão em `engine/AGENTS.md`.
+- **Você pode estar sem rede (o normal).** O corpus é coletado por **outro processo** (`scripts/corvo_corpus_loop.ps1`, iniciado pelo dono) em `engine/data/corvo_corpus/corpus.jsonl`. Trabalhe sobre esse arquivo. **Só T0 (ler o feed público) e T10 (verificar URLs de fontes novas) precisam de rede**: sem rede, pule, registre no relatório e siga. **Nunca** tente liberar rede, trocar o sandbox nem contornar uma permissão negada.
+- **Relatório:** use `docs/corvo/RELATORIO_NOITE_MODELO.md` como esqueleto.
+
 ## 1. Missão
 Cuidar de **tudo da coleta e do treino do bot** do CORVO:
 1. **Coleta:** manter e ampliar a leitura de notícias do mundo (feeds oficiais e de imprensa), com saúde de fontes medida.
@@ -94,6 +99,10 @@ Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **
 | `engine/corvo_engine/munin/` | **Munin** (memória): `scoring` (Brier, taxa-base, skill, ECE), `registry` (validador de previsão), `leakage` (anti-futuro), `retention` (o que se guarda e por quanto tempo). 18 testes |
 | `engine/benchmarks/corvo_munin_eval.py` | bancada de prova de Munin (`--synthetic` ou arquivo de resolvidas) |
 | `engine/benchmarks/corvo_make_sample.py` | monta a amostra de rotulagem (aceitos + rejeitados, lacre 70/30, pesos) |
+| `engine/benchmarks/corvo_label.py` | ajudante de rotulagem: mostra títulos **sem a decisão do portão**, grava K/M/D com estrato, peso e lado (ajuste ou lacrado) |
+| `engine/benchmarks/corvo_gate_eval.py` | mede o portão contra os rótulos, **ponderado**, por conjunto |
+| `scripts/corvo_codex_preflight.py` | confere a prontidão e imprime o prompt de partida |
+| `scripts/corvo_corpus_loop.ps1` | laço de coleta do corpus em teste a seco (rodado pelo dono) |
 | `engine/benchmarks/corvo_review.py` | **ferramenta de revisão**: recalcula a relevância de um corpus e lista aceitas e rejeitadas (só relevância; ignora idade, duplicata e cota) |
 | `engine/tests/test_intake_gate.py`, `test_oracle_publisher.py`, `test_collect_runner.py` | testes que protegem o comportamento |
 | `apps/worker/src/routes/corvo.ts` | API (**só leia**): formato do lote, teto de escrita |
@@ -103,6 +112,9 @@ Decisões: **HOT** (grava, relevância ≥ corte alto), **BUFFER** (grava, relev
 ## 6. Comandos (PowerShell, na pasta `engine`)
 ```powershell
 cd C:\projetos\Pulso\engine
+# prontidão (na raiz do repositório): confere tudo e imprime o prompt de partida
+py scripts/corvo_codex_preflight.py
+# (rodado pelo dono, em outra janela) laço de coleta do corpus: powershell -File scripts\corvo_corpus_loop.ps1 -Hours 6
 # um ciclo de teste, mostra os aprovados (nada é enviado)
 py -m corvo_engine.collect --once --dry-run
 # registra a decisão de CADA item (inclusive descartes) num corpus local
@@ -110,6 +122,14 @@ py -m corvo_engine.collect --once --dry-run --quiet --dump data\corvo_corpus\cor
 # laço da noite: um ciclo a cada 10 min (use o limite de tempo que preferir)
 $fim = (Get-Date).AddHours(6)
 while ((Get-Date) -lt $fim) { py -m corvo_engine.collect --once --dry-run --quiet --dump data\corvo_corpus\corpus.jsonl; Start-Sleep -Seconds 600 }
+# montar a amostra de rotulagem (divisão 70/30 estável por URL) e rotular sem ver a decisão do portão
+py benchmarks\corvo_make_sample.py data\corvo_corpus\corpus.jsonl --n 300
+py benchmarks\corvo_label.py status data\corvo_corpus\corpus.sample.jsonl
+py benchmarks\corvo_label.py show   data\corvo_corpus\corpus.sample.jsonl --from 0 --count 40
+py benchmarks\corvo_label.py apply  data\corvo_corpus\corpus.sample.jsonl --from 0 --codes KMDKKMD...   # K=keep M=marginal D=drop -=pular
+# medir o portão contra os rótulos (ponderado, por conjunto)
+py benchmarks\corvo_gate_eval.py data\corvo_corpus\corpus.labels.jsonl
+py benchmarks\corvo_gate_eval.py data\corvo_corpus\corpus.labels.jsonl --split eval   # lacrado: UMA vez por rodada de ajuste
 # revisar o efeito de uma mudança de léxico sem recoletar
 py benchmarks\corvo_review.py data\corvo_corpus\corpus.jsonl --rejected --limit 300
 # auditar o que foi para o banco (somente leitura)
@@ -120,7 +140,7 @@ Cada linha do `corpus.jsonl`: `cycle_at, source_id, url, title, published_at, ve
 ## 7. Plano da noite
 **Fase 0 (15 min), preparar.** Registre-se, rode os testes (devem passar), rode um ciclo e confirme que os 24 feeds respondem. Anote hora de início e versões.
 
-**Fase 1 (a noite toda, em segundo plano), coletar o corpus.** Inicie o laço da seção 6 em outra janela e deixe rodando durante as outras fases. Meta: ≥ 30 ciclos e ≥ 3.000 itens únicos, cobrindo horários de Ásia, Europa e Américas. Registre por ciclo: feeds com falha, tempo, itens novos.
+**Fase 1 (a noite toda, em segundo plano), coletar o corpus.** O laço é iniciado **pelo dono** (`scripts\corvo_corpus_loop.ps1`); se você tiver rede, pode iniciar o da seção 6 em outra janela. Trabalhe sobre `corpus.jsonl` enquanto ele cresce. Meta: ≥ 30 ciclos e ≥ 3.000 itens únicos, cobrindo horários de Ásia, Europa e Américas. Registre por ciclo: feeds com falha, tempo, itens novos.
 
 **Fase 2 (≈1 h), rotular.** Com ≥ 1.500 itens, sorteie uma amostra **estratificada por fonte e por decisão atual** de ≥ 400 itens (mínimo 300) e rotule em `engine/data/corvo_corpus/labels.jsonl`: `{"url","label":"keep|marginal|drop","topic","kind":"fato|reportagem|rumor|opiniao|previsao","region"}`.
 - **keep:** tem **efeito plausível em preço de ativo** ou em risco que chega a ele. Ex.: decisão de juros ou ata do FOMC; dado de inflação ou emprego; tarifa, sanção, embargo; corte de produção de petróleo; escalada militar em região de energia ou rota de navio; terremoto ou furacão em polo industrial; exploit ou ruína de exchange de cripto; falência, calote ou rebaixamento relevante; queda abrupta de bolsa.
@@ -128,7 +148,7 @@ Cada linha do `corpus.jsonl`: `cycle_at, source_id, url, title, published_at, ve
 - **drop:** **sem efeito previsível em preço.** Ex.: celebridade, esporte, receita, publieditorial, opinião, incêndio ou obra local, crime comum, ajuda humanitária, rotina de órgão regulador (aprovação de aplicação, ata de comitê técnico), "como fazer", previsão de preço de blogueiro.
 - Rotule **pelo conteúdo**, nunca pela decisão do portão. Reserve **30% (semente fixa registrada) como conjunto de avaliação lacrado**. Registre as regras de rotulagem e os casos ambíguos no relatório.
 
-**Fase 3 (≈45 min), medir.** Crie `engine/benchmarks/corvo_gate_eval.py` que lê `corpus.jsonl` e `labels.jsonl` e imprime, **por conjunto (ajuste e avaliação)**:
+**Fase 3 (≈45 min), medir.** **Já existe** `engine/benchmarks/corvo_gate_eval.py` (testado): lê os rótulos e imprime, **por conjunto (ajuste e avaliação)**, o que segue. Rode, confira que bate com a conta que você faria à mão em 5 itens e **estenda** só o que faltar (linhas por dia, cobertura do mapa, acerto de `kind`):
 - matriz `label × verdict` (keep/marginal/drop contra hot/buffer/drop);
 - **precisão do HOT** (fração de HOT que é keep), **recall do keep** (fração de keep que ficou HOT ou BUFFER), **proporção de HOT entre os aceitos**;
 - **taxa de keep descartado** (o pior erro, com o motivo do descarte) e **taxa de drop gravado** (o que polui o banco);
@@ -180,7 +200,7 @@ Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a
 ## 10. O que entregar de manhã
 1. **`docs/corvo/RELATORIO_NOITE_<data>.md`:** (a) resumo de 10 linhas para o dono; (b) tabela antes e depois das métricas, nos dois conjuntos; (c) mudanças, uma por linha, com o commit; (d) fichas das fontes; (e) o que **piorou** ou foi revertido; (f) 10 exemplos reais que o portão ainda erra (título e motivo); (g) fontes sugeridas, ligadas ou não; (h) auditoria do banco (T0); (i) perguntas para o dono; (j) próximos passos.
 2. Commits pequenos na `hen`, testes verdes, `lock release` feito.
-3. `engine/benchmarks/corvo_gate_eval.py` funcionando e documentado no topo, para qualquer pessoa repetir a medição.
+3. `engine/benchmarks/corvo_gate_eval.py` (já existe) estendido e documentado no topo com o que você acrescentar, para qualquer pessoa repetir a medição.
 4. Nada de segredo, corpus ou `.sqlite` no commit (`git diff --cached --name-only` e `sh scripts/gitcrypt_check.sh`).
 
 ## 11. Armadilhas já conhecidas

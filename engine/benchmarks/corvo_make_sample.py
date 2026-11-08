@@ -1,16 +1,19 @@
 """Monta a amostra para rotulagem do portão do CORVO (estratificada, com semente fixa).
 
-Uso (pasta engine):  py benchmarks\\corvo_make_sample.py data\\corvo_corpus\\filtro.jsonl --n 300 --seed 20261108
+Uso (pasta engine):  py benchmarks\\corvo_make_sample.py data\\corvo_corpus\\corpus.jsonl --n 300 --seed 20261108
 
 Dois estratos, pela decisão ATUAL do portão (só relevância, pelo título):
   - "aceito": todos (é onde mora a precisão do HOT);
   - "rejeitado": amostra aleatória (é onde mora o recall do keep; estimativa ponderada pelo peso `w` = tamanho do estrato / amostrados).
-Saída: <corpus>.sample.jsonl com {idx, url, source_id, title, stratum, w}. O rótulo é feito SEM olhar a decisão (use o título só).
-Divide em ajuste (70%) e avaliação LACRADA (30%) pela mesma semente: a divisão é gravada em `split`.
+Saída: <corpus>.sample.jsonl com {idx, url, source_id, title, stratum, w, split}. O rótulo é feito SEM olhar a decisão (título só).
+
+LACRE ESTÁVEL: a divisão ajuste (70%) / avaliação lacrada (30%) é função do HASH da URL com a semente, não da posição. Assim, gerar a
+amostra de novo com um corpus maior NUNCA troca um item já rotulado de lado (sem contaminar o conjunto lacrado).
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import sys
@@ -18,6 +21,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from corvo_engine.intake.gate import GateConfig, NewsItem, Pressure, score  # noqa: E402
+
+
+def split_of(url: str, seed: int) -> str:
+    """'eval' (lacrado, ~30%) ou 'fit' (ajuste, ~70%), estável para a mesma URL e semente."""
+    h = int(hashlib.sha1(f"{seed}:{url}".encode()).hexdigest()[:8], 16)
+    return "eval" if h % 100 < 30 else "fit"
 
 
 def main() -> int:
@@ -42,7 +51,7 @@ def main() -> int:
     rng.shuffle(rows)  # a ordem de leitura não revela o estrato
     for i, row in enumerate(rows):
         row["idx"] = i
-        row["split"] = "eval" if rng.random() < 0.3 else "fit"
+        row["split"] = split_of(row["url"], args.seed)
     out = Path(args.corpus).with_suffix(".sample.jsonl")
     out.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
     print(f"únicos {len(seen)} | aceitos {len(acc)} | rejeitados {len(rej)} | amostra {len(rows)} (rejeitados amostrados {len(pick_rej)}) -> {out}")
