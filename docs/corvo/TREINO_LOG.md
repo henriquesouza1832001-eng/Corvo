@@ -39,6 +39,8 @@
 
 | 9 | 2026-11-08 | P1 Munin events: conservative 0.30 title overlap; 48h, same topic, complete-link | fit-only challenge: 30 labeled pairs; TP 4, FP 0, FN 8, TN 18 (precision 1.00; recall 0.33) | Hugin sealed n/a (Munin event identity) | 458/day; baseline unchanged | implemented; false merges 0/30 (challenge set, not population estimate); conservative recall remains weak | pending |
 
+| 10 | 2026-11-08 | Closed questions + local price resolution rule; exact-symbol routing, 30 prior horizon returns | unit tests: 14 passed across event/questions/resolve; synthetic fixture only in tests | no Hugin sealed metric (Munin rules) | baseline unchanged at 458/day | missing/ambiguous prices and unfinished horizons abstain; no market outcome inferred in this block | pending |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
