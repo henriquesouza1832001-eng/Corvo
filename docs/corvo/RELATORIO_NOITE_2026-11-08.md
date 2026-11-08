@@ -413,3 +413,7 @@ Mantive os mesmos 30 pares do `fit` e testei 0,235. Em rela??o a 0,25, TP subiu 
 No corpus aprovado real, 0,25?0,235 reduziu grupos de 56 para 55; cobertura multifuente ficou em 7 eventos; distribui??o final: 48 com uma fonte, 5 com duas e 2 com tr?s; confirma??o: 4 oficiais, 7 multifuente, 44 de fonte ?nica. O painel final tem 55 eventos, 100 perguntas, 0 previs?es, 100 absten??es, 18 resolu??es de pre?o local sem previs?o, 2 aguardando pre?o futuro e 80 sem instrumento; Brier, base, skill e ECE N/A. Registro local: 520 linhas em cinco snapshots idempotentes; execu??o atual com 100 linhas (`run_id=run_71e39f445d40751646a5`).
 
 Essa itera??o usa somente `fit` para ajustar a identidade de eventos; n?o abriu o lacre nem mudou o port?o Hugin. Hugin H2, Munin M3. O novo conjunto de avalia??o Hugin segue indispon?vel: eval existente tem 15 `keep`, abaixo dos 40 pedidos.
+
+### 9.18 T9: ciclo resiliente a falhas distintas por fonte (20:10 BRT)
+
+Ampliei o teste de integra??o do `run_cycle` com oito fontes simuladas: XML quebrado, corpo vazio, HTML inesperado, corpo excessivo, timeout, HTTP 403, HTTP 503 e erro de redirecionamento. Cada falha foi registrada pelo ID da fonte; a fonte saud?vel completou envio local `dry-run` e foi marcada uma vez; nenhum acesso de rede ocorreu. A su?te direcionada final ficou em **76 passed**. O c?digo de agrupamento 0,235 est? no commit `09b4c36`; o freio antes deste commit T9 permaneceu verde (1.278 itens, 458/562 normal/economia, 432/432 cr?tico).
