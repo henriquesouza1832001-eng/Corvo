@@ -462,3 +462,32 @@ O ciclo 7 terminou as 20:30:07 com 24 feeds sem falhas e 1 item novo; precos sem
 Auditei `precos.csv` local sem alterar linhas: 5.220 registros, 5.220 chaves ativo/horario unicas, zero linhas invalidas, fechamento nao positivo, duplicata, duplicata conflitante ou fechamento futuro. As series cripto chegam ate 2026-11-08 23:00 UTC; as cinco series FX diarias, ate 2026-11-06 16:00 UTC, coerente com a janela de fim de semana desta coleta. Nenhum preco foi sintetizado.
 
 A checagem valida apenas a estrutura temporal local; nao comprova licenca/proveniencia da fonte nem cria previsoes resolvidas. Os resultados do painel permanecem os do ciclo 7: 0 previsoes, 100 abstencoes, 8 resolucoes de preco sem forecast e metricas preditivas N/A. Hugin H2 e Munin M3.
+
+
+### 9.24 Testes cruzados Munin e matriz de payloads T9 (20:36 BRT)
+
+A bateria completa de testes Munin ficou em **53 passed**. Ampliei o teste de robustez da coleta com cinco retornos invalidos do adaptador (`None`, tupla, objeto, lista com registro invalido e texto); em cada caso, a fonte foi isolada e a fonte saudavel concluiu o mesmo ciclo local. A bateria T9 junto dos testes de `collect` ficou em **10 passed**, sem rede real. Rodei tambem 31 casos da matriz HTTP de caos em servidor loopback local (6 foram omitidos), incluindo hang/gotejamento limitados pelo deadline; 31 passaram em 7,74 s.
+
+A medicao Hugin consultou somente `fit`: n=225/keep=46, precisao HOT 1.000, recall keep 0.540 (46% dos keep descartados), drop gravado 0.049, keep entre gravadas 0.607 e HOT entre aceitos 0.082. Nao reabri `eval` nem alterei o gate; Hugin permanece H2.
+
+O freio permaneceu verde antes deste bloco (1.289 URLs unicas, volume 24 h 520; 458 linhas/dia, 562 a 5x, 432/432 critico). Nao houve mudanca no portao Hugin nem no placar de previsoes: Hugin H2, Munin M3, sem forecast real resolvido.
+
+
+### 9.25 T0: auditoria GET do feed de producao (20:40 BRT)
+
+Fiz somente GET em `/api/corvo/feed`; nao houve POST nem outra escrita. A resposta gerada em 2026-11-08T23:40:46Z trouxe 31 noticias e um orcamento remoto de 232/300.000 linhas. As estatisticas do painel indicam 818 recebidas, 17 HOT, 14 BUFFER e 787 descartadas. Os 31 itens retornados coincidem com os 31 gravados reportados (`17 HOT + 14 BUFFER`); os 818 incluem descartes e nao sao o total armazenado. Os 31 itens retornados tinham `ingested_at=2026-11-08T03:13:32Z`, cerca de 20,5 horas antes da leitura, embora o processo local de raspagem siga ativo em `--dry-run`.
+
+Classifiquei manualmente os 31 titulos, ignorando os campos `verdict`, `reason` e `relevance` do payload: **22 keep, 8 marginal, 1 drop**; `keep=71,0%`, abaixo da meta T0 de 85%. A resposta nao inclui corpo ou resumo, entao os rotulos sao de agente baseados apenas em manchete; as notas marginais incluem comentario sem mudanca de politica, cobertura repetida/ambigua sobre o escandalo bancario no Paraguai, analise de investimento sobre IA/S&P e retorica sem acao. O item drop foi a contribuicao de financiamento ao TPI/Japao, sem canal de mercado claro no titulo. Nao ajustei Hugin com esta amostra de producao e nao abri o lacre.
+
+| Universo lido | Keep | Marginal | Drop | Keep % | Meta | Resultado |
+|---|---:|---:|---:|---:|---:|---|
+| 31 itens gravados devolvidos pelo GET (17 HOT + 14 BUFFER) | 22 | 8 | 1 | 71,0% | >=85% | abaixo; bucket atual, mas fotografia atrasada |
+
+O T0 cobre os 31 itens gravados reportados no bucket; a fotografia esta cerca de 20,5 horas atrasada porque a coleta local roda em `--dry-run` e nao atualiza producao. Nenhum dado foi alterado. O freio local segue verde.
+
+
+### 9.26 Ciclo 8 e painel local atualizado (20:40 BRT)
+
+O ciclo 8 terminou as 20:40:08: 24 feeds sem falhas, 1 item novo e nenhum preco novo (5.220 candles). O freio local ficou verde: 1.290 URLs unicas, volume 24 h 515, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica.
+
+A repeticao `corvo_munin_backtest.py --dry-run` permaneceu em 55 eventos, 100 perguntas, 0 previsoes e 100 abstencoes. Ha 8 resolucoes locais sem forecast, 12 aguardando preco futuro e 80 aguardando instrumento; 6 janelas sobrepostas foram excluidas do baseline. BTC/ETH tem 1 resultado independente cada, faltando 29 para `n=30`. Brier, taxa-base, skill e ECE seguem N/A. A raspagem externa segue ativa em `--dry-run`, PID 13596.
