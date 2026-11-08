@@ -34,6 +34,33 @@ Este documento diz **o que significa "certo"** para cada um, **como medir** e **
 
 ---
 
+## 0.1 A escada: o que é "ficar melhor"
+
+Treinar é **subir de nível**, com prova. Cada degrau tem um critério que dá para medir; só se sobe com número no **conjunto lacrado** e o **freio de banco** verde. O placar de cada rodada fica em [`TREINO_LOG.md`](TREINO_LOG.md).
+
+### 🧠 Hugin
+| Nível | Nome | Sobe quando… | Estado |
+|---|---|---|---|
+| **H1** | Filtra por palavra | acerta o óbvio (juros, tarifa, hack) | ✅ superado |
+| **H2** | Filtra com ruído e título | descarta esporte, rotina de regulador, humanitário; o título decide | ✅ **v3, aqui hoje** |
+| **H3** | **Calibrado em dados lacrados** | precisão do HOT ≥ 0,85 · recall do keep ≥ 0,90 · keep entre gravadas ≥ 0,85 · HOT ≤ 25% | 🎯 **meta desta noite** |
+| **H4** | Aprende por fonte e por tema | pesos de fonte e de tema vindos de medição (ficha de cada fonte), com amostra mínima | ⬜ |
+| **H5** | Entende o acontecimento | agrupa o mesmo fato de várias fontes e liga a ativos, sem fundir fatos diferentes | ⬜ |
+
+### 🗃️ Munin
+| Nível | Nome | Sobe quando… | Estado |
+|---|---|---|---|
+| **M1** | Guarda e esquece certo | só o aprovado, só os campos permitidos, prazos 30/14/48 h, tudo **testado** | ✅ |
+| **M2** | Registra previsão válida | probabilidade, intervalo, evidências e método; recusa o inválido (API e código) | ✅ |
+| **M3** | **Confere com contas honestas** | Brier, taxa-base, skill, calibração e anti-vazamento funcionam e são **testados em cenários realistas** (calibrado, exagerado, com vazamento, com pouca amostra) | 🎯 **meta desta noite** |
+| **M4** | Confere com preço real | resultados reais de mercado alimentam a bancada (fonte de preço registrada em `SOURCES.md`) | ⬜ precisa de dados |
+| **M5** | Calibra e aprende | ≥ 100 resolvidas, ECE ≤ 0,05, e só então ajusta pesos (amostra mínima de 30 por tema ou fonte) | ⬜ precisa de dados |
+
+> [!NOTE]
+> **Regra de subida:** um nível só conta como atingido com **evidência no relatório** (métrica, conjunto, commit). Nunca se sobe por opinião. Se uma rodada não melhora o lacrado duas vezes seguidas (**platô**), pare, registre o que falta aprender e deixe pronto para a próxima noite.
+
+---
+
 ## 1. A ideia, em um desenho
 
 Na mitologia nórdica, Odin envia Hugin (pensamento) e Munin (memória) todo dia para sobrevoar os nove reinos. Voltam ao amanhecer e contam o que viram. O CORVO faz o mesmo com notícias e sinais do mundo.
