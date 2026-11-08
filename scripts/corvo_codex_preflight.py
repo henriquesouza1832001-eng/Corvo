@@ -23,8 +23,8 @@ AGENT = "codex-noite"
 # Testes: reserva por ARQUIVO (a pasta engine/tests inteira conflita com reservas antigas de outros agentes). Teste novo seu: `claim` nele ao criar.
 CLAIMS = ["engine/corvo_engine/intake", "engine/corvo_engine/collect", "engine/corvo_engine/munin", "engine/corvo_engine/oracle", "engine/benchmarks",
           "engine/tests/test_intake_gate.py", "engine/tests/test_oracle_publisher.py", "engine/tests/test_collect_runner.py",
-          "engine/tests/test_munin.py", "engine/tests/test_corvo_bench.py", "docs/corvo"]
-TESTS = ["tests/test_intake_gate.py", "tests/test_oracle_publisher.py", "tests/test_collect_runner.py", "tests/test_munin.py", "tests/test_corvo_bench.py"]
+          "engine/tests/test_munin.py", "engine/tests/test_corvo_bench.py", "engine/tests/test_corvo_budget.py", "docs/corvo"]
+TESTS = ["tests/test_intake_gate.py", "tests/test_oracle_publisher.py", "tests/test_collect_runner.py", "tests/test_munin.py", "tests/test_corvo_bench.py", "tests/test_corvo_budget.py"]
 MIN_FOR_LABELING = 1500  # itens únicos para começar a rotular (brief, Fase 2)
 
 problems: list[str] = []
@@ -68,7 +68,8 @@ def main() -> int:
 
     for rel, what in (("docs/corvo/CODEX_BRIEF_COLETA.md", "briefing"), ("docs/corvo/HUGIN_MUNIN_TREINO.md", "guia Hugin e Munin"),
                       ("engine/AGENTS.md", "instruções do Codex para o engine"), ("engine/benchmarks/corvo_gate_eval.py", "ferramenta de medição"),
-                      ("engine/benchmarks/corvo_label.py", "ferramenta de rotulagem"), ("engine/benchmarks/corvo_make_sample.py", "montador de amostra")):
+                      ("engine/benchmarks/corvo_label.py", "ferramenta de rotulagem"), ("engine/benchmarks/corvo_make_sample.py", "montador de amostra"),
+                      ("engine/benchmarks/corvo_budget_check.py", "freio de banco"), ("docs/corvo/CODEX_START_HERE.md", "página de entrada do Codex")):
         line((ROOT / rel).exists(), f"existe {what}", rel)
 
     uniq, by_src = 0, {}
@@ -85,6 +86,11 @@ def main() -> int:
          "rode scripts\\corvo_corpus_loop.ps1 numa janela do PowerShell")
     if CORPUS.exists() and uniq < MIN_FOR_LABELING:
         line(None, f"corpus ainda abaixo de {MIN_FOR_LABELING} itens", "o Codex pode começar pela Fase 0 e T0; a rotulagem espera o corpus crescer")
+
+    if CORPUS.exists():
+        rc, out = sh([sys.executable, "benchmarks/corvo_budget_check.py", str(CORPUS)], cwd=ENGINE)
+        res = [l.strip() for l in out.splitlines() if "linhas_por_dia " in l or "fracao_aceita" in l]
+        line(rc == 0, "freio de banco: projeção de linhas por dia dentro dos limites", "; ".join(res) if res else out.splitlines()[-1] if out else "")
 
     if SAMPLE.exists():
         n = len(SAMPLE.read_text(encoding="utf-8").splitlines())

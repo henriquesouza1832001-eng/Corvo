@@ -5,6 +5,8 @@
 ## Prompt de partida (cole isto no Codex)
 ```text
 Você é o agente "codex-noite" do projeto CORVO, repositório C:\projetos\Pulso, branch hen.
+Comece por docs/corvo/CODEX_START_HERE.md (1 página): traz a regra de ouro de NAO ESTOURAR O BANCO. O freio
+engine/benchmarks/corvo_budget_check.py precisa passar antes de CADA commit; freio vermelho = nao commite.
 Leia por inteiro e obedeça docs/corvo/CODEX_BRIEF_COLETA.md: é a sua ordem de serviço.
 Leia também docs/corvo/HUGIN_MUNIN_TREINO.md: define o que é "certo" para Hugin (lê e filtra) e Munin (lembra e confere),
 as métricas, os diagramas e o ciclo de treino. Em caso de dúvida sobre COMO medir, ele manda; sobre O QUE PODE FAZER, o brief manda.
@@ -16,6 +18,7 @@ Comece pela Fase 0 e registre-se: py scripts/agentbus.py register codex-noite --
 ```
 
 ## 0. Prontidão e ambiente (leia antes de tudo)
+- **Primeiro, leia `CODEX_START_HERE.md`** (uma página): ela traz a **regra de ouro de não estourar o banco** e o **freio de banco** (`engine/benchmarks/corvo_budget_check.py`), que precisa passar antes de **cada** commit.
 - **Prontidão:** `cd C:\projetos\Pulso` e `py scripts/corvo_codex_preflight.py`. Ele confere branch, testes, corpus e amostra, reserva as suas pastas no quadro e imprime o prompt acima. Só comece com **PRONTO**. As instruções curtas que o Codex lê sozinho estão em `engine/AGENTS.md`.
 - **Você pode estar sem rede (o normal).** O corpus é coletado por **outro processo** (`scripts/corvo_corpus_loop.ps1`, iniciado pelo dono) em `engine/data/corvo_corpus/corpus.jsonl`. Trabalhe sobre esse arquivo. **Só T0 (ler o feed público) e T10 (verificar URLs de fontes novas) precisam de rede**: sem rede, pule, registre no relatório e siga. **Nunca** tente liberar rede, trocar o sandbox nem contornar uma permissão negada.
 - **Relatório:** use `docs/corvo/RELATORIO_NOITE_MODELO.md` como esqueleto.
@@ -68,7 +71,7 @@ Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **
 1. Trabalhe só na branch **`hen`**. Nunca na `main`, **nunca crie outras branches**. Antes: `git status`, `git branch --show-current`, `git pull`.
 2. Quadro de agentes: `py scripts/agentbus.py register codex-noite --role "coleta e treino do portao CORVO"`; `who`; reserve o que vai editar com `claim`. Para commitar: `py scripts/agentbus.py lock acquire codex-noite --note "..."` e `lock release` ao terminar. `git add` **sempre por nome de arquivo** (nunca `-A` nem `.`). Rode `py scripts/agentbus.py check-staged codex-noite` e `sh scripts/gitcrypt_check.sh` antes de commitar.
 3. Commits pequenos, mensagem em inglês `tipo(escopo): resumo`, **no nome do dono do repositório** (use o `git config` existente; não troque `user.name` nem `user.email`). **Nunca `push --force`.** **Nunca merge na `main`** (o PR da `hen` já está aberto; o dono decide o merge).
-4. Antes de cada commit: `cd engine && py -m pytest tests/test_intake_gate.py tests/test_oracle_publisher.py tests/test_collect_runner.py -q`. Se algo seu ficar vermelho, conserte ou reverta.
+4. Antes de cada commit: `cd engine && py -m pytest tests/test_intake_gate.py tests/test_oracle_publisher.py tests/test_collect_runner.py tests/test_munin.py tests/test_corvo_bench.py tests/test_corvo_budget.py -q` **e** `py benchmarks\corvo_budget_check.py data\corvo_corpus\corpus.jsonl` (o freio de banco precisa dizer "dentro dos limites seguros"). Se algo seu ficar vermelho, conserte ou reverta; freio vermelho = **não commite**.
 
 **Segredos e produção** (nada disso é seu):
 5. **Não rode** `wrangler`, comandos do Turso, `gh secret`, nem `curl` com método diferente de GET na API de produção. **Não leia nem imprima** `deploy/oracle/.env`, `apps/worker/.dev.vars`, `~/corvo-gitcrypt.key` nem tokens. **Não use** `POST /api/corvo/ingest` nem `/api/corvo/purge`. Todo o seu trabalho é **local**, com `--dry-run`.
@@ -101,6 +104,7 @@ Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **
 | `engine/benchmarks/corvo_make_sample.py` | monta a amostra de rotulagem (aceitos + rejeitados, lacre 70/30, pesos) |
 | `engine/benchmarks/corvo_label.py` | ajudante de rotulagem: mostra títulos **sem a decisão do portão**, grava K/M/D com estrato, peso e lado (ajuste ou lacrado) |
 | `engine/benchmarks/corvo_gate_eval.py` | mede o portão contra os rótulos, **ponderado**, por conjunto |
+| `engine/benchmarks/corvo_budget_check.py` | **freio de banco**: projeta linhas/dia do portão atual e falha se passar do limite seguro |
 | `scripts/corvo_codex_preflight.py` | confere a prontidão e imprime o prompt de partida |
 | `scripts/corvo_corpus_loop.ps1` | laço de coleta do corpus em teste a seco (rodado pelo dono) |
 | `engine/benchmarks/corvo_review.py` | **ferramenta de revisão**: recalcula a relevância de um corpus e lista aceitas e rejeitadas (só relevância; ignora idade, duplicata e cota) |
