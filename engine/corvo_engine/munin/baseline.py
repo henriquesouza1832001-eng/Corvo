@@ -1,10 +1,9 @@
 """Previsão pela TAXA-BASE (v1): a régua mínima de qualquer previsão do CORVO.
 
-Para cada chave (tema, ativo, horizonte) guarda-se quantas vezes a resposta foi "sim" e "não". A probabilidade é a média de uma distribuição
-beta com prior fraco (1, 1): p = (sim + 1) / (sim + não + 2). O intervalo de incerteza usa aproximação normal da posterior Beta para formar um intervalo central aproximado de 80%; não são quantis Beta exatos e encolhe com mais dados.
+Para cada chave (tema, ativo, direção da pergunta, horizonte), guarda quantas vezes a resposta foi "sim" e "não". A probabilidade é a média de uma distribuição beta com prior fraco (1, 1): p = (sim + 1) / (sim + não + 2). O intervalo de incerteza usa aproximação normal da posterior Beta para formar um intervalo central aproximado de 80%; não são quantis Beta exatos e encolhe com mais dados.
 Com menos de `min_n` casos o modelo SE ABSTÉM ("dados insuficientes"): dizer "não sei" é resposta válida.
 
-Conte EVENTOS, nunca notícias: seis matérias sobre o mesmo fato são uma amostra só (ver docs/corvo/PREDITIVO.md, seção 4.1).
+Conte EVENTOS, nunca notícias: seis matérias sobre o mesmo fato são uma amostra só (ver docs/corvo/PREDITIVO.md, seção 4.1). Janelas de preço sobrepostas na mesma chave não contam como observações independentes.
 Só passe disto para um modelo com características se ele BATER esta régua no conjunto lacrado, dividido no tempo.
 """
 from __future__ import annotations
