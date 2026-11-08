@@ -462,3 +462,12 @@ O ciclo 7 terminou as 20:30:07 com 24 feeds sem falhas e 1 item novo; precos sem
 Auditei `precos.csv` local sem alterar linhas: 5.220 registros, 5.220 chaves ativo/horario unicas, zero linhas invalidas, fechamento nao positivo, duplicata, duplicata conflitante ou fechamento futuro. As series cripto chegam ate 2026-11-08 23:00 UTC; as cinco series FX diarias, ate 2026-11-06 16:00 UTC, coerente com a janela de fim de semana desta coleta. Nenhum preco foi sintetizado.
 
 A checagem valida apenas a estrutura temporal local; nao comprova licenca/proveniencia da fonte nem cria previsoes resolvidas. Os resultados do painel permanecem os do ciclo 7: 0 previsoes, 100 abstencoes, 8 resolucoes de preco sem forecast e metricas preditivas N/A. Hugin H2 e Munin M3.
+
+
+### 9.24 Testes cruzados Munin e matriz de payloads T9 (20:36 BRT)
+
+A bateria completa de testes Munin ficou em **53 passed**. Ampliei o teste de robustez da coleta com cinco retornos invalidos do adaptador (`None`, tupla, objeto, lista com registro invalido e texto); em cada caso, a fonte foi isolada e a fonte saudavel concluiu o mesmo ciclo local. A bateria T9 junto dos testes de `collect` ficou em **10 passed**, sem rede real. Rodei tambem 31 casos da matriz HTTP de caos em servidor loopback local (6 foram omitidos), incluindo hang/gotejamento limitados pelo deadline; 31 passaram em 7,74 s.
+
+A medicao Hugin consultou somente `fit`: n=225/keep=46, precisao HOT 1.000, recall keep 0.540 (46% dos keep descartados), drop gravado 0.049, keep entre gravadas 0.607 e HOT entre aceitos 0.082. Nao reabri `eval` nem alterei o gate; Hugin permanece H2.
+
+O freio permaneceu verde antes deste bloco (1.289 URLs unicas, volume 24 h 520; 458 linhas/dia, 562 a 5x, 432/432 critico). Nao houve mudanca no portao Hugin nem no placar de previsoes: Hugin H2, Munin M3, sem forecast real resolvido.

@@ -1,6 +1,7 @@
 """T9 robustness tests for malformed fetcher responses; no network is used."""
 import time
 import urllib.error
+import pytest
 
 from corvo_engine.collect import run_cycle
 from corvo_engine.intake import IntakeGate, NewsItem
@@ -23,7 +24,8 @@ class DryTransport:
         return {"ok": True, "dry_run": True}
 
 
-def test_malformed_feed_payload_is_isolated_without_dropping_healthy_feed():
+@pytest.mark.parametrize("bad_payload", [None, (), {}, [{}], "not-a-list"])
+def test_malformed_feed_payload_is_isolated_without_dropping_healthy_feed(bad_payload):
     transport = DryTransport()
     publisher = OraclePublisher(transport, IntakeGate(clock=lambda: NOW), clock=lambda: NOW)
     store = SeenStore(":memory:", clock=lambda: NOW)
@@ -31,7 +33,7 @@ def test_malformed_feed_payload_is_isolated_without_dropping_healthy_feed():
 
     def fetcher(feed):
         if feed["id"] == "bad":
-            return None
+            return bad_payload
         return [NewsItem("healthy", "https://healthy.test/1", "Fed signals rate decision after inflation data", NOW - 60, "", 0.9)]
 
     result = run_cycle(feeds, publisher, store, fetcher=fetcher, workers=2)
