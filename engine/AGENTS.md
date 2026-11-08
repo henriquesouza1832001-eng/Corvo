@@ -33,7 +33,7 @@ O corpus é coletado por **outro processo** (`scripts/corvo_corpus_loop.ps1`, ro
 | `py benchmarks\corvo_budget_check.py data\corvo_corpus\corpus.jsonl` | **freio de banco**: projeta linhas/dia (≤ 5.000; ≤ 25.000 com 5×; ≤ 12% aceito). **Obrigatório antes de commit** |
 
 ## As dez regras que não se negociam
-1. Branch **`hen`** apenas. Nunca `main`, nunca branch nova, nunca `push --force`, nunca merge.
+1. Branch **`hen`** apenas (leia da `main`, empurre na `hen`). Nunca escreva na `main`, nunca branch nova, nunca `push --force`, nunca merge manual.
 2. **Local e em `--dry-run`.** Não rode `wrangler`, Turso, `gh secret`; não use `POST` na API; não toque em `.env`, `.dev.vars`, chave do git-crypt.
 3. Edite **só** `corvo_engine/{intake,collect,munin,oracle}`, `benchmarks/`, os testes `tests/test_corvo_*` e os 5 já reservados, e `../docs/corvo/`. Ao criar teste novo, reserve o arquivo: `py scripts/agentbus.py claim codex-noite engine/tests/<arquivo>`. **Não** edite `apps/worker`, `database/`, `packages/shared`, `.github/workflows` (outro dono; mudam contrato). Proponha no relatório.
 4. **Conjunto lacrado:** ajuste só com o lado `fit`; rode `--split eval` **uma vez por rodada** e nunca olhe os itens `eval` para decidir uma regra.
@@ -53,5 +53,8 @@ py -m pytest tests/test_intake_gate.py tests/test_oracle_publisher.py tests/test
 ## Entrega
 `../docs/corvo/RELATORIO_NOITE_<data>.md` (use `RELATORIO_NOITE_MODELO.md` como esqueleto). Prioridade: **T0, T1, T2, T3, T8**, depois T12, T4, T5, T6, T9, T7. Termine bem o que começou.
 
-## Pare e escreva no relatório se
-um servidor bloquear (403/429 repetido); testes ficarem vermelhos por algo que você não entende; algo exigir segredo, deploy, escrita na API ou mudança de contrato; uma permissão for negada (**não contorne**).
+## Modo contínuo: NÃO PARE
+**Trabalhe a noite toda e só pare quando o dono escrever "PARE".** Acabou a lista? Nova passada (mais corpus, rótulos, alavancas, testes). Platô? Troque de alavanca ou de tarefa. Sem rede? Trabalhe sobre o corpus e durma 10 min entre rodadas. Travou, freio de banco vermelho ou permissão negada? **Registre no `TREINO_LOG.md`, reverta se preciso, não contorne e siga para outra tarefa.** Uma linha de "batimento" por hora no `TREINO_LOG.md`. Segurança continua valendo: "não parar" nunca autoriza violar uma regra.
+
+## Leia da main
+A **`main` é a fonte da verdade**. Antes de cada rodada: `git fetch origin` e, na `hen`, `git merge origin/main`. Você dá push só na `hen`; o dono leva a `hen` para a `main` (`bash scripts/ship.sh`, só com CI verde). **Você não faz merge.** Seu dever: CI verde a cada push.

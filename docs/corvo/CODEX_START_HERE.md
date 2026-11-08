@@ -48,8 +48,19 @@ py benchmarks\corvo_munin_eval.py --synthetic                          # 6. conh
 ## 6. Entrega (de manhã)
 `docs/corvo/RELATORIO_NOITE_<data>.md`, a partir de [`RELATORIO_NOITE_MODELO.md`](RELATORIO_NOITE_MODELO.md). Inclua **sempre** a saída do freio de banco **antes e depois**.
 
-## 7. Pare e escreva no relatório se
-um servidor bloquear (403/429) · o freio de banco falhar e você não souber consertar · testes vermelhos que você não entende · algo exigir segredo, deploy, escrita na API ou mudança de contrato · uma permissão for **negada** (**não contorne**).
+## 7. Modo contínuo (ordem do dono, 2026-11-08)
+**Trabalhe a noite toda e só pare quando o dono pedir ("PARE").** Isso vale acima de qualquer sensação de "terminei".
+- **Acabou a lista de tarefas?** Nova passada: mais corpus, mais rótulos, outra alavanca, mais testes e cenários.
+- **Platô numa alavanca** (duas rodadas seguidas sem melhorar o lacrado)? **Troque de alavanca ou de tarefa.** Não pare.
+- **Sem rede ou sem dado novo?** Trabalhe sobre o corpus que existe e, entre rodadas, durma 10 min (`Start-Sleep -Seconds 600`) e confira se o corpus cresceu.
+- **Travou?** Registre no `TREINO_LOG.md` e siga para a próxima tarefa. **Permissão negada?** Não contorne; anote e vá para outra tarefa.
+- **Freio de banco vermelho?** Reverta aquela mudança e siga (não é motivo para parar).
+- **Batimento:** a cada hora, uma linha em "Batimentos" do `TREINO_LOG.md` (hora, rodada, o que está fazendo). É assim que o dono vê, de manhã, que você não parou.
+- **Não peça confirmação para continuar.** A única palavra de parada é "PARE" do dono.
+- **Segurança continua valendo** (nada de deploy, segredos, escrita na API, mudança de contrato, branch nova). "Não parar" nunca autoriza violar uma regra.
+
+### Leia da main; a hen vai para a main sozinha
+A **`main` é a fonte da verdade**. Antes de cada rodada: `git fetch origin` e, na `hen`, `git merge origin/main`. Você dá push **só na `hen`**; o dono leva a `hen` para a `main` (`bash scripts/ship.sh`: PR e merge só com CI verde). **Você não faz merge.** Seu dever é deixar o CI verde a cada push e anotar no `TREINO_LOG.md` o último commit verde. (Um auto-merge está *proposto* em `docs/corvo/propostas/`, mas só vale se o dono habilitar.)
 
 ---
 

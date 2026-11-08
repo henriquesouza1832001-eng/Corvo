@@ -22,7 +22,8 @@ describe("banco com limite de taxa ou DNS fora", () => {
 		const txt = await r.text();
 		expect(r.status).toBe(500);
 		expect(JSON.parse(txt).request_id).toBeTruthy();
-		expect(txt).not.toMatch(/turso|429|ENOTFOUND|getaddrinfo|rate limited/i); // nada do backend vaza para o chamador
+		// o request_id é um UUID aleatório e pode conter "429" por acaso: confere o corpo SEM ele (antes o teste falhava de vez em quando)
+		expect(txt.replace(/"request_id":"[^"]*"/, "")).not.toMatch(/turso|429|ENOTFOUND|getaddrinfo|rate limited/i); // nada do backend vaza para o chamador
 		expect(Object.values(s.counts()).every((n) => n === 0)).toBe(true);
 
 		armed = false;

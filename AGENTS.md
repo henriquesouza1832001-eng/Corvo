@@ -1,5 +1,7 @@
 # AGENTS.md — regras para agentes de IA (e humanos) no CORVO
 
+> **CODEX, leia primeiro. MODO CONTÍNUO DO CODEX (ordem do dono, 2026-11-08):** trabalhe a noite toda em rodadas e **só pare quando o dono escrever "PARE"**. Leia sempre da **`main`** (fonte da verdade); dê push só na `hen`; o dono leva a `hen` para a `main` com `bash scripts/ship.sh` (PR; só com CI verde). Você não faz merge. Missão, regras e tarefas: `docs/corvo/CODEX_START_HERE.md`, `docs/corvo/CODEX_BRIEF_COLETA.md` e `engine/AGENTS.md`.
+
 **Contexto completo, divisão de tarefas e como entregar: `docs/OVERVIEW_PARA_AGENTES.md`. Passo a passo humano: `docs/ONBOARDING_BACKEND.md`.**
 
 Leia antes de qualquer alteração: `docs/architecture/ARCHITECTURE.md`, `docs/api/API.md`, `docs/SCORING.md`.
@@ -27,7 +29,7 @@ Vários agentes (Claude, Codex, humanos) podem editar este repositório **ao mes
 ## Nunca
 - Commitar secrets: `.env`, `.dev.vars`, tokens, cookies, chaves privadas.
 - Mudar contrato silenciosamente. Contratos vivem em `packages/shared/src/contracts.ts` (espelho: `engine/corvo_engine/models.py`) e `docs/api/API.md`. Mudança de contrato = mesmo PR atualiza os 3 + label `contract`.
-- Fazer merge automático na `main`. Merge é decisão humana, via PR.
+- Fazer merge **manual** na `main` fora do fluxo. **Política (2026-11-08):** a `hen` é levada para a `main` pelo dono ou por quem ele mandar, com `bash scripts/ship.sh` (PR; só com CI verde). Auto-merge por workflow está **proposto** em `docs/corvo/propostas/auto-merge-hen.yml.txt`, mas **não está ativo**: exige habilitação explícita do dono.
 - Contornar autenticação, limites ou termos de uso de qualquer fonte.
 - Implementar reconhecimento facial, rastreamento de pessoas ou perfil individual.
 - Tratar alegação política como fato.

@@ -1,0 +1,53 @@
+# PROPOSTA INERTE (não executa nada). Auto-merge da hen para a main quando o CI fica verde.
+# NÃO está ativo: foi bloqueado pelo sistema de permissões por mesclar na main sem revisão humana, e só o DONO pode decidir isso.
+# Para habilitar (decisão do dono): copie este arquivo para .github/workflows/auto-merge-hen.yml (remova o .txt e este cabeçalho),
+# faça o commit POR UM PR comum (o GITHUB_TOKEN não consegue alterar workflows) e confira que o repositório permite merge commit.
+# Riscos: tudo que passa no CI da hen vira main sem olho humano; um teste fraco deixa passar um erro. Desligar: apagar o arquivo.
+name: Levar hen para a main
+
+# Política do dono (2026-11-08): nada fica parado na hen. Quando o CI da hen termina VERDE, este workflow faz o merge da exata
+# versão verificada na main. Assim a main (que o Codex e todo mundo lê) está sempre em dia.
+# Limites: não roda se o CI estiver vermelho; só mescla o commit que o CI testou (se a hen já avançou, espera o próximo CI);
+# se houver conflito, FALHA (você recebe o e-mail) e nada é forçado. O GITHUB_TOKEN não pode alterar arquivos de .github/workflows:
+# mudanças em workflows precisam de um PR comum (scripts/ship.sh).
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: levar-hen-para-main
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'hen' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Mesclar a versão verificada
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin hen
+          tip=$(git rev-parse origin/hen)
+          if [ "$tip" != "$SHA" ]; then
+            echo "A hen avançou ($tip) depois do CI de $SHA: espero o CI do commit mais novo."
+            exit 0
+          fi
+          if git merge-base --is-ancestor "$SHA" origin/main; then
+            echo "A main já contém $SHA: nada a fazer."
+            exit 0
+          fi
+          git config user.name "corvo-bot"
+          git config user.email "corvo-bot@users.noreply.github.com"
+          git merge --no-ff -m "merge: hen -> main (CI verde em ${SHA:0:7})" "$SHA"
+          git push origin main
+          echo "main atualizada com ${SHA:0:7}"

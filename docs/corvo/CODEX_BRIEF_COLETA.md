@@ -4,7 +4,18 @@
 
 ## Prompt de partida (cole isto no Codex)
 ```text
-Você é o agente "codex-noite" do projeto CORVO, repositório C:\projetos\Pulso, branch hen.
+Você é o agente "codex-noite" do projeto CORVO, repositório C:\projetos\Pulso.
+
+MODO CONTÍNUO (ordem do dono): trabalhe A NOITE TODA, em rodadas, e SÓ PARE QUANDO O DONO PEDIR (ele escreverá "PARE").
+Nunca encerre por conta própria: acabou a lista? comece nova passada (mais corpus, mais rótulos, outra alavanca, mais testes).
+Platô numa alavanca? troque de alavanca ou de tarefa. Sem rede ou sem dados novos? trabalhe sobre o corpus que existe e, entre
+rodadas, durma 10 min (Start-Sleep -Seconds 600) e confira se o corpus cresceu. Travou em algo? registre no TREINO_LOG.md e siga
+para a próxima tarefa. Não peça confirmação para continuar.
+
+LEIA DA MAIN: a main é a fonte da verdade (tudo foi mesclado nela). Antes de cada rodada: git fetch origin e, na branch hen,
+git merge origin/main. Os documentos canônicos estão na main: docs/corvo/CODEX_START_HERE.md, docs/corvo/CODEX_BRIEF_COLETA.md,
+docs/corvo/HUGIN_MUNIN_TREINO.md, AGENTS.md e engine/AGENTS.md. Você trabalha e dá push SÓ na branch hen; o dono leva a hen para a
+main (bash scripts/ship.sh). Você NÃO faz merge. Seu dever: deixar o CI verde e dar push a cada rodada.
 
 MISSÃO: TREINAR HUGIN E MUNIN PARA FICAREM MELHORES, rodada após rodada. "Melhor" não é opinião: é número no placar
 (docs/corvo/TREINO_LOG.md) e subida na escada de níveis (docs/corvo/HUGIN_MUNIN_TREINO.md, seção 0.1).
@@ -16,38 +27,40 @@ MISSÃO: TREINAR HUGIN E MUNIN PARA FICAREM MELHORES, rodada após rodada. "Melh
 Treino aqui NÃO é rede neural: é o ciclo MEDIR → AJUSTAR → PROVAR → REGISTRAR, repetido. Na dúvida sem efeito plausível em preço, descarte.
 
 COMECE por docs/corvo/CODEX_START_HERE.md (1 página): traz a regra de ouro de NÃO ESTOURAR O BANCO. O freio
-engine/benchmarks/corvo_budget_check.py precisa passar antes de CADA commit; freio vermelho = não commite.
+engine/benchmarks/corvo_budget_check.py precisa passar antes de CADA commit; freio vermelho = não commite essa mudança (reverta e siga).
 
 LEIA, nesta ordem: docs/corvo/CODEX_START_HERE.md → docs/corvo/CODEX_BRIEF_COLETA.md (ordem de serviço, regras, tarefas T0 a T12)
 → docs/corvo/HUGIN_MUNIN_TREINO.md (o que é "certo", métricas, escada de níveis) → engine/AGENTS.md (10 regras curtas).
 
 COMO COMEÇAR (Fase 0):
   cd C:\projetos\Pulso
+  git fetch origin ; git merge origin/main
   py scripts/corvo_codex_preflight.py        (precisa dar PRONTO)
   cd engine
   py benchmarks\corvo_budget_check.py data\corvo_corpus\corpus.jsonl     (linha de base do banco, ANTES de mexer)
 Registre-se no quadro: py scripts/agentbus.py register codex-noite --role "treino de Hugin e Munin"
 
-CADA RODADA DE TREINO (faça várias; uma por mudança relevante):
+CADA RODADA DE TREINO (repita sem parar):
   1. MEDIR   - corvo_gate_eval.py (ajuste e lacrado) + corvo_budget_check.py. Anote a linha de base no TREINO_LOG.md.
   2. ENSINAR - escolha UMA alavanca por vez (ruído, peso de tema, corte, léxico ES/FR, dedup, geocódigo, kind). Mude só no que o
                conjunto de AJUSTE mostra.
-  3. PROVAR  - rode o conjunto LACRADO uma vez. Melhorou sem piorar outra métrica e com o freio verde? Commit. Se não: reverta e registre.
-  4. REGISTRAR - uma linha no TREINO_LOG.md (o que mudou, métricas antes/depois, commit). Pare quando duas rodadas seguidas não
-               melhorarem o lacrado (platô): escreva o que falta aprender e deixe pronto para a próxima noite.
+  3. PROVAR  - rode o conjunto LACRADO uma vez. Melhorou sem piorar outra métrica e com o freio verde? Commit e push (o CI e o
+               workflow levam para a main). Se não: reverta e registre.
+  4. REGISTRAR - uma linha no TREINO_LOG.md (o que mudou, métricas antes/depois, commit) e uma linha de "batimento" com a hora.
+  5. SEGUIR  - próxima alavanca. Duas rodadas seguidas sem melhorar o lacrado? mude de alavanca/tarefa (não pare).
 
 PRIORIDADE: T0 (auditar o banco, só com rede), T1 (HOT x BUFFER), T2 (relevância "só mercado"), T3 (dedup), T8 (carga), depois
-T12 (Munin), T4, T5, T6, T9, T7. Termine bem o que começar.
+T12 (Munin), T4, T5, T6, T9, T7; terminou todas? nova passada com mais dados.
 
 PROIBIDO: deploy, wrangler, Turso, gh secret, escrever na API de produção (nada de POST), ler ou imprimir .env, tokens ou a chave do
-git-crypt, mudar contrato, editar apps/worker, database, packages/shared e .github/workflows, merge, branch nova, push --force.
-Trabalhe local, em --dry-run, só na branch hen. Você pode estar sem rede: trabalhe sobre engine/data/corvo_corpus/corpus.jsonl, pule
-T0 e T10 sem rede e registre. Se uma permissão for negada, NÃO contorne: anote e siga. Não olhe os itens do conjunto lacrado para
-decidir uma regra.
+git-crypt, mudar contrato, editar apps/worker, database, packages/shared e .github/workflows, merge manual, branch nova, push --force.
+Trabalhe local, em --dry-run, só na branch hen. Se uma permissão for negada, NÃO contorne: anote e siga para outra tarefa.
+Não olhe os itens do conjunto lacrado para decidir uma regra.
 
-ENTREGA: docs/corvo/TREINO_LOG.md atualizado e docs/corvo/RELATORIO_NOITE_<data>.md (use RELATORIO_NOITE_MODELO.md), com a saída do
-freio de banco ANTES e DEPOIS, métricas nos dois conjuntos, o que piorou ou foi revertido, o nível atual de Hugin e de Munin e as
-perguntas para o dono. Commits pequenos, em inglês, git add por nome de arquivo, com a trava do quadro, no nome do dono.
+ENTREGA CONTÍNUA: docs/corvo/TREINO_LOG.md sempre atualizado (rodadas e batimentos) e, a cada bloco de rodadas,
+docs/corvo/RELATORIO_NOITE_<data>.md (use RELATORIO_NOITE_MODELO.md), com a saída do freio de banco ANTES e DEPOIS, métricas nos dois
+conjuntos, o que piorou ou foi revertido, o nível atual de Hugin e de Munin e as perguntas para o dono. Commits pequenos, em inglês,
+git add por nome de arquivo, com a trava do quadro, no nome do dono. Só pare quando o dono escrever "PARE".
 ```
 
 ## 0. Prontidão e ambiente (leia antes de tudo)
@@ -103,7 +116,7 @@ Resultado no corpus do dia 07/11 (818 itens, 24 feeds, 0 falhas), portão v2: **
 **Git e coordenação** (`AGENTS.md`):
 1. Trabalhe só na branch **`hen`**. Nunca na `main`, **nunca crie outras branches**. Antes: `git status`, `git branch --show-current`, `git pull`.
 2. Quadro de agentes: `py scripts/agentbus.py register codex-noite --role "coleta e treino do portao CORVO"`; `who`; reserve o que vai editar com `claim`. Para commitar: `py scripts/agentbus.py lock acquire codex-noite --note "..."` e `lock release` ao terminar. `git add` **sempre por nome de arquivo** (nunca `-A` nem `.`). Rode `py scripts/agentbus.py check-staged codex-noite` e `sh scripts/gitcrypt_check.sh` antes de commitar.
-3. Commits pequenos, mensagem em inglês `tipo(escopo): resumo`, **no nome do dono do repositório** (use o `git config` existente; não troque `user.name` nem `user.email`). **Nunca `push --force`.** **Nunca merge na `main`** (o PR da `hen` já está aberto; o dono decide o merge).
+3. Commits pequenos, mensagem em inglês `tipo(escopo): resumo`, **no nome do dono do repositório** (use o `git config` existente; não troque `user.name` nem `user.email`). **Nunca `push --force`.** **Você não faz merge**: o dono leva a `hen` para a `main` (`bash scripts/ship.sh`, PR só com CI verde). Leia sempre da `main` (`git fetch origin` e `git merge origin/main` na `hen` antes de cada rodada).
 4. Antes de cada commit: `cd engine && py -m pytest tests/test_intake_gate.py tests/test_oracle_publisher.py tests/test_collect_runner.py tests/test_munin.py tests/test_corvo_bench.py tests/test_corvo_budget.py -q` **e** `py benchmarks\corvo_budget_check.py data\corvo_corpus\corpus.jsonl` (o freio de banco precisa dizer "dentro dos limites seguros"). Se algo seu ficar vermelho, conserte ou reverta; freio vermelho = **não commite**.
 
 **Segredos e produção** (nada disso é seu):
@@ -249,8 +262,19 @@ Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a
 - Palavras ambíguas: "Fed", "SEC", "ETF", "Georgia", "Jordan", "Turkey", "gold", "war", "troops". Teste sempre com contraexemplos.
 - Não otimize para o conjunto de ajuste: o conjunto lacrado é o juiz.
 
-## 12. Condições de parada
-Pare e escreva no relatório (sem insistir) se: um servidor bloquear o projeto (403/429 repetido); os testes ficarem vermelhos por algo que você não entende; qualquer ação exigir segredo, deploy, escrita na API ou mudança de contrato; o corpus passar de ~200 MB. **Nenhuma ação irreversível.**
+## 12. Modo contínuo (ordem do dono, 2026-11-08)
+**Trabalhe a noite toda e só pare quando o dono pedir ("PARE").** Isso vale acima de qualquer sensação de "terminei".
+- **Acabou a lista de tarefas?** Nova passada: mais corpus, mais rótulos, outra alavanca, mais testes e cenários.
+- **Platô numa alavanca** (duas rodadas seguidas sem melhorar o lacrado)? **Troque de alavanca ou de tarefa.** Não pare.
+- **Sem rede ou sem dado novo?** Trabalhe sobre o corpus que existe e, entre rodadas, durma 10 min (`Start-Sleep -Seconds 600`) e confira se o corpus cresceu.
+- **Travou?** Registre no `TREINO_LOG.md` e siga para a próxima tarefa. **Permissão negada?** Não contorne; anote e vá para outra tarefa.
+- **Freio de banco vermelho?** Reverta aquela mudança e siga (não é motivo para parar).
+- **Batimento:** a cada hora, uma linha em "Batimentos" do `TREINO_LOG.md` (hora, rodada, o que está fazendo). É assim que o dono vê, de manhã, que você não parou.
+- **Não peça confirmação para continuar.** A única palavra de parada é "PARE" do dono.
+- **Segurança continua valendo** (nada de deploy, segredos, escrita na API, mudança de contrato, branch nova). "Não parar" nunca autoriza violar uma regra.
+
+## Leia da main; a hen vai para a main sozinha
+A **`main` é a fonte da verdade**. Antes de cada rodada: `git fetch origin` e, na `hen`, `git merge origin/main`. Você dá push **só na `hen`**; o dono leva a `hen` para a `main` (`bash scripts/ship.sh`: PR e merge só com CI verde). **Você não faz merge.** Seu dever é deixar o CI verde a cada push e anotar no `TREINO_LOG.md` o último commit verde. (Um auto-merge está *proposto* em `docs/corvo/propostas/`, mas só vale se o dono habilitar.)
 
 ## 13. Definição de pronto
 - [ ] Corpus ≥ 1.500 itens únicos e ≥ 300 rótulos, com conjunto lacrado e semente registrada.
