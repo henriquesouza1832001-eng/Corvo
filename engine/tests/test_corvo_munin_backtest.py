@@ -51,9 +51,14 @@ def test_end_to_end_walk_forward_abstains_until_30_resolved_events_and_registry_
     assert result["abstentions"] == 61
     assert result["resolved_forecast_outcomes"] == 1
     assert result["brier"] is not None
+    assert result["brier_taxa_base"] == result["brier"]
+    assert result["skill_vs_taxa_base"] == 0.0
+    assert result["ece"] is not None
     assert result["calibration_claim"].startswith("not assessed")
     final_btc = [entry for entry in result["entries"] if entry["asset"] == "BTC"][-1]
     assert final_btc["record_type"] == "forecast" and final_btc["n_prior_resolved_events"] == 30
+    first_btc = next(entry for entry in result["entries"] if entry["asset"] == "BTC")
+    assert first_btc["remaining_to_min_n"] == 30
     assert repeated["run_id"] == result["run_id"]
     assert len(first_lines) == len(second_lines) == 62
 
@@ -66,3 +71,17 @@ def test_no_prices_produces_only_abstentions_and_no_fake_brier():
     assert result["abstentions"] == 2
     assert result["resolution_status"] == {"awaiting_price": 2}
     assert result["brier"] is None
+    assert result["brier_taxa_base"] is None and result["skill_vs_taxa_base"] is None and result["ece"] is None
+    assert len(result["open_to_min_n"]) == 2
+    assert all(value["additional_events_needed"] == 1 for value in result["open_to_min_n"].values())
+
+
+def test_local_registry_preserves_explicit_official_confirmation():
+    events, _ = synthetic_fixture(event_count=1)
+    events[0]["source_id"] = "official-wire"
+    events[0]["url"] = "https://official.test/event"
+    result = run_backtest(events, [], official_sources={"official-wire"})
+
+    assert result["entries"][0]["confirmation"] == "official"
+    assert result["entries"][0]["source_ids"] == ["official-wire"]
+    assert "crypto trades continuously" in result["entries"][0]["annulment_rule"]

@@ -11,6 +11,9 @@ from typing import Iterable
 
 from .questions import ClosedQuestion
 
+_CONTINUOUS_ASSETS = frozenset({"BTC", "ETH", "SOL", "BNB", "XRP"})
+_FX_ASSETS = frozenset({"USDBRL", "USDEUR", "USDJPY", "USDGBP", "USDCNY"})
+
 
 @dataclass(frozen=True)
 class Resolution:
@@ -72,6 +75,24 @@ def _first_at_or_after(rows: list[tuple[datetime, float]], target: datetime, max
     return None
 
 
+def _fx_closed(stamp: datetime) -> bool:
+    """Approximate FX weekend closure: Fri 22:00 UTC through Sun 22:00 UTC."""
+    return stamp.weekday() == 5 or (stamp.weekday() == 4 and stamp.hour >= 22) or (stamp.weekday() == 6 and stamp.hour < 22)
+
+
+def _window_has_market_close(asset: str, start: datetime, end: datetime) -> bool:
+    if asset in _CONTINUOUS_ASSETS:
+        return False
+    if asset not in _FX_ASSETS:
+        return False  # Unknown calendars are not guessed.
+    cursor = start
+    while cursor <= end:
+        if _fx_closed(cursor):
+            return True
+        cursor += timedelta(hours=1)
+    return False
+
+
 def resolve_question(question: ClosedQuestion, event_time: str, rows: Iterable[dict]) -> Resolution:
     """Resolve only when local history and a post-horizon close are both present.
 
@@ -87,14 +108,20 @@ def resolve_question(question: ClosedQuestion, event_time: str, rows: Iterable[d
     if not prices:
         return Resolution(question.question_id, "awaiting_price", reason=f"no local price series for {question.asset}")
 
+    horizon = timedelta(hours=question.horizon_hours)
+    if _window_has_market_close(question.asset, t0, t0 + horizon):
+        return Resolution(
+            question.question_id,
+            "cancelled_market_closed",
+            reason="the forecast window intersects the instrument's known market closure",
+        )
+
     gaps = [(b[0] - a[0]).total_seconds() for a, b in zip(prices, prices[1:])]
     positive_gaps = [gap for gap in gaps if gap > 0]
     if not positive_gaps:
         return Resolution(question.question_id, "insufficient_history", reason="fewer than two valid closes")
     step = statistics.median(positive_gaps)
     max_gap = timedelta(seconds=max(step * 1.5, 3600))
-    horizon = timedelta(hours=question.horizon_hours)
-
     anchors: list[tuple[datetime, float]] = []
     for k in range(31, 0, -1):
         sample = _last_at_or_before(prices, t0 - horizon * k, max_gap)

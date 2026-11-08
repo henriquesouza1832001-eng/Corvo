@@ -22,6 +22,8 @@ def test_questions_are_closed_deterministic_and_describe_the_resolution_rule():
     assert all(q.instrument_available for q in first)
     assert all(q.rule_version == PRICE_RULE_VERSION for q in first)
     assert all(q.min_prior_returns == MIN_VOLATILITY_RETURNS == 30 for q in first)
+    assert all("crypto trades continuously" in q.annulment_rule for q in first)
+    assert all("30 prior same-horizon returns" in q.resolution_rule for q in first)
     assert all("retorno anormal logarítmico" in q.text and "6h" in q.text and "30 retornos de 6h" in q.text for q in first)
     assert all(q.direction == "down" and q.question_id.startswith("q_") for q in first)
 
@@ -33,6 +35,7 @@ def test_questions_do_not_guess_fx_pair_or_claim_missing_asset_price():
     usd = next(q for q in questions if q.asset == "USD")
     assert usd.instrument_available is False  # USD is not silently mapped to a particular FX pair.
     assert any(q.asset == "OURO" and not q.instrument_available for q in questions)
+    assert "calendar unknown" in usd.annulment_rule
     assert len({(q.asset, q.direction, q.horizon_hours) for q in questions}) == len(questions)
 
 

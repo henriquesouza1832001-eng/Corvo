@@ -1,5 +1,7 @@
 # Relatório da noite — 2026-11-08
 
+> **Checkpoint nota8 ? 2026-11-08 19:30?20:00 BRT:** cadeia Munin e tarefa T9 conclu?das; a coleta externa de tr?s horas continua ativa. Detalhes e pend?ncias na se??o 9.13.
+
 **Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 17:42 BRT (encerrado por `PARE`) · **Commit inicial:** `4df88e6` · **Último checkpoint:** parada solicitada pelo dono
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
@@ -334,3 +336,52 @@ O freio final do corpus temporário marcou volume 24 h 845, aceitos 19 e HOT ent
 Para a amostra fresca posterior ao lacre anterior, foram excluídas as 258 URLs já lacradas; o pool tinha 365 URLs de 17 fontes no último recálculo. Rotulei somente o lado `fit` (248 itens: 14 keep, 6 marginal, 228 drop; pesos 1 por ser o censo disponível). Com o corte BUFFER normal 0,50, recall keep ponderado 0,143, keep entre gravadas 0,667 e drop gravado 0. Uma hipótese única, ainda somente em memória e escolhida pelo fit, acrescentou o termo específico `Aramco` ao tema energia: no fit, recall 0,214, keep entre gravadas 0,750 e drop gravado 0. São apenas 14 keep; o resultado é instável e a alteração não foi aplicada ao código.
 
 O `eval` fresco permaneceu sem rótulos e seus títulos não foram consultados. Não houve prova lacrada da hipótese, promoção nem mudança de nível: Hugin H2; Munin M3, sem previsões reais avaliadas. Resultado desta sessão é evidência preliminar de ajuste, não melhora confirmada. Próxima etapa: ampliar o corpus fresco, terminar a rotulagem `fit`, congelar a hipótese antes de abrir/rotular `eval` e fazer a prova lacrada uma única vez. Pergunta ao dono: para a próxima retomada, mantém autorização para completar essa prova depois de mais dados?
+
+### 9.13 Rodada nota8 ? checkpoint 19:30?20:00 BRT (coleta externa ainda ativa)
+
+Esta rodada come?ou na `hen` em `b2c1508`. O preflight retornou **PRONTO** (55 testes); o freio inicial marcou 1.260 itens ?nicos, volume 24 h de 528, 458 linhas/dia e 562 a 5?; cr?tico 432/432, tudo verde. ?s 19:54 BRT, o corpus local tinha 1.265 itens ?nicos e 527 itens nas ?ltimas 24 h; o freio continuou em 458/562 (normal e economia) e 432/432 (cr?tico), verde. O processo externo de coleta permaneceu ativo em `--dry-run`: ciclos 1?3 entre 19:30 e 19:50, 24 feeds por ciclo; um HTTP 404 de `fed-press` no ciclo 2 foi isolado, sem interromper a coleta. O arquivo local de pre?os tinha 5.215 linhas para BNB, BTC, ETH, SOL, XRP e cinco pares USD/FX. N?o reiniciei nem encerrei esse processo.
+
+O avaliador Hugin foi executado uma vez e s? seus agregados foram consultados; nenhum exemplo `eval` foi aberto para escolher regra. O port?o n?o mudou nesta rodada, portanto os agregados antes/depois s?o iguais:
+
+| M?trica ponderada | Fit (225; 46 keep) | Eval lacrado existente (75; 15 keep) | Antes ? depois |
+|---|---:|---:|---|
+| Precis?o HOT | 1,000 | 1,000 | igual |
+| Recall keep | 0,540 | 0,800 | igual |
+| Keep descartado | 0,460 | 0,200 | igual |
+| Drop gravado | 0,049 | 0,125 | igual |
+| Keep entre gravadas | 0,607 | 0,583 | igual |
+| HOT entre aceitos | 0,082 | 0,083 | igual |
+| Linhas/dia (normal; 5?) | 458; 562 | ? | or?amento verde antes/depois |
+
+N?o foi poss?vel gerar um novo lacre com 40+ casos `keep`: o conjunto existente tem 15 `keep` no `eval`, e n?o havia r?tulos humanos novos. N?o abri os itens lacrados. Assim Hugin permanece **H2**; H3 n?o ? alegado. A m?trica de eventos ? uma adjudica??o manual de desafio no `fit`, separada do port?o Hugin: em 30 pares entre fontes, 4 merges corretos, 0 falsos, 8 pares positivos perdidos e 18 negativos separados (precis?o 1,00, recall 0,33). ? uma amostra pequena e selecionada, n?o estimativa populacional.
+
+Blocos entregues nesta rodada:
+
+| Bloco | Prova | Commit |
+|---|---|---|
+| Eventos Munin: Jaccard ?0,30, mesmo t?pico, at? 48 h, complete-link | teste novo; pares `fit` 0/30 fus?es erradas, recall baixo explicitado | `a5afa14` |
+| Perguntas fechadas e resolu??o local | teste novo; regra usa 30 retornos anteriores do mesmo horizonte e fecha por pre?o local; sint?tico s? nos testes | `08c6a40` |
+| Walk-forward, absten??o, registro `previsoes.jsonl` e painel | teste novo; corpus/pre?os reais locais: 58 eventos, 106 perguntas, **0 previs?es** por `n<30`, 106 absten??es; resolu??o: 18 resolvidas, 2 sem fechamento futuro, 86 sem instrumento; Brier N/A | `1112aa9` |
+| T9 robustez da coleta | teste novo; payload `None` de uma fonte foi registrado como falha, enquanto fonte saud?vel completou ciclo e foi marcada uma vez; 72 testes da bateria passaram no commit T9; a su?te final ap?s o complemento teve 74 aprovados | `ab2a42c` |
+
+As 18 resolu??es usaram pre?os locais existentes, n?o sint?ticos; nenhuma era resultado de previs?o. Os 86 casos sem instrumento foram `OURO` (32), `PETROLEO` (32), `SP500` (13) e `USD` sem escolha de par (9); permanecem aguardando fonte/mapeamento. Os dois casos adicionais BTC/ETH aguardam pre?o posterior ao horizonte. Munin permanece **M3**; M4 n?o ? alegado porque o painel n?o produziu previs?es resolvidas nem uma avalia??o independente de calibra??o. A taxa-base exige 30 eventos resolvidos anteriores por chave (incluindo dire??o); a divis?o walk-forward n?o usa resultado futuro; corre??o Benjamini?Hochberg `q=0,05` e regra de 100 resolvidas/ECE ?0,05 continuam como protocolo, n?o como resultado emp?rico.
+
+T0 (leitura de banco remoto) e T10 (verifica??o de novas fontes) n?o foram executados; nenhuma fonte foi adicionada. A coleta e o pre?o local vieram do processo externo; n?o houve POST, deploy ou acesso a `.env`. `previsoes.jsonl` foi escrito localmente e n?o entrou no Git. O teste sint?tico ficou restrito aos testes e cada linha de fixture est? marcada `synthetic`.
+
+**Perguntas para o dono (uma por linha):**
+- Qual par USD/FX deve representar as hip?teses de `USD` (por exemplo, USDBRL ou USDEUR), e qual ser? a refer?ncia registrada em `SOURCES.md`?
+- O limite de agrupamento (Jaccard 0,30 / 48 h) ? aceit?vel como ponto inicial, dado recall de 0,33 no desafio manual?
+- Pode fornecer/anotar um novo conjunto lacrado com pelo menos 40 `keep`; o `eval` atual tem apenas 15?
+- A fonte/termos dos pre?os locais deve ser formalmente registrada em `SOURCES.md` antes de qualquer alega??o M4?
+
+**Pr?ximos passos:** manter o processo externo de coleta intocado; quando houver r?tulos novos, congelar uma amostra sem URLs vistas e executar o `eval` agregado uma vez; acumular 30+ eventos independentes resolvidos por chave antes de emitir previs?es; confirmar proxy USD e proveni?ncia de pre?os antes de resolver hip?teses n?o cobertas.
+
+### 9.14 Fechamento dos crit?rios preditivos expl?citos (20:00 BRT)
+
+A tabela `impact.py` foi exercitada com os 58 eventos aprovados agrupados: 53 eventos t?m uma fonte, 4 t?m duas e 1 tem tr?s. O cat?logo local marca explicitamente 5 fontes oficiais; 4 eventos foram confirmados por fonte oficial, 5 por cobertura de m?ltiplas fontes e 49 ficaram como fonte ?nica. N?o mudei os candidatos porque os dados ainda n?o permitem validar dire??o/ativo: o tema `conflito_chave` gerou 28 eventos e suas hip?teses PETROLEO/OURO n?o t?m s?rie local; os candidatos SP500 tamb?m n?o t?m pre?o, e `USD` n?o determina qual dos cinco pares FX usar. S?o hip?teses audit?veis, n?o efeitos provados. `catastrofe ? SP500 volatile` e `infraestrutura ? PETROLEO volatile` parecem amplos demais sem evento sist?mico/choque de oferta; ficam como perguntas para aprova??o e futura contagem, sem peso aprendido.
+
+Ajustei a regra de `questions.py`/`resolve.py` para declarar anula??o e horizonte; o registro inclui IDs de fonte, contagem, n?vel de confirma??o e as regras usadas. Cripto ? cont?nuo; para FX com instrumento exato, uma janela que intersecta o fechamento de fim de semana (aproxima??o UTC de sexta 22:00 a domingo 22:00) ? `cancelled_market_closed`; calend?rios desconhecidos n?o s?o adivinhados e sem s?rie o estado continua `awaiting_price`. Testes novos cobrem cancelamento FX e n?o cancelamento por calend?rio para cripto. Feriados e hor?rio de ver?o n?o est?o modelados; o intervalo ? uma aproxima??o expl?cita a confirmar com o dono.
+
+O painel de prova agora imprime Brier, Brier da taxa-base ponto-no-tempo, skill, ECE e, por chave aberta, quantas resolu??es independentes faltam para `n=30`. O arquivo local cont?m tr?s snapshots determin?sticos (318 linhas no total); a execu??o mais recente tem 106 entradas e ? identificada por `run_id`, sem gravar corpus ou dados sint?ticos. No snapshot local atual n?o h? nenhuma previs?o, logo as quatro m?tricas s?o **N/A**, n?o zero. H? 17 chaves abertas: BTC/ETH cripto t?m 6 resultados resolvidos anteriores e faltam 24; BTC volatilidade de banco central tem 2 e faltam 28; todas as demais t?m 0 e faltam 30. A taxa-base ? o ?nico previsor, ent?o, quando houver previs?es, a r?gua de taxa-base ? a mesma probabilidade e o skill contra essa r?gua ser? zero por defini??o; qualquer ganho exige outro m?todo futuro e prova temporal separada.
+
+A coleta externa continuou sem rein?cio: o ciclo 4 concluiu ?s 20:00 BRT, 24 feeds sem falhas, 2 itens novos; a renova??o local acrescentou 5 linhas de pre?o (5.220 totais). O painel foi repetido ap?s as altera??es e manteve 58 eventos, 106 perguntas, 0 previs?es e 106 absten??es, sem mudan?a de status de resolu??o. O processo continua ativo em `--dry-run`. Nenhuma nova avalia??o lacrada foi consultada.

@@ -26,6 +26,12 @@ class ClosedQuestion:
     sigma_threshold: float = SIGMA_THRESHOLD
     min_prior_returns: int = MIN_VOLATILITY_RETURNS
     instrument_available: bool = False
+    resolution_rule: str = "close at or after horizon; abnormal log return versus 30 prior same-horizon returns"
+    annulment_rule: str = "cancel if the instrument's known market calendar is closed during the forecast window"
+
+
+_CONTINUOUS_ASSETS = frozenset({"BTC", "ETH", "SOL", "BNB", "XRP"})
+_FX_ASSETS = frozenset({"USDBRL", "USDEUR", "USDJPY", "USDGBP", "USDCNY"})
 
 
 def _horizon_hours(value: str) -> int:
@@ -59,6 +65,13 @@ def _question(event_id: str, topic: str, h: Hypothesis, available: frozenset[str
         horizon_hours=hours,
         text=text,
         instrument_available=h.asset in available,
+        annulment_rule=(
+            "no market-close annulment; crypto trades continuously"
+            if h.asset in _CONTINUOUS_ASSETS
+            else "cancel when the FX weekend closure intersects the horizon (UTC approximation)"
+            if h.asset in _FX_ASSETS
+            else "calendar unknown until an exact local instrument is registered; keep unresolved"
+        ),
     )
 
 

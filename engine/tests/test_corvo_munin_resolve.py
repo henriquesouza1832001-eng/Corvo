@@ -79,6 +79,18 @@ def test_invalid_event_time_and_nonpositive_prices_are_rejected():
     assert invalid_price.status == "awaiting_price"
 
 
+def test_known_fx_weekend_closure_cancels_but_crypto_is_not_calendar_cancelled():
+    saturday = datetime(2026, 11, 14, 12, tzinfo=timezone.utc)
+    fx_question = question(asset="USDEUR", direction="volatile", hours=24)
+    fx_rows = [{"ativo": "USDEUR", "timestamp_utc": "2026-11-13T16:00:00Z", "fechamento": "0.9", "provenance": "synthetic"}]
+    cancelled = resolve_question(fx_question, saturday.isoformat(), fx_rows)
+    crypto = resolve_question(question(), saturday.isoformat(), synthetic_prices())
+
+    assert cancelled.status == "cancelled_market_closed"
+    assert cancelled.outcome is None
+    assert crypto.status != "cancelled_market_closed"
+
+
 def test_load_price_csv_reads_only_existing_local_rows(tmp_path):
     path = tmp_path / "prices.csv"
     path.write_text("ativo,timestamp_utc,fechamento\nBTC,2026-11-10T00:00:00Z,100\n", encoding="utf-8")
