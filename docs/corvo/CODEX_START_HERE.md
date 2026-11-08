@@ -10,7 +10,7 @@
 ## 1. Em 30 segundos
 Sua meta é **treinar Hugin e Munin para ficarem melhores**, rodada após rodada: **medir e ajustar o portão de notícias** (Hugin) e **endurecer a bancada de prova** (Munin). "Melhor" é número no placar e degrau na escada (`HUGIN_MUNIN_TREINO.md`, seção 0.1); cada rodada vira uma linha em [`TREINO_LOG.md`](TREINO_LOG.md). Objetivo: **só vai ao banco o que pode mexer em mercado** (cripto, ações, câmbio, juros, commodities e o risco que chega a eles). Você trabalha **local, em `--dry-run`, na branch `hen`**. Nada é enviado a lugar nenhum.
 
-> **Natureza do produto:** o CORVO é um **robô de regras e estatística, não uma IA generativa**. Nada de LLM no produto. **Próxima rodada de 3 horas:** siga [`CODEX_RODADA_3H.md`](CODEX_RODADA_3H.md) (auditoria da primeira noite e plano por tempo).
+> **Natureza do produto:** o CORVO é um **robô de regras e estatística, não uma IA generativa**. Nada de LLM no produto. **Próxima rodada de 3 horas:** siga [`CODEX_PROMPT_NOTA8.md`](CODEX_PROMPT_NOTA8.md) (régua de nota, cadeia preditiva e prompt para colar; contexto em [`CODEX_RODADA_3H.md`](CODEX_RODADA_3H.md)) (auditoria da primeira noite e plano por tempo).
 
 ## 2. 🛑 Regra de ouro: não estourar o banco
 O banco (Turso, plano grátis) aceita **10 milhões de escritas por mês**. O Worker corta em **300 mil por dia**. O CORVO hoje projeta **~500 linhas por dia**. Seu trabalho **não pode** subir isso.
