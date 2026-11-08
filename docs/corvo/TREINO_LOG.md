@@ -43,6 +43,8 @@
 
 | 11 | 2026-11-08 | Local walk-forward chain + append-only forecast registry + proof panel | real local corpus/prices: 58 events, 106 questions, 0 forecasts (all n<30), 106 abstentions; resolution statuses: 18 resolved, 2 awaiting future, 86 awaiting source; Brier N/A | no Hugin sealed metric (Munin backtest) | 458/day; green | no accuracy claim; 18 outcomes are real local resolutions, none had a forecast; registry remains local/untracked | pending |
 
+| 12 | 2026-11-08 | T9 collection robustness: reject malformed fetcher payload per source | bad feed returning `None` plus healthy feed: failed source recorded; valid item fetched, sent, and marked once; tests: 5 passed with existing runner tests | no Hugin sealed metric (collection boundary only) | baseline unchanged; budget checked before commit | malformed adapter output is isolated without dropping healthy feeds; no Hugin gate change | pending |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
