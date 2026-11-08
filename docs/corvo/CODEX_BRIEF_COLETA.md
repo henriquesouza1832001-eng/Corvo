@@ -2,6 +2,17 @@
 
 > Leia inteiro antes de tocar em qualquer arquivo. Este documento é a sua ordem de serviço. Tempo estimado de execução: uma noite (6 a 8 h). Você trabalha sozinho: ninguém vai responder dúvidas até de manhã. Se travar, registre no relatório e passe para a próxima tarefa; não improvise fora das regras.
 
+## Prompt de partida (cole isto no Codex)
+```text
+Você é o agente "codex-noite" do projeto CORVO, repositório C:\projetos\Pulso, branch hen.
+Leia por inteiro e obedeça docs/corvo/CODEX_BRIEF_COLETA.md: é a sua ordem de serviço desta noite.
+Resumo: coletar um corpus real de notícias com o portão em --dry-run, rotular uma amostra, medir
+o que o portão manda ou não para o banco, ajustar regras e limiares com validação em conjunto lacrado
+e entregar o relatório docs/corvo/RELATORIO_NOITE_<data>.md. Nada de deploy, segredos, envio à API de
+produção, mudança de contrato nem branch nova. Se travar, registre no relatório e siga para a próxima tarefa.
+Comece pela Fase 0 e registre-se no quadro: py scripts/agentbus.py register codex-noite --role "treino noturno do portao CORVO".
+```
+
 ## 1. Missão em uma frase
 Fazer o robô **decidir bem, antes de salvar qualquer coisa, se cada notícia do mundo vai ou não para o banco**, e provar com números que ele decide melhor de manhã do que à noite.
 
@@ -14,14 +25,18 @@ Fazer o robô **decidir bem, antes de salvar qualquer coisa, se cada notícia do
 - **Por que o portão existe:** o banco tem limite. Turso grátis: 10 milhões de escritas por mês (teto de projeto: 300 mil por dia, `DAILY_WRITE_LIMIT`). Cada notícia gravada custa ~2 linhas. **Toda linha gravada precisa merecer.**
 - Leia também: `docs/corvo/TRATAMENTO_NOTICIAS.md` (política de armazenamento), `docs/corvo/ARQUITETURA.md`, `docs/COLLECTION_PROTOCOL.md`, `docs/sources/SOURCES.md`, `AGENTS.md`.
 
-## 3. Estado atual (medido em 2026-11-07, primeiro ciclo real)
+## 3. Estado atual (medido em 2026-11-07)
+**Produção já está ligada** (você não mexe nela, só precisa saber):
+- API `corvo-api` (Cloudflare Worker) sobre **Turso**, painel `corvo-web`. A primeira coleta real já foi enviada: **818 itens lidos, 30 gravados (3,7%), 788 descartados**, e **62 linhas** gastas de um teto de 300 mil por dia.
+- Descartes do primeiro ciclo: 645 `stale`, 142 `irrelevant`, 1 `near_duplicate`. Gravados: 8 HOT e 22 BUFFER, de 23 fontes.
+
 | Medida | Valor |
 |---|---|
-| Feeds ativos no catálogo | 24 (5 oficiais, 19 imprensa/mercado/cripto) |
+| Feeds ativos no catálogo | 24 (5 oficiais, 19 imprensa, mercado e cripto) |
 | Feeds com falha | 0 |
-| Itens lidos no ciclo | 818 |
-| Aprovados (HOT+BUFFER) | 34 (4%): 8 HOT e 26 BUFFER |
-| Descartados | 636 `stale`, 145 `irrelevant`, 3 `near_duplicate` |
+| Itens lidos no 1º ciclo | 818 |
+| Aprovados (HOT+BUFFER) | 30 (3,7%) |
+| Linhas de banco gastas | 62 de 300.000/dia (0,02%) |
 | Testes do portão, publicador e coleta | 18 passando |
 
 Leituras importantes dessa medição (confirme ou refute com mais dados):
@@ -29,6 +44,9 @@ Leituras importantes dessa medição (confirme ou refute com mais dados):
 2. Muito item de política geral cai em BUFFER com relevância ~0,63. É esperado; a pergunta é se o corte HOT (0,75) está bom.
 3. A relevância é por palavras-chave em inglês e português. Perde notícias em outros idiomas e pode deixar passar lixo com palavra "boa" (ex.: "Fed" em contexto esportivo).
 4. A geolocalização só reconhece países e hubs de uma tabela fixa; vários itens relevantes ficam sem ponto no mapa.
+
+## 3.1 O que isso significa para o seu trabalho
+O gargalo **não é o limite do banco** (62 de 300 mil linhas). O objetivo da noite é **qualidade da decisão**: não perder o que importa (keep descartado) e não encher o painel de lixo (drop gravado). Quando a coleta rodar o dia inteiro, o volume real de linhas ainda é pequeno; por isso o custo de um erro de relevância é de **qualidade do painel e das previsões futuras**, mais do que de quota. Mantenha mesmo assim a disciplina de custo: a quota vale quando as previsões e o histórico crescerem.
 
 ## 4. Regras invioláveis
 **Git e coordenação** (de `AGENTS.md`, valem para você):
@@ -38,7 +56,7 @@ Leituras importantes dessa medição (confirme ou refute com mais dados):
 4. Antes de cada commit: `cd engine && py -m pytest tests/test_intake_gate.py tests/test_oracle_publisher.py tests/test_collect_runner.py -q`. Se algo vermelho for seu, conserte ou reverta o commit; não deixe vermelho.
 
 **Segredos e produção** (nada disso é seu):
-5. **Não rode** `wrangler deploy`, `wrangler secret`, `wrangler d1`, comandos do Turso, nem `gh secret`. **Não leia nem imprima** `deploy/oracle/.env`, `apps/worker/.dev.vars` nem tokens. **Não envie nada à API de produção** (`corvo-api`): todo o seu trabalho é local, com `--dry-run`.
+5. **Não rode** `wrangler deploy`, `wrangler secret`, `wrangler d1`, comandos do Turso, nem `gh secret`. **Não leia nem imprima** `deploy/oracle/.env`, `apps/worker/.dev.vars` nem tokens. **Não envie nada à API de produção** (`corvo-api`): todo o seu trabalho é local, com `--dry-run`. A API já recebeu a primeira coleta real; o dono decide quando enviar as próximas, depois de ler o seu relatório.
 6. Nunca commite o corpus coletado (`engine/data/corvo_corpus/` está no `.gitignore`: títulos e links de terceiros, só para uso local de medição).
 
 **Fontes e coleta** (de `docs/COLLECTION_PROTOCOL.md`):
