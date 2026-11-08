@@ -1,8 +1,8 @@
 """Previsão pela TAXA-BASE (v1): a régua mínima de qualquer previsão do CORVO.
 
 Para cada chave (tema, ativo, horizonte) guarda-se quantas vezes a resposta foi "sim" e "não". A probabilidade é a média de uma distribuição
-beta com prior fraco (1, 1): p = (sim + 1) / (sim + não + 2). O intervalo de incerteza vem da mesma beta (80% de credibilidade) e encolhe
-com mais dados. Com menos de `min_n` casos o modelo SE ABSTÉM ("dados insuficientes"): dizer "não sei" é resposta válida.
+beta com prior fraco (1, 1): p = (sim + 1) / (sim + não + 2). O intervalo de incerteza usa aproximação normal da posterior Beta para formar um intervalo central aproximado de 80%; não são quantis Beta exatos e encolhe com mais dados.
+Com menos de `min_n` casos o modelo SE ABSTÉM ("dados insuficientes"): dizer "não sei" é resposta válida.
 
 Conte EVENTOS, nunca notícias: seis matérias sobre o mesmo fato são uma amostra só (ver docs/corvo/PREDITIVO.md, seção 4.1).
 Só passe disto para um modelo com características se ele BATER esta régua no conjunto lacrado, dividido no tempo.
@@ -15,7 +15,7 @@ from math import sqrt
 from .registry import ForecastRecord, validate_record
 
 METHOD = "taxa-base por tema, ativo e horizonte (beta-binomial v1)"
-Z80 = 1.2816  # normal bilateral de 80%
+Z80 = 1.2816  # approximate central 80% normal quantile
 MIN_N = 30
 
 
@@ -48,7 +48,7 @@ class BaseRateModel:
         return 0 if c is None else c[0] + c[1]
 
     def predict(self, key: tuple[str, str, str]) -> Prediction | None:
-        """`None` = dados insuficientes (abstenção). Caso contrário, probabilidade com intervalo de 80%."""
+        """None = dados insuficientes; caso contrário, probabilidade com intervalo central Beta aproximado por normal (80%)."""
         c = self._counts.get(key, [0, 0])
         n = c[0] + c[1]
         if n < self.min_n:

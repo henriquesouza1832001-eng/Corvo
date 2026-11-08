@@ -337,6 +337,14 @@ Comece com uma **tabela editável e auditável** (nada de LLM):
 - **Janela de ajuste x janela de prova:** ajuste no passado, prove no futuro (divisão **temporal**, nunca embaralhada).
 - **Reversível:** todo ajuste versionado e com como desfazer (cabe no relatório como proposta).
 
+#### Regra operacional proposta
+
+1. Conte **eventos independentes resolvidos**, não artigos repetidos. Uma hipótese é a chave `(tema, ativo, horizonte)`; estimativa por fonte também exige 30 eventos resolvidos daquela fonte. Com `n < 30`, mantenha o peso anterior e retorne `INSUFFICIENT_DATA`.
+2. Ordene por `resolved_at`: use os 70% mais antigos para ajuste e os 30% seguintes como prova futura. Não embaralhe nem reabra a janela de prova para escolher pesos. Depois, avance a janela e repita como walk-forward.
+3. Em cada janela, compare Brier com a taxa-base calculada somente no passado. Reporte Brier skill, ECE, cobertura do intervalo, número de eventos e número de hipóteses testadas. A amostra de pouca dimensão continua `EXPERIMENTAL`, mesmo se uma métrica parecer boa.
+4. Para a família de hipóteses testadas na janela, aplique Benjamini-Hochberg com FDR `q = 0.05`; publique a lista completa e os valores ajustados, inclusive os que não passaram. Só proponha atualizar um peso se `n >= 30`, Brier skill for positivo, ECE `<= 0.05` e o resultado passar a correção em **duas janelas futuras consecutivas**. Caso contrário, `HOLD`.
+5. Registre a versão anterior, a nova estimativa e o caminho de reversão. Esta regra é um protocolo proposto: não há previsão real resolvida no CORVO para validá-la ainda.
+
 ---
 
 ## 5. Placar final (o que sobe e o que prova)

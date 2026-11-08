@@ -39,7 +39,7 @@ A **taxa-base** é a frequência com que algo aconteceu antes: "depois de um cor
 2. **Dizer "não sei" é natural:** abaixo de 30 casos, o CORVO **se abstém** (`dados insuficientes`) em vez de inventar.
 3. **É auditável:** qualquer pessoa refaz a conta.
 
-**Como a probabilidade é calculada (v1).** Para cada chave *(tema, ativo, horizonte)* guarda-se quantas vezes a resposta foi "sim" e "não". A estimativa é a média de uma distribuição beta com *prior* fraco (1, 1): `p = (sim + 1) / (sim + não + 2)`. O intervalo vem da mesma distribuição (80% de credibilidade) e encolhe com mais dados. O código está em `engine/corvo_engine/munin/baseline.py`.
+**Como a probabilidade é calculada (v1).** Para cada chave *(tema, ativo, horizonte)* guarda-se quantas vezes a resposta foi "sim" e "não". A estimativa é a média de uma distribuição beta com *prior* fraco (1, 1): `p = (sim + 1) / (sim + não + 2)`. O intervalo central de 80% usa aproximação normal da posterior Beta, não quantis Beta exatos; sua cobertura ainda precisa ser validada com dados. Ele encolhe com mais dados. O código está em `engine/corvo_engine/munin/baseline.py`.
 
 **Quando passar da taxa-base a um modelo.** Só se uma versão com características (relevância, número de fontes, hora do dia, regime de volatilidade, "surpresa" contra o consenso) **bater a taxa-base no conjunto lacrado, dividido no tempo**, com Brier menor e calibração aceitável. Primeiro candidato: regressão logística regularizada, simples e explicável. Redes ou ensembles só depois, e só se ganharem do simples.
 
