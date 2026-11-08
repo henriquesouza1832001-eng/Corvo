@@ -323,3 +323,14 @@ Freio final, conferido após a parada às 18:10 BRT: corpus temporário com volu
 Nenhuma regra foi ajustada nesta retomada e nenhum conjunto lacrado foi aberto. Portanto Hugin segue H2 e Munin M3, sem previsão real avaliada. A rodada de avaliação fresca ficou pendente; não se afirma melhora de qualidade a partir do volume raspado. O dono pediu `PARE` e revisão às 18:10 BRT. Os artefatos temporários e os commits permanecem locais, sem push.
 
 Pergunta para o dono: ao retomar em outra sessão, autoriza completar a avaliação lacrada fresca a partir de dados posteriores ao lacre anterior?
+
+
+### 9.12 Retomada, avaliação de ajuste e parada solicitada pelo dono (18:31 BRT)
+
+Na nova retomada, os ciclos 45 e 46 terminaram às 18:13:08 e 18:23:14 BRT: 6 e 8 itens novos, 24 feeds sem falhas, `collect_exit=0`, `budget_exit=0` e `dry_run=true` em ambos. O corpus temporário chegou a 1.528 itens únicos (+14 desde 18:10). A coleta foi interrompida durante a espera anterior ao ciclo 47, após o pedido `PARE` às 18:31 BRT; a sessão terminou e a checagem não encontrou processo residual.
+
+O freio final do corpus temporário marcou volume 24 h 845, aceitos 19 e HOT entre aceitos 0,053; projeções normal/economia 470 linhas/dia e 622 a 5×; crítico 432/432. O corpus oficial local permaneceu em volume 24 h 465, aceitos 27, HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos dentro dos limites seguros.
+
+Para a amostra fresca posterior ao lacre anterior, foram excluídas as 258 URLs já lacradas; o pool tinha 365 URLs de 17 fontes no último recálculo. Rotulei somente o lado `fit` (248 itens: 14 keep, 6 marginal, 228 drop; pesos 1 por ser o censo disponível). Com o corte BUFFER normal 0,50, recall keep ponderado 0,143, keep entre gravadas 0,667 e drop gravado 0. Uma hipótese única, ainda somente em memória e escolhida pelo fit, acrescentou o termo específico `Aramco` ao tema energia: no fit, recall 0,214, keep entre gravadas 0,750 e drop gravado 0. São apenas 14 keep; o resultado é instável e a alteração não foi aplicada ao código.
+
+O `eval` fresco permaneceu sem rótulos e seus títulos não foram consultados. Não houve prova lacrada da hipótese, promoção nem mudança de nível: Hugin H2; Munin M3, sem previsões reais avaliadas. Resultado desta sessão é evidência preliminar de ajuste, não melhora confirmada. Próxima etapa: ampliar o corpus fresco, terminar a rotulagem `fit`, congelar a hipótese antes de abrir/rotular `eval` e fazer a prova lacrada uma única vez. Pergunta ao dono: para a próxima retomada, mantém autorização para completar essa prova depois de mais dados?
