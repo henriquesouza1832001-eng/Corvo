@@ -313,7 +313,7 @@ Já existe: `engine/corvo_engine/munin/` e `engine/benchmarks/corvo_munin_eval.p
                            ·    ·    ·    ·    ·
 ```
 
-**Dados de preço (somente leitura, quando for o caso):** séries públicas de cripto (candles da Binance, o MNEME já coleta) e referência de câmbio do BCE. **Registre antes** em `docs/sources/SOURCES.md` (acesso, termos, limite, retenção) e guarde só local. Sem registro, use apenas dados sintéticos.
+**Dados de preço (somente leitura, quando for o caso):** séries públicas de cripto (candles públicos de cripto) e referência de câmbio do BCE. **Registre antes** em `docs/sources/SOURCES.md` (acesso, termos, limite, retenção) e guarde só local. Sem registro, use apenas dados sintéticos.
 
 ### 4.3 M3 — ligar notícia a ativo (proposta, não contrato)
 

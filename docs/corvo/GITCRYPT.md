@@ -33,7 +33,7 @@ sh scripts/gitcrypt_check.sh   # deve dizer ok
 git commit -m "chore: add encrypted oracle env"
 ```
 
-## Em outra máquina (Oracle, MNEME, colaborador)
+## Em outra máquina (servidor, colaborador)
 ```
 git clone https://github.com/henriquesouza1832001-eng/Corvo.git
 cd Corvo

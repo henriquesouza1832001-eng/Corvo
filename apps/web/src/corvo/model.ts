@@ -64,7 +64,7 @@ export const REASON_LABEL: Record<string, string> = {
 	source_quota: "cota por hora da fonte esgotada",
 	malformed: "item malformado",
 	relevant: "grava já e segue para análise",
-	batch_later: "fica no buffer e sobe em lote",
+	batch_later: "vai para a fila e sobe em lote",
 };
 
 export const TOPIC_LABEL: Record<Topic, string> = {

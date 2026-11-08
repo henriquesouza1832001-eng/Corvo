@@ -1,7 +1,7 @@
 """Uso: py -m corvo_engine.oracle itens.jsonl   (uma notícia por linha; "-" lê da entrada padrão)
 
 Cada linha: {"source_id","url","title","published_at" (ISO ou epoch),"text","source_reliability"}.
-É o ponto de encontro com o MNEME: o coletor de notícias dele (robo/mneme/noticias.py) gera essas linhas; o CORVO só filtra e publica.
+Uso avançado e testes: publica notícias de um arquivo. A coleta normal é `python -m corvo_engine.collect`.
 """
 from __future__ import annotations
 

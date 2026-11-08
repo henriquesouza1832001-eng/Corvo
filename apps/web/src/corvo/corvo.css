@@ -121,3 +121,29 @@ footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line);
 .sources li { display: grid; grid-template-columns: 9.5em 1fr 4ch; gap: 8px; align-items: center; font-size: 11px; }
 .sname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mute); }
 .sbar { height: 6px; background: #0d1a21; } .sbar i { display: block; height: 100%; background: var(--c); }
+
+/* caminho até a previsão */
+.path { margin-top: 12px; background: var(--panel); border: 1px solid var(--line); padding: 12px; display: grid; gap: 10px; }
+.path h2 { font-size: 12px; letter-spacing: .14em; color: var(--c); font-weight: 700; }
+.path h2 small { color: var(--mute); letter-spacing: 0; font-weight: 400; margin-left: 8px; }
+.stages { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.stage { border: 1px solid var(--line); border-top: 2px solid var(--c); padding: 8px; display: grid; gap: 3px; align-content: start; position: relative; }
+.stage.m { border-top-color: var(--a); }
+.stage b { color: #e4eef4; }
+.stage p { color: var(--mute); font-size: 12px; margin: 0; }
+.st-n { position: absolute; top: 6px; right: 8px; color: var(--line2); font-size: 20px; font-weight: 700; }
+.st-who { color: var(--mute); letter-spacing: .12em; font-size: 10px; }
+.st-state { justify-self: start; font-size: 10px; padding: 0 7px; border: 1px solid var(--line2); margin-top: 3px; }
+.s-pronto { color: var(--g); border-color: var(--g); } .s-em-construção { color: var(--a); border-color: var(--a); } .s-planejado { color: var(--mute); }
+
+/* filtros do feed */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.search, .sel { background: #060b0f; color: var(--text); border: 1px solid var(--line2); padding: 5px 8px; font: inherit; font-size: 12px; min-width: 0; }
+.search { flex: 1 1 200px; }
+.search::placeholder { color: var(--mute); }
+
+/* atividade por hora */
+.hourly { display: flex; align-items: flex-end; gap: 2px; height: 64px; border-bottom: 1px solid var(--line2); }
+.hbar { flex: 1; height: 100%; display: flex; flex-direction: column-reverse; min-width: 3px; }
+.hbar i { display: block; width: 100%; min-height: 0; }
+.hd { background: var(--drop); } .hb { background: var(--buffer); } .hh { background: var(--hot); }

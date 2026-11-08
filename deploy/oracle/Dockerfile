@@ -3,7 +3,5 @@ WORKDIR /app
 COPY engine/pyproject.toml engine/pyproject.toml
 COPY engine/corvo_engine engine/corvo_engine
 ENV PYTHONPATH=/app/engine PYTHONUNBUFFERED=1
-COPY deploy/oracle/loop.sh /loop.sh
-RUN chmod +x /loop.sh
-# A cada 60 s publica o que houver na caixa de entrada (/inbox/*.jsonl) e move o arquivo para /state/done.
-CMD ["/loop.sh"]
+# A cada 10 min lê os feeds, passa pelo portão e envia o aprovado à API (memória de já vistos em /state).
+CMD ["python", "-m", "corvo_engine.collect", "--interval", "600", "--state", "/state/seen.sqlite"]
