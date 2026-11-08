@@ -1,8 +1,8 @@
 #!/bin/sh
 # Comando único do CORVO na caixa, só por terminal.  Uso:  sh deploy/box/corvo.sh <comando>
 #   status    estado do coletor, último ciclo, contagens, preços e memória
-#   start     liga o coletor em segundo plano (se já estiver ligado, não duplica)
-#   stop      desliga o coletor
+#   on        (ou start) liga o coletor em segundo plano (se já estiver ligado, não duplica)
+#   off       (ou stop) desliga o coletor
 #   restart   desliga e liga
 #   logs [n]  últimas n linhas do log (padrão 20)
 #   painel    painel ao vivo no terminal (feed da API: pressão do orçamento e últimas notícias); Ctrl+C sai
@@ -23,10 +23,10 @@ case "$1" in
     grep -E 'MemAvailable' /proc/meminfo 2>/dev/null | head -1
     df -h "$DATA" 2>/dev/null | tail -1 | awk '{print "disco livre: "$4" ("$5" usado)"}'
     ;;
-  start)
+  start|on)
     if rodando; then echo "já está ligado"; else termux-wake-lock 2>/dev/null; nohup sh deploy/box/run.sh >/dev/null 2>&1 & sleep 1; echo "ligado"; fi
     ;;
-  stop)
+  stop|off)
     pkill -f 'deploy/box/run.sh' 2>/dev/null; pkill -f 'corvo_engine.collect' 2>/dev/null; echo "desligado"
     ;;
   restart) sh "$0" stop; sleep 2; sh "$0" start ;;
