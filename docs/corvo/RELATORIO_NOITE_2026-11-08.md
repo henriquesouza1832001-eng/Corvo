@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 16:53 BRT (em andamento) · **Commit inicial:** `4df88e6` · **Último checkpoint:** 16:53 BRT
+**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 17:42 BRT (encerrado por `PARE`) · **Commit inicial:** `4df88e6` · **Último checkpoint:** parada solicitada pelo dono
 
-> **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permanece ativa nesta atualização.
+> **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
 ## 1. Resumo para o dono
 
@@ -10,7 +10,7 @@
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
 - Hugin permanece em H2: recall lacrado 0,800 e keep entre gravadas 0,583; o lacre tem só 15 keep e 2 HOT, então a estimativa é instável.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
-- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 37 ciclos até 16:53, com 566 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–37 (detalhes na seção 9).
+- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
 - O freio ficou verde antes e depois; a aceitação normal projetada permaneceu em 26 de 411 itens no corpus final.
 - Suíte Python exigida: 55 testes passaram. T2 e T3 precisam de uma nova avaliação lacrada e pares de deduplicação rotulados.
@@ -22,13 +22,13 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53: 37 ciclos e 566 novos; 24 feeds consultados |
-| Corpus da retomada / feeds | 1.471 itens únicos temporários / 24 feeds; freio verde |
+| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53–17:33: 41 ciclos e 595 novos; 24 feeds consultados |
+| Corpus da retomada / feeds | 1.500 itens únicos temporários / 24 feeds; freio verde |
 | Destino da coleta contínua | `%TEMP%\corvo-codex-noite\corpus.jsonl`, `ciclos.log` e `ciclos_continuos.log`; área separada porque `engine/data/` está reservada por `claude-hen` |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
 | Semente da amostra | 20261108; divisão estável por URL |
 | Keep no lacre | 15 de 75; menos de 30, aviso de instabilidade do avaliador |
-| Feeds com falha no período | 0 nos 3 ciclos iniciais e 8 ciclos da retomada |
+| Feeds com falha no período | 0 nos 3 ciclos iniciais; um HTTP 404 no ciclo 15 da retomada; 0 nos ciclos 16–41 |
 | GET T0 | `generated_at=2026-11-08T04:02:03.947Z`; orçamento 232/300.000 linhas; estatística do ciclo: 818 recebidas, 17 HOT, 14 BUFFER, 787 DROP |
 
 Os títulos foram rotulados por conteúdo, sem usar o veredito do portão como critério. O feed T0 foi auditado por manchete; não houve leitura de corpo nem verificação factual das alegações. A amostra de Hugin usa um único anotador, portanto casos limítrofes ainda precisam de revisão humana.
@@ -293,7 +293,15 @@ Após o checkpoint de 15:53, os ciclos 32–37 concluíram às 16:03, 16:13, 16:
 
 Freio às 16:53: corpus temporário com volume 24 h 838, aceitos 18, HOT entre aceitos 0,056; normal/economia 468 linhas/dia e 612 a 5×; crítico 432/432. Corpus oficial local: volume 24 h 465, aceitos 27, HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos dentro dos limites seguros. Sem alteração de regra de Hugin nem avaliação de novos títulos lacrados; Hugin segue H2 e Munin M3, sem previsões reais.
 
-O coletor permanece em execução, com intervalo de dez minutos. A próxima verificação está prevista para 17:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
+Naquele checkpoint, a próxima verificação estava prevista para 17:03 BRT; a coleta continuou pelos ciclos 38–41 e terminou após o pedido explícito do dono às 17:42 BRT.
+
+### 9.10 Trecho final e parada solicitada pelo dono
+
+Após o checkpoint de 16:53, os ciclos 38–41 concluíram às 17:03, 17:13, 17:23 e 17:33, com 7, 4, 14 e 4 itens novos (29 no trecho). Todos usaram `--dry-run`; os 24 feeds responderam sem falhas e cada ciclo retornou `collect_exit=0` e `budget_exit=0`. O acumulado da retomada passou de 566 para 595 itens novos, totalizando 1.500 itens únicos no corpus temporário. Nos ciclos 40 e 41, `sent_news=1` foi apenas contador de simulação, com `dry_run=true`; nenhum envio foi feito.
+
+Freio final após a parada: corpus temporário com volume 24 h 847, aceitos 19, HOT entre aceitos 0,053; normal/economia 470 linhas/dia e 622 a 5×; crítico 432/432. Corpus oficial local: volume 24 h 465, aceitos 27, HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos dentro dos limites seguros. A coleta foi interrompida por `PARE` às 17:42 BRT, antes do próximo ciclo previsto para 17:43.
+
+Revisão do resultado: Hugin permanece H2 porque o candidato BUFFER 0,45 não passou pelo critério combinado de promoção e não foi aplicado; nenhum título da avaliação lacrada nova foi aberto. Munin permanece M3, com seis cenários sintéticos e nenhuma previsão real avaliada. Nenhuma regra, métrica ou nível foi promovido durante os ciclos contínuos. Os commits de checkpoint ficaram locais na branch `hen`; não houve push.
 
 ## 10. Conferência final (estado da primeira sessão; revisar antes de encerrar a retomada)
 
