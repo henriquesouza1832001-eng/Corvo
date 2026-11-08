@@ -1,7 +1,7 @@
 """Bancada de prova de Munin: mede uma lista de previsões resolvidas (Brier, taxa-base, skill, calibração, intervalo).
 
 Uso (pasta engine):
-    py benchmarks\\corvo_munin_eval.py --synthetic              # demonstra a bancada com dois previsores simulados (calibrado x exagerado)
+    py benchmarks\\corvo_munin_eval.py --synthetic              # cobre seis cenários simulados, inclusive vazamento e pouca amostra
     py benchmarks\\corvo_munin_eval.py resolvidas.jsonl         # uma previsão por linha: {"p":0.7,"y":1,"lo":0.6,"hi":0.8}
     py benchmarks\\corvo_munin_eval.py resolvidas.jsonl --base-rate 0.32   # taxa-base de um período ANTERIOR (sem olhar o futuro)
 
@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from corvo_engine.munin import (  # noqa: E402
     base_rate_brier, bin_interval_coverage, brier, calibration_table, ece, forecast_status, skill,
 )
+from corvo_engine.munin.leakage import LeakageError, assert_point_in_time  # noqa: E402
 
 
 def report(name: str, ps: list[float], ys: list[int], los: list[float] | None = None, his: list[float] | None = None, base_rate: float | None = None) -> None:
@@ -33,12 +34,41 @@ def report(name: str, ps: list[float], ys: list[int], los: list[float] | None = 
     if los and his:
         cov = bin_interval_coverage(ps, ys, los, his)
         print(f"   Cobertura do intervalo por faixa  {cov:.0%}" if cov == cov else "   Cobertura do intervalo: amostra pequena por faixa")
-    print(f"   Estado          {forecast_status(n, e)}")
+    print(f"   Calibração      {forecast_status(n, e)}")
+    if sk is not None and sk <= 0:
+        print("   Skill não positivo: não há ganho sobre a taxa-base.")
     if n < 100:
         print("   AVISO: menos de 100 resolvidas. Amostra pequena não prova nada.")
     print("   faixa      n    prevê   real")
     for b in calibration_table(ps, ys):
         print(f"   {b.lo:.1f}-{b.hi:.1f} {b.n:5d}  {b.mean_p:5.2f}  {b.freq:5.2f}")
+
+
+def run_synthetic() -> None:
+    """Run deterministic teaching cases; none represents a real CORVO forecast."""
+    rng = random.Random(7)
+    truth = [rng.random() for _ in range(3000)]
+    ys = [1 if rng.random() < t else 0 for t in truth]
+    report("previsor CALIBRADO (simulado)", truth, ys)
+    report("previsor EXAGERADO (simulado)", [0.97 if t > 0.5 else 0.03 for t in truth], ys)
+    report("previsor TAXA-BASE (simulado; base anterior=0,50)", [0.5] * len(ys), ys, base_rate=0.5)
+    cautious = [0.5 + 0.5 * (p - 0.5) for p in truth]
+    report("previsor CONSERVADOR (simulado)", cautious, ys, base_rate=0.5)
+
+    small_n = 12
+    report("previsor com POUCA AMOSTRA (simulado)", truth[:small_n], ys[:small_n], base_rate=0.5)
+    print(f"   Atualização de pesos: HOLD ({small_n} < 30 resolvidas por tema/fonte).")
+
+    forecast_at = "2026-11-08T10:00:00Z"
+    future_rows = [{"ingested_at": "2026-11-08T10:01:00Z", "future_outcome": 1}]
+    try:
+        assert_point_in_time(future_rows, forecast_at)
+    except LeakageError as exc:
+        print("\n== previsor COM VAZAMENTO (simulado) ==")
+        print(f"   BLOQUEADO antes da pontuação: {exc}")
+    else:
+        raise AssertionError("a bancada aceitou uma feature recebida depois do corte temporal")
+    print("\nCENÁRIOS SIMULADOS: 6; todos sintéticos, nenhuma previsão real avaliada.")
 
 
 def main() -> int:
@@ -49,11 +79,7 @@ def main() -> int:
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if args.synthetic:
-        rng = random.Random(7)
-        truth = [rng.random() for _ in range(3000)]
-        ys = [1 if rng.random() < t else 0 for t in truth]
-        report("previsor CALIBRADO (simulado)", truth, ys)
-        report("previsor EXAGERADO (simulado)", [0.97 if t > 0.5 else 0.03 for t in truth], ys)
+        run_synthetic()
         return 0
     if not args.file:
         print(__doc__)

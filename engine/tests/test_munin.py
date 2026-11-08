@@ -12,6 +12,7 @@ from corvo_engine.munin import (
 )
 from corvo_engine.munin.leakage import assert_point_in_time
 from corvo_engine.oracle import OraclePublisher
+from benchmarks.corvo_munin_eval import run_synthetic
 
 ROOT = Path(__file__).resolve().parents[2]
 NOW = 1_700_000_000.0
@@ -70,6 +71,21 @@ def test_synthetic_calibrated_forecaster_beats_overconfident_one():
     assert skill(overconfident, ys) < skill(calibrated, ys)
 
 
+def test_synthetic_benchmarks_cover_calibration_baseline_leakage_and_small_samples(capsys):
+    run_synthetic()
+    output = capsys.readouterr().out
+    assert "previsor CALIBRADO (simulado)" in output
+    assert "previsor EXAGERADO (simulado)" in output
+    assert "previsor TAXA-BASE (simulado" in output
+    assert "previsor CONSERVADOR (simulado)" in output
+    assert "previsor com POUCA AMOSTRA (simulado)" in output
+    assert "EXPERIMENTAL" in output
+    assert "Atualização de pesos: HOLD (12 < 30" in output
+    assert "previsor COM VAZAMENTO (simulado)" in output
+    assert "BLOQUEADO antes da pontuação" in output
+    assert "CENÁRIOS SIMULADOS: 6" in output
+
+
 def test_interval_coverage_and_abstention():
     rng = random.Random(3)
     ps = [rng.choice([0.2, 0.4, 0.6, 0.8]) for _ in range(2000)]
@@ -95,6 +111,11 @@ def test_registry_accepts_valid_and_rejects_the_unpublishable():
                     ({"probability": 1.2, "interval_high": 1.3}, "fora"), ({"status": "x"}, "estado"), ({"question": ""}, "obrigatórios")):
         with pytest.raises(RegistryError, match=why):
             validate_record(rec(**kw))
+
+
+def test_registry_accepts_probability_at_closed_interval_boundaries():
+    assert validate_record(rec(probability=0.0, interval_low=0.0, interval_high=0.0)).probability == 0.0
+    assert validate_record(rec(probability=1.0, interval_low=1.0, interval_high=1.0)).probability == 1.0
 
 
 def test_forecast_status_ladder():
@@ -124,6 +145,12 @@ def test_drop_stores_nothing_and_approved_keeps_only_allowed_fields():
     assert set(out) <= ALLOWED_NEWS_FIELDS and "text" not in out and "author" not in out
     with pytest.raises(ValueError):
         storable_payload("maybe", {})
+
+
+def test_buffer_storage_keeps_only_allowed_news_metadata():
+    out = storable_payload("buffer", {"title": "x", "url": "https://a.com", "summary": "short", "text": "body", "author": "person"})
+    assert out["title"] == "x" and out["url"] == "https://a.com"
+    assert set(out) <= ALLOWED_NEWS_FIELDS and "text" not in out and "author" not in out
 
 
 def test_publisher_payload_never_contains_dropped_items_or_body_text():
