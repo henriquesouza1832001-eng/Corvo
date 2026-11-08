@@ -75,5 +75,5 @@ Termine com o relatório (RELATORIO_NOITE_MODELO.md) e as perguntas ao dono em u
 
 ## 6. Antes de soltar o Codex (o dono)
 1. Reativar o laço de coleta do corpus por 3 horas (`scripts/corvo_corpus_loop.ps1 -Hours 3`).
-2. **Arquivo de preços real (opcional, mas é o que faz a resolução ser de verdade):** `engine/data/corvo_corpus/precos.csv`. Se não houver, o Codex entrega a cadeia e as previsões ficam abertas. A fonte tem de ser registrada em `docs/sources/SOURCES.md` antes de entrar no produto.
+2. **Preços: já existe a coleta.** `py -m corvo_engine.collect.prices` (e o laço do corpus a chama a cada ciclo) grava `engine/data/corvo_corpus/precos.csv` com BTC, ETH, SOL, BNB, XRP (velas de 1 h, cerca de 41 dias) e USD contra EUR, BRL, JPY, GBP, CNY (diário). **Sem ações, índices, petróleo e ouro** (sem fonte pública permitida ainda): previsões desses ativos ficam "aguardando fonte de preço". Ficha em `docs/sources/SOURCES.md`.
 3. Garantir que a `main` está sincronizada (`bash scripts/ship.sh`).
