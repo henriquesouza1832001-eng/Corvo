@@ -28,8 +28,11 @@ app.use(
 
 // Troca o banco por requisição: com DB_BACKEND="turso" as rotas continuam usando `c.env.DB`, agora sobre o Turso.
 app.use("*", async (c, next) => {
-	if (c.env.DB_BACKEND === "turso" && c.env.TURSO_URL && c.env.TURSO_TOKEN) {
-		c.env = { ...c.env, DB: new TursoDatabase({ url: c.env.TURSO_URL, token: c.env.TURSO_TOKEN }) as unknown as D1Database };
+	// trim: segredo colado com quebra de linha ou espaço no fim não pode derrubar a API
+	const tursoUrl = c.env.TURSO_URL?.trim();
+	const tursoToken = c.env.TURSO_TOKEN?.trim().replace(/^["']|["']$/g, "");
+	if (c.env.DB_BACKEND === "turso" && tursoUrl && tursoToken) {
+		c.env = { ...c.env, DB: new TursoDatabase({ url: tursoUrl, token: tursoToken }) as unknown as D1Database };
 	}
 	await next();
 });
