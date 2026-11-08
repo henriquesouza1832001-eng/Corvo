@@ -1,6 +1,6 @@
 # Relatório da noite — 2026-11-08
 
-**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 15:53 BRT (em andamento) · **Commit inicial:** `4df88e6` · **Último checkpoint:** 15:53 BRT
+**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 16:53 BRT (em andamento) · **Commit inicial:** `4df88e6` · **Último checkpoint:** 16:53 BRT
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permanece ativa nesta atualização.
 
@@ -10,7 +10,7 @@
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
 - Hugin permanece em H2: recall lacrado 0,800 e keep entre gravadas 0,583; o lacre tem só 15 keep e 2 HOT, então a estimativa é instável.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
-- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 31 ciclos até 15:53, com 534 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–31 (detalhes na seção 9).
+- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 37 ciclos até 16:53, com 566 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–37 (detalhes na seção 9).
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
 - O freio ficou verde antes e depois; a aceitação normal projetada permaneceu em 26 de 411 itens no corpus final.
 - Suíte Python exigida: 55 testes passaram. T2 e T3 precisam de uma nova avaliação lacrada e pares de deduplicação rotulados.
@@ -22,8 +22,8 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53: 31 ciclos e 534 novos; 24 feeds consultados |
-| Corpus da retomada / feeds | 1.439 itens únicos temporários / 24 feeds; freio verde |
+| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53: 37 ciclos e 566 novos; 24 feeds consultados |
+| Corpus da retomada / feeds | 1.471 itens únicos temporários / 24 feeds; freio verde |
 | Destino da coleta contínua | `%TEMP%\corvo-codex-noite\corpus.jsonl`, `ciclos.log` e `ciclos_continuos.log`; área separada porque `engine/data/` está reservada por `claude-hen` |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
 | Semente da amostra | 20261108; divisão estável por URL |
@@ -285,7 +285,15 @@ Após o checkpoint de 14:53, os ciclos 26–31 concluíram às 15:03, 15:13, 15:
 
 Freio às 15:53: corpus temporário com volume 24 h 824, aceitos 19, HOT entre aceitos 0,053; normal/economia 470 linhas/dia e 622 a 5×; crítico 432/432. Corpus oficial local: volume 24 h 465, aceitos 27, HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos dentro dos limites seguros. Sem alteração de regra de Hugin nem avaliação de novos títulos lacrados; Hugin segue H2 e Munin M3, sem previsões reais.
 
-O coletor permanece em execução, com intervalo de dez minutos. A próxima verificação está prevista para 16:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
+O coletor permanece em execução, com intervalo de dez minutos. Naquele checkpoint, a próxima verificação estava prevista para 16:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
+
+### 9.9 Continuidade da coleta até 16:53 BRT
+
+Após o checkpoint de 15:53, os ciclos 32–37 concluíram às 16:03, 16:13, 16:23, 16:33, 16:43 e 16:53, com 4, 3, 6, 5, 7 e 7 itens novos, respectivamente (32 no trecho). Todos usaram `--dry-run`; os 24 feeds responderam sem falhas e cada ciclo retornou `collect_exit=0` e `budget_exit=0`. O acumulado da retomada passou de 534 para 566 itens novos e o corpus temporário chegou a 1.471 únicos. No ciclo 34, `sent_news=1` foi somente contador de simulação; a API permaneceu `dry_run=true`.
+
+Freio às 16:53: corpus temporário com volume 24 h 838, aceitos 18, HOT entre aceitos 0,056; normal/economia 468 linhas/dia e 612 a 5×; crítico 432/432. Corpus oficial local: volume 24 h 465, aceitos 27, HOT entre aceitos 0,074; normal 486/702, economia 482/682 e crítico 432/432. Ambos dentro dos limites seguros. Sem alteração de regra de Hugin nem avaliação de novos títulos lacrados; Hugin segue H2 e Munin M3, sem previsões reais.
+
+O coletor permanece em execução, com intervalo de dez minutos. A próxima verificação está prevista para 17:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
 
 ## 10. Conferência final (estado da primeira sessão; revisar antes de encerrar a retomada)
 

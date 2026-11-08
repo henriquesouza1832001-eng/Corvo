@@ -48,6 +48,7 @@
 | 2026-11-08 13:53 | collection cycle 19 + T3 pair-availability audit | 1,336 unique items (scratch corpus) | green: normal/economy 476/day; 652 at 5x; critical 432/432 |
 | 2026-11-08 14:53 | continuous collection, cycle 25; all 24 feeds healthy | 1,387 unique items (scratch corpus) | green: normal/economy 474/day; 642 at 5x; critical 432/432 |
 | 2026-11-08 15:53 | continuous collection, cycle 31; all 24 feeds healthy | 1,439 unique items (scratch corpus) | green: normal/economy 470/day; 622 at 5x; critical 432/432 |
+| 2026-11-08 16:53 | continuous collection, cycle 37; all 24 feeds healthy | 1,471 unique items (scratch corpus) | green: normal/economy 468/day; 612 at 5x; critical 432/432 |
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
