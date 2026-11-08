@@ -51,7 +51,7 @@ def test_source_quota_does_not_burn_on_junk():
 
 
 def test_pressure_tightens_gate():
-    t = "Congress debates election bill"  # política, relevância média (~0,67)
+    t = "Prime minister resigns as government collapses"  # crise política: relevância média (~0,63)
     assert gate().admit(item(t)).decision is Decision.BUFFER
     assert gate().admit(item(t), Pressure.ECONOMY).decision is Decision.BUFFER
     assert gate().admit(item(t), Pressure.CRITICAL).decision is Decision.DROP
@@ -59,6 +59,21 @@ def test_pressure_tightens_gate():
     assert gate().admit(item(t2), Pressure.ECONOMY).decision is Decision.HOT
 
 
+def test_only_market_moving_news_is_kept():
+    g = gate()
+    for title in ("Election campaign enters final week", "Local fire destroys 50 cars in parking lot", "Football star signs new deal",
+                  "Bitcoin price prediction: will it hit 200k?", "Minister visits school in capital"):
+        assert g.admit(item(title, f"https://x.com/{abs(hash(title))}")).decision is Decision.DROP, title
+    for title in ("OPEC agrees surprise oil output cut", "US imposes new tariffs on Chinese chips", "Fire shuts down major refinery",
+                  "Exchange hack drains 200 million from hot wallet"):
+        assert g.admit(item(title, f"https://x.com/{abs(hash(title))}")).decision is not Decision.DROP, title
+
+
+def test_topic_in_summary_alone_never_reaches_hot():
+    v = gate().admit(item("City council approves budget", "https://x.com/s1", text="The war in the region and new tariffs were mentioned."))
+    assert v.decision is not Decision.HOT
+
+
 def test_critical_still_passes_top_news():
-    v = gate().admit(item("Earthquake and tsunami hit coast, blackout reported", rel=1.0), Pressure.CRITICAL)
+    v = gate().admit(item("Earthquake and tsunami hit coast, blackout reported at nationwide grid", rel=1.0), Pressure.CRITICAL)
     assert v.decision is Decision.HOT

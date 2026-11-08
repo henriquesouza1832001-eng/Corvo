@@ -43,16 +43,17 @@ def test_unreadable_pressure_falls_back_to_economy():
     p = pub(f)
     assert p.pressure().value == "economy"
     # relevância média (política) cai no buffer, nunca em HOT, sob economia
-    p.run([mk("Congress debates election bill", "https://x.com/9")])
+    p.run([mk("Prime minister resigns as government collapses", "https://x.com/9")])
     assert f.sent[0]["news"][0]["verdict"] == "buffer"
 
 
-def test_stats_accumulate_across_runs_in_the_same_hour():
+def test_each_run_sends_only_its_own_delta_for_the_hour():
+    # o Worker soma os deltas; assim execuções sem memória (GitHub Actions) não se sobrescrevem
     f = Fake()
     p = pub(f)
     p.run([mk("Earthquake hits Tokyo", "https://x.com/q1")])
     p.run([mk("Tsunami warning after quake", "https://x.com/q2")])
-    assert f.sent[1]["stats"][0]["received"] == 2
+    assert f.sent[0]["stats"][0]["received"] == 1 and f.sent[1]["stats"][0]["received"] == 1
 
 
 def test_classify_kind_defaults_to_report_and_official_is_fact():

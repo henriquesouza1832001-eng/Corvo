@@ -5,10 +5,10 @@
 export type Pressure = "normal" | "economy" | "critical";
 export type Verdict = "hot" | "buffer" | "drop";
 export type Kind = "fato" | "reportagem" | "rumor" | "opiniao" | "previsao";
-export type Topic = "catastrofe" | "geopolitica" | "politica" | "banco_central" | "cripto" | "mercado";
+export type Topic = "banco_central" | "dados_macro" | "comercio" | "energia" | "geopolitica" | "catastrofe" | "infraestrutura" | "cripto" | "empresas" | "politica" | "mercado";
 
 export const HOT_MIN: Record<Pressure, number> = { normal: 0.75, economy: 0.85, critical: 0.95 };
-export const BUFFER_MIN: Record<Pressure, number> = { normal: 0.3, economy: 0.5, critical: 0.95 };
+export const BUFFER_MIN: Record<Pressure, number> = { normal: 0.5, economy: 0.6, critical: 0.95 };
 
 export type DropReason = "duplicate_url" | "near_duplicate" | "stale" | "irrelevant" | "source_quota" | "malformed";
 
@@ -68,11 +68,16 @@ export const REASON_LABEL: Record<string, string> = {
 };
 
 export const TOPIC_LABEL: Record<Topic, string> = {
-	catastrofe: "catástrofe",
-	geopolitica: "geopolítica",
-	politica: "política",
 	banco_central: "banco central",
+	dados_macro: "dados macro",
+	comercio: "comércio e sanções",
+	energia: "energia e commodities",
+	geopolitica: "conflito",
+	catastrofe: "catástrofe",
+	infraestrutura: "infraestrutura crítica",
 	cripto: "cripto",
+	empresas: "empresas e crédito",
+	politica: "crise política",
 	mercado: "mercado",
 };
 
@@ -96,10 +101,15 @@ export const ANCHORS = [
 ] as const;
 
 export const TOPIC_COLOR: Record<Topic, string> = {
-	catastrofe: "#ff4d5e",
-	geopolitica: "#ff8a3d",
-	politica: "#b58cff",
 	banco_central: "#29d8ff",
+	dados_macro: "#5aa9ff",
+	comercio: "#ff8a3d",
+	energia: "#e0c341",
+	geopolitica: "#ff6a3d",
+	catastrofe: "#ff4d5e",
+	infraestrutura: "#ff7a90",
 	cripto: "#ffb000",
+	empresas: "#c0a0ff",
+	politica: "#b58cff",
 	mercado: "#39ff88",
 };

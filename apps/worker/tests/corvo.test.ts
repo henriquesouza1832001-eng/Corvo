@@ -56,6 +56,20 @@ describe("API do CORVO", () => {
 	});
 });
 
+describe("estatísticas por hora", () => {
+	it("soma os deltas de execuções diferentes no mesmo balde", async () => {
+		const t = setup();
+		const post = (s: unknown) => t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify({ stats: [s] }) });
+		await post({ ...stats, received: 10, hot: 1, buffer: 2, dropped: 7, reasons: { stale: 5, irrelevant: 2 }, sources: { bbc: 6, g1: 4 } });
+		await post({ ...stats, received: 5, hot: 0, buffer: 1, dropped: 4, reasons: { stale: 1, near_duplicate: 3 }, sources: { bbc: 2, dw: 3 } });
+		const feed = (await (await t.get("/api/corvo/feed")).json()) as any;
+		expect(feed.stats).toHaveLength(1);
+		expect(feed.stats[0]).toMatchObject({ received: 15, hot: 1, buffer: 3, dropped: 11 });
+		expect(feed.stats[0].reasons).toEqual({ stale: 6, irrelevant: 2, near_duplicate: 3 });
+		expect(feed.stats[0].sources).toEqual({ bbc: 8, g1: 4, dw: 3 });
+	});
+});
+
 describe("teto de escrita do CORVO", () => {
 	const post = (t: ReturnType<typeof setup>, body: unknown, extra: Record<string, string> = {}) =>
 		t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify(body) }, extra);

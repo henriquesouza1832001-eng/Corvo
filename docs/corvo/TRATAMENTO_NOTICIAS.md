@@ -2,10 +2,13 @@
 
 Regra central: **o robô avalia antes de gravar qualquer coisa.** Nada vai ao banco sem passar pelo portão, e o que é descartado não deixa texto em lugar nenhum.
 
+## O que o CORVO considera "relevante"
+Só entra o que **pode mexer em mercado** (cripto, ações, câmbio, juros, commodities) ou em risco que chega a eles: decisões e dados de banco central e macro, tarifas e sanções, energia e commodities, conflito armado, catástrofe de escala, ataque ou pane em infraestrutura crítica, hack ou ruína em cripto, falência ou calote, crise política que derruba governo, queda abrupta de bolsa. **Não entra:** política geral, esporte, celebridade, opinião, crime e incêndio locais, previsão de preço de blogueiro. O título decide; um tema que só aparece no resumo vale 60%.
+
 ## Etapas (engine/corvo_engine)
 1. **Coleta** (`collect/`): lê os feeds do catálogo (`collect/catalog.json`), no máximo uma vez a cada 5 min por fonte e 2 conexões por servidor. Só título, link e resumo curto.
 2. **Já visto** (`intake/store.py`): se a URL já foi tratada nas últimas 48 h, sai sem nem contar como "recebida". Evita reprocessar e reenviar o mesmo item a cada ciclo.
-3. **Portão** (`intake/gate.py`): frescor (6 h), URL repetida, quase-duplicata (mesmo fato em outra fonte), relevância por tema, cota por fonte e pressão do orçamento.
+3. **Portão** (`intake/gate.py`): frescor (6 h), URL repetida, quase-duplicata (mesmo fato em outra fonte), **relevância para mercado**, cota por fonte e pressão do orçamento.
 4. **Classificação** (`oracle/publisher.py`): fato (só fonte oficial), reportagem (padrão), rumor, opinião ou previsão de terceiros.
 5. **Localização** (`intake/geo.py`): país ou hub citado no título; sem correspondência, não aparece no mapa.
 6. **Publicação**: só HOT e BUFFER sobem ao painel; o lote leva também as estatísticas da hora.
@@ -25,7 +28,7 @@ Regra central: **o robô avalia antes de gravar qualquer coisa.** Nada vai ao ba
 4. Retenção diária: apaga notícias com mais de 30 dias e estatísticas com mais de 14 dias.
 
 ## Medição (primeiro ciclo real, 24 feeds)
-818 itens lidos, 0 fontes com falha, **34 aprovados (4%)**. Os pesos de relevância são hipóteses e precisam ser medidos com o tempo (quais temas geram previsão que acerta).
+818 itens lidos, 0 fontes com falha. Com o filtro "só mercado": **9 aprovados (1,1%)**, todos plausíveis para mercado (antes do filtro: 34, com política geral, incêndio local e esporte). Os pesos de relevância são hipóteses e precisam ser medidos com o tempo (quais temas geram previsão que acerta).
 
 ## Limites conhecidos
 - Relevância por palavras-chave em inglês e português; outros idiomas passam menos.

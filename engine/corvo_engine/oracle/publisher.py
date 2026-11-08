@@ -67,7 +67,6 @@ class OraclePublisher:
         self.transport = transport
         self.gate = gate or IntakeGate(clock=clock)
         self._clock = clock
-        self._buckets: dict[str, Counter[str]] = {}
         self.last_decisions: list[dict] = []  # decisão de CADA item do último ciclo (inclusive descartes), para auditoria e ajuste
 
     def pressure(self) -> Pressure:
@@ -80,7 +79,7 @@ class OraclePublisher:
         pressure = self.pressure()
         now = self._clock()
         bucket = _iso(now - now % 3600)
-        c = self._buckets.setdefault(bucket, Counter())
+        c: Counter[str] = Counter()  # só o que ESTA execução viu; o Worker soma ao balde da hora
         news = []
         self.last_decisions = []
         for item in items:
@@ -116,9 +115,6 @@ class OraclePublisher:
                 "region": place[0] if place else None,
                 "assets": [],  # impacto por ativo vem do motor de previsão (MNEME/CORVO), ainda não ligado
             })
-        # Só o balde da hora atual: reenviar horas antigas custaria linhas do D1 a cada ciclo sem mudar nada.
-        for old in [k for k in self._buckets if k != bucket]:
-            del self._buckets[old]
         if not items:
             return {"pressure": pressure.value, "sent_news": 0, "received": 0, "api": None}
         stats = [{

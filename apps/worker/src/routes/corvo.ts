@@ -84,6 +84,30 @@ corvo.post("/ingest", async (c) => {
 	const mode = modeFor(used, limit);
 	const admitted = used >= limit ? [] : mode === "normal" ? news : mode === "economy" ? news.filter((n) => n.verdict === "hot") : news.filter((n) => n.verdict === "hot" && n.relevance >= 0.95);
 	const shed = news.length - admitted.length;
+	// As estatísticas chegam como DELTA da execução; soma ao balde da hora que já existe (execuções independentes não se sobrescrevem).
+	const addMaps = (a: Record<string, number>, b: Record<string, number>) => {
+		const out = { ...a };
+		for (const [k, v] of Object.entries(b)) out[k] = (out[k] ?? 0) + v;
+		return out;
+	};
+	const prev = await Promise.all(
+		stats.map((s) =>
+			db.prepare("SELECT received,hot,buffer,dropped,reasons,sources FROM corvo_gate_stats WHERE bucket = ?1").bind(s.bucket).first<Record<string, unknown>>(),
+		),
+	);
+	const mergedStats = stats.map((s, i) => {
+		const p = prev[i];
+		if (!p) return s;
+		return {
+			...s,
+			received: Number(p.received) + s.received,
+			hot: Number(p.hot) + s.hot,
+			buffer: Number(p.buffer) + s.buffer,
+			dropped: Number(p.dropped) + s.dropped,
+			reasons: addMaps(parseJson<Record<string, number>>(String(p.reasons), {}), s.reasons),
+			sources: addMaps(parseJson<Record<string, number>>(String(p.sources), {}), s.sources),
+		};
+	});
 	const stmts = [
 		...admitted.map((n) =>
 			db
@@ -94,7 +118,7 @@ corvo.post("/ingest", async (c) => {
 				)
 				.bind(n.item_id, n.source_id, n.source_reliability, n.title, n.url, n.published_at, now, n.verdict, n.reason, n.relevance, n.kind, JSON.stringify(n.topics), JSON.stringify(n.assets), n.lat, n.lon, n.region),
 		),
-		...stats.map((s) =>
+		...mergedStats.map((s) =>
 			db
 				.prepare(
 					`INSERT INTO corvo_gate_stats (bucket,pressure,received,hot,buffer,dropped,reasons,updated_at,sources) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)

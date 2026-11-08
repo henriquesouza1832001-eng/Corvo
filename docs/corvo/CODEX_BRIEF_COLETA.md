@@ -14,7 +14,9 @@ Comece pela Fase 0 e registre-se no quadro: py scripts/agentbus.py register code
 ```
 
 ## 1. Missão em uma frase
-Fazer o robô **decidir bem, antes de salvar qualquer coisa, se cada notícia do mundo vai ou não para o banco**, e provar com números que ele decide melhor de manhã do que à noite.
+Fazer o robô **gravar só o que pode mexer em mercado** (cripto, ações, câmbio, juros, commodities, e o risco geopolítico ou físico que chega a eles), decidindo **antes de salvar qualquer coisa** se cada notícia do mundo vai ou não para o banco, e provar com números que ele decide melhor de manhã do que à noite.
+
+> **Diretriz do dono:** "buscar coisas que mudam o mercado, não algo que não influencie, para não popular tanto o banco". Na dúvida entre gravar e descartar uma notícia que **não tem efeito plausível em preço**, **descarte**. O banco deve conter pouca coisa e toda ela relevante.
 
 ### O que "treinar" significa aqui
 **Não é treinar rede neural.** O portão é determinístico (regras, listas de palavras, limiares). Treinar = coletar um corpus real, rotular uma amostra, **medir** erros (o que entrou e não devia, o que ficou de fora e devia entrar) e **ajustar regras e limiares** até as métricas melhorarem em dados que o ajuste nunca viu. Sem LLM tomando a decisão em produção, sem probabilidade inventada.
@@ -44,6 +46,9 @@ Leituras importantes dessa medição (confirme ou refute com mais dados):
 2. Muito item de política geral cai em BUFFER com relevância ~0,63. É esperado; a pergunta é se o corte HOT (0,75) está bom.
 3. A relevância é por palavras-chave em inglês e português. Perde notícias em outros idiomas e pode deixar passar lixo com palavra "boa" (ex.: "Fed" em contexto esportivo).
 4. A geolocalização só reconhece países e hubs de uma tabela fixa; vários itens relevantes ficam sem ponto no mapa.
+
+### Filtro "só mercado" (já aplicado em 2026-11-07, antes da sua noite)
+O primeiro filtro (30 aprovados de 818) deixava passar política geral, incêndio local e esporte. Foi apertado: temas específicos de mercado em `TOPICS` (banco central, dados macro, comércio e sanções, energia e commodities, conflito, catástrofe de escala, infraestrutura crítica, cripto, empresas e crédito, crise política, mercado), lista de ruído (esporte, celebridade, opinião, "price prediction", "como fazer") e **o título decide** (tema achado só no resumo vale 60%). Resultado no mesmo conjunto: **9 aprovados de 818 (1,1%)**, todos plausíveis para mercado (guerra no Golfo, tarifas, hack de exchange). **Risco inverso agora: ficou rígido demais?** Confira se notícias importantes estão sendo perdidas (ex.: comunicados oficiais, decisões de juros em outros idiomas, dados macro), e reporte. O corte BUFFER normal subiu de 0,30 para 0,50 e o HOT segue 0,75.
 
 ## 3.1 O que isso significa para o seu trabalho
 O gargalo **não é o limite do banco** (62 de 300 mil linhas). O objetivo da noite é **qualidade da decisão**: não perder o que importa (keep descartado) e não encher o painel de lixo (drop gravado). Quando a coleta rodar o dia inteiro, o volume real de linhas ainda é pequeno; por isso o custo de um erro de relevância é de **qualidade do painel e das previsões futuras**, mais do que de quota. Mantenha mesmo assim a disciplina de custo: a quota vale quando as previsões e o histórico crescerem.
@@ -105,9 +110,9 @@ Cada linha do `corpus.jsonl`: `cycle_at, source_id, url, title, published_at, ve
 **Fase 1 (a noite toda, em segundo plano), coletar o corpus.** Inicie o laço da seção 6 em uma janela separada e **deixe rodando durante as outras fases**. Meta: pelo menos 30 ciclos e 3.000 itens únicos, de preferência cobrindo horários de Ásia, Europa e Américas. Registre por ciclo: feeds com falha, tempo, itens novos.
 
 **Fase 2 (≈1 h), rotular.** Com o corpus parcial (≥ 1.500 itens), sorteie uma amostra **estratificada por fonte e por decisão atual** de 400 itens (mínimo 300) e rotule cada um em `engine/data/corvo_corpus/labels.jsonl` (`{"url": "...", "label": "keep|marginal|drop", "topic": "...", "kind": "fato|reportagem|rumor|opiniao|previsao", "region": "..."}`).
-- **keep**: pode mexer em preço de ativo, câmbio, juros, política de países relevantes, conflito, desastre, regulação, hack ou ruptura de infraestrutura. Exemplos: decisão de juros; ataque a um oleoduto; terremoto M6+ em região industrial; exploit em protocolo grande de cripto; sanção a país exportador de energia.
-- **marginal**: contexto político ou econômico com efeito indireto ou lento. Exemplos: pesquisa eleitoral; discurso de ministro sem medida concreta; balanço de empresa média.
-- **drop**: sem efeito previsível em mercado, política ou segurança. Exemplos: celebridade, esporte, receita, horóscopo, publieditorial, clima ordinário, "como fazer".
+- **keep**: tem **efeito plausível em preço de ativo** (cripto, ações, câmbio, juros, commodities) ou em risco que chega a eles. Exemplos: decisão de juros ou comunicado de banco central; dado de inflação ou emprego; tarifa, sanção, embargo; corte de produção de petróleo; ataque ou escalada militar em região de energia ou rota de navio; terremoto ou furacão em polo industrial; exploit ou ruína de exchange e protocolo grande de cripto; falência, calote ou rebaixamento de empresa ou banco relevante; queda abrupta de bolsa.
+- **marginal**: contexto com efeito indireto, lento ou incerto. Exemplos: crise política que pode virar mudança de governo; pesquisa eleitoral em grande economia; balanço de empresa média. **Marginal conta como "não gravar" na meta de precisão do HOT**, mas registre-o: ele mostra onde o corte deve ficar.
+- **drop**: **sem efeito previsível em preço**. Exemplos: celebridade, esporte, receita, horóscopo, publieditorial, opinião de colunista, incêndio ou obra local, crime comum, clima ordinário, "como fazer", previsão de preço de blogueiro.
 - Rotule o item **pelo conteúdo**, nunca pela decisão que o portão tomou. Reserve **30% dos rótulos** (sorteados com semente fixa e registrada) como conjunto de avaliação lacrado.
 - Registre as regras de rotulagem que usou e os casos ambíguos no relatório.
 
@@ -128,7 +133,7 @@ Salve o resultado base em `docs/corvo/RELATORIO_NOITE_<data>.md` antes de mudar 
 | # | Tarefa | Aceite |
 |---|---|---|
 | T1 | **Janela de frescor por fonte.** Medir idade típica dos itens por feed (mediana, p90). Propor `max_age_s` por classe (oficial, agência, mercado, cripto), configurável no catálogo. | Menos keeps oficiais perdidos por `stale`; nenhuma explosão de linhas; teste novo cobrindo cada classe. |
-| T2 | **Relevância.** Ampliar o léxico (inglês, português, espanhol) e criar **padrões negativos** (esporte, celebridade, estilo de vida, "opinião" de colunista, resultado de loteria). Manter determinístico. Reavaliar os pesos de `TOPICS` e o corte HOT. | Precisão do HOT ≥ 0,85 e recall do keep ≥ 0,90 **no conjunto lacrado**; taxa de drop gravado cai sem aumentar keep descartado. |
+| T2 | **Relevância "só mercado".** O filtro atual é rígido (1,1% aprovados): meça **o que ele perde** (keep descartado) e **o que ainda deixa passar** (drop gravado). Ampliar o léxico (inglês, português, espanhol; nomes de bancos centrais, índices, commodities, moedas), refinar `TOPICS` e `_NOISE`, reavaliar pesos e cortes. Manter determinístico. | Precisão do HOT ≥ 0,85 e recall do keep ≥ 0,90 **no conjunto lacrado**; taxa de drop gravado cai sem aumentar keep descartado. |
 | T3 | **Quase-duplicata.** Normalizar títulos (acento, caixa, stopwords, aspas), testar limiares de Jaccard e comparação também com o resumo. Medir **fusões erradas** (dois fatos diferentes tratados como um): é pior que deixar passar uma cópia. | Fusões erradas ≤ 2% das comparações revisadas; cópias entre fontes reduzidas; testes com pares positivos e negativos. |
 | T4 | **Cobertura do geocodificador.** Adicionar países, capitais e hubs financeiros que apareçam no corpus sem local, **evitando falso positivo** (ex.: "Georgia" estado x país, "Jordan" pessoa x país, "Turkey" ave, nomes de empresas). | Cobertura dos aprovados ≥ 85% e acerto na amostra ≥ 95%; testes de falso positivo. |
 | T5 | **Classificação `kind`** (fato, reportagem, rumor, opinião, previsão). Medir contra seus rótulos e melhorar as regras. Regra de ouro: na dúvida, **reportagem**; só fonte oficial vira **fato**. | Acerto geral ≥ 0,80 e **nenhum rumor ou opinião classificado como fato**. |
@@ -153,9 +158,9 @@ chegou um item
   └─ senão                                      → BUFFER (grava, entra em lote)
 descarte = só contador por motivo + hash da URL (48 h). Nunca o texto.
 ```
-Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a 85%), **crítico** (>85%). Cortes padrão em `GateConfig`: HOT 0,75 / 0,85 / 0,95; BUFFER 0,30 / 0,50 / 0,95. Esses números são palpites a medir, não verdades.
+Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a 85%), **crítico** (>85%). Cortes padrão em `GateConfig`: HOT 0,75 / 0,85 / 0,95; BUFFER 0,50 / 0,60 / 0,95. Esses números são palpites a medir, não verdades.
 
-**Princípio de custo dos erros:** deixar passar uma notícia importante (keep descartado) é **pior** que gravar uma irrelevante (drop gravado), mas cada linha custa quota. Calibre para que o primeiro seja raro e o segundo, pequeno, e mostre a troca nos números.
+**Princípio de custo dos erros:** deixar passar uma notícia que mexe em mercado (keep descartado) é **pior** que gravar uma irrelevante (drop gravado). Mas o dono pediu um banco enxuto: o drop gravado também é erro, e o que mais polui o painel. Calibre para que o primeiro seja raro e o segundo, pequeno, e mostre a troca nos números.
 
 ## 10. O que entregar de manhã
 1. **`docs/corvo/RELATORIO_NOITE_<data>.md`** com: (a) resumo de 10 linhas para o dono; (b) tabela antes e depois das métricas, nos dois conjuntos; (c) mudanças feitas, uma por linha, com o commit; (d) fichas das fontes (T6); (e) o que **piorou** ou foi revertido; (f) casos que o portão ainda erra (10 exemplos reais com título e motivo); (g) fontes sugeridas, ligadas ou não; (h) perguntas para o dono; (i) próximos passos.
