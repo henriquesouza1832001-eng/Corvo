@@ -1,6 +1,6 @@
 # Relatório da noite — 2026-11-08
 
-**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 12:53 BRT (em andamento) · **Commit inicial:** `4df88e6` · **Commit de código/documentação:** `a351101`
+**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 13:53 BRT (em andamento) · **Commit inicial:** `4df88e6` · **Último commit:** `365c2c2`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permanece ativa nesta atualização.
 
@@ -10,7 +10,7 @@
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
 - Hugin permanece em H2: recall lacrado 0,800 e keep entre gravadas 0,583; o lacre tem só 15 keep e 2 HOT, então a estimativa é instável.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
-- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 13 ciclos até 12:53, com 384 itens novos e sem falhas de feed (detalhes na seção 9).
+- Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 19 ciclos até 13:53, com 431 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos seguintes (detalhes na seção 9).
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
 - O freio ficou verde antes e depois; a aceitação normal projetada permaneceu em 26 de 411 itens no corpus final.
 - Suíte Python exigida: 55 testes passaram. T2 e T3 precisam de uma nova avaliação lacrada e pares de deduplicação rotulados.
@@ -22,8 +22,8 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53: 13 ciclos e 384 novos; 24 feeds sem falhas |
-| Corpus da retomada / feeds | 1.289 itens únicos temporários / 24 feeds consultados; freio verde |
+| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53: 19 ciclos e 431 novos; 24 feeds consultados |
+| Corpus da retomada / feeds | 1.336 itens únicos temporários / 24 feeds; freio verde |
 | Destino da coleta contínua | `%TEMP%\corvo-codex-noite\corpus.jsonl`, `ciclos.log` e `ciclos_continuos.log`; área separada porque `engine/data/` está reservada por `claude-hen` |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
 | Semente da amostra | 20261108; divisão estável por URL |
@@ -221,9 +221,15 @@ O coletor local consultou os mesmos 24 feeds em oito ciclos de dez minutos, semp
 | 11 | 12:33 | 7 |
 | 12 | 12:43 | 5 |
 | 13 | 12:53 | 11 |
-| **Total** | | **384** |
+| 14 | 13:03 | 5 |
+| 15 | 13:13 | 4 (23 feeds; `fed-press` HTTP 404) |
+| 16 | 13:23 | 8 (24 feeds; sem falhas) |
+| 17 | 13:33 | 11 |
+| 18 | 13:43 | 8 |
+| 19 | 13:53 | 11 |
+| **Total** | | **431** |
 
-O scratch começou esta retomada em **905 itens únicos**. Antes da retomada, o freio estava verde: volume 24 h 462, 25 aceitos, normal 482 linhas/dia e 682 a 5×; economia 478/662; crítico 432/432. Após o ciclo 13: **1.289 itens únicos**, volume 24 h 719, 24 aceitos e HOT share 0,042; normal **480/672**, economia **480/672**, crítico **432/432**. Todas as pressões seguem abaixo dos limites.
+O scratch começou esta retomada em **905 itens únicos**. Antes da retomada, o freio estava verde: volume 24 h 462, 25 aceitos, normal 482 linhas/dia e 682 a 5×; economia 478/662; crítico 432/432. Após o ciclo 19: **1.336 itens únicos**, volume 24 h 750, 22 aceitos e HOT share 0,045; normal **476/652**, economia **476/652**, crítico **432/432**. Todas as pressões seguem abaixo dos limites.
 
 O corpus oficial local não foi alterado. A checagem de referência e a checagem após a auditoria T0 deram o mesmo resultado: 904 URLs únicas, volume 24 h 465, 27 aceitos, normal 486/702, economia 482/682 e crítico 432/432; freio verde.
 
@@ -251,15 +257,21 @@ O lacrado tem 63 itens e só 7 `keep`; o avaliador alerta que a métrica é inst
 - A regra M6 operacional foi registrada em `HUGIN_MUNIN_TREINO.md`: eventos independentes, mínimo 30 por chave/fonte, walk-forward temporal, Benjamini–Hochberg `q=0.05`, ganho sobre taxa-base e dois períodos futuros consecutivos. É uma proposta, ainda sem validação com resultados reais.
 - O intervalo do baseline usa aproximação normal da posterior Beta; a documentação agora diz que não são quantis exatos e que a cobertura ainda precisa de validação. Sem mudança nas probabilidades; 30 testes de Munin passaram.
 - Munin permanece **M3**; não há resultado real ou nível M4 alegado.
-- Commits locais desta retomada: `8fc9156`, `0174825`, `9ef3694`, `66fd55a`, `a351101`. Nenhum push: não foi verificado CI verde.
+- Commits locais desta retomada: `8fc9156`, `0174825`, `9ef3694`, `66fd55a`, `a351101`, `365c2c2`. Nenhum push: não foi verificado CI verde.
 
-### 9.5 Perguntas atualizadas para o dono
+### 9.5 T3 — disponibilidade de pares de deduplicação
+
+Nos 173 itens coletados depois da amostra usada para T2, um censo agregado encontrou 2 pares entre fontes com Jaccard ≥ 0,40, 1 com Jaccard ≥ 0,50/0,60 e nenhum no corte atual de 0,70. Não rotulei nem abri títulos lacrados. É insuficiente para estimar fusões erradas; o corte de deduplicação foi mantido.
+
+O único erro de feed desta retomada foi o HTTP 404 do `fed-press` no ciclo 15; o ciclo 16 voltou sem falhas.
+
+### 9.6 Perguntas atualizadas para o dono
 
 1. Confirma manter o corte BUFFER em 0,50 até haver um lacrado novo com pelo menos 30 casos `keep`?
 2. Confirma os rótulos marginais do snapshot T0 listados na seção 3.5?
 3. Há objeção ao protocolo M6 temporal + Benjamini–Hochberg `q=0.05`, mantido em HOLD até cumprir os critérios?
 
-O coletor permanece em execução, com intervalo de dez minutos. A próxima verificação está prevista para 13:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
+O coletor permanece em execução, com intervalo de dez minutos. A próxima verificação está prevista para 14:03 BRT. O relatório será atualizado antes do encerramento explícito do dono (`PARE`).
 
 ## 10. Conferência final (estado da primeira sessão; revisar antes de encerrar a retomada)
 
