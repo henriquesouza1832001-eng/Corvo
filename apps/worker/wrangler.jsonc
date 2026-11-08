@@ -11,21 +11,13 @@
 		"ALLOWED_ORIGINS": "http://localhost:5173,https://corvo-web.henriquesouza.workers.dev",
 		// Repositório cujo workflow "collect.yml" o Cron Trigger aciona. Não é segredo.
 		"GITHUB_REPO": "henriquesouza1832001-eng/Corvo",
-		// Banco: Turso (segredos TURSO_URL e TURSO_TOKEN). Enquanto os segredos não existirem, o Worker cai no D1/KV abaixo, que serão removidos depois.
+		// Banco: Turso (segredos TURSO_URL e TURSO_TOKEN). O KV abaixo é só cache do feed (60 s), não guarda dado de verdade.
 		"DB_BACKEND": "turso",
 		// Teto diário de linhas (Turso grátis: ~10 mi/mês). Ajuste depois de ver o consumo real.
 		"DAILY_WRITE_LIMIT": "300000"
 	},
-	// A cada 5 min a Cloudflare aciona a coleta (mais pontual que o agendador do GitHub).
+	// Sem Cron: a coleta roda no Oracle (docs/corvo/ARQUITETURA.md).
 	"triggers": { "crons": [] },
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "corvo",
-			"database_id": "8576fa1d-aee4-485d-a5a1-0064c9b0dc3f",
-			"migrations_dir": "../../database/migrations"
-		}
-	],
 	"kv_namespaces": [{ "binding": "KV", "id": "9547445c745042fca6f71aa758f4629a" }],
 	// Segredos (via `wrangler secret put`, nunca no Git): INGEST_TOKEN (o Oracle usa este para empurrar dados), ADMIN_TOKEN
 }
