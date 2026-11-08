@@ -24,7 +24,8 @@ class Event:
     event_id: str
     title: str
     topics: tuple[str, ...]
-    first_observed_at: str
+    available_at: str | None
+    observation_time_basis: str
     source_ids: tuple[str, ...]
     articles: tuple[dict, ...]
     confirmation: str
@@ -109,6 +110,7 @@ def build_events(
         seen_urls.add(url)
         row = dict(raw)
         row["_published"] = published
+        row["_cycle_at"] = _parse_time(raw.get("cycle_at"))
         prepared.append(row)
     prepared.sort(key=lambda row: (row["_published"], row["url"]))
 
@@ -138,14 +140,21 @@ def build_events(
         # change a previously emitted event identifier.
         anchor = str(first["url"]).strip().casefold()
         event_id = "evt_" + hashlib.sha256(anchor.encode("utf-8")).hexdigest()[:20]
-        clean_articles = tuple({k: v for k, v in row.items() if k != "_published"} for row in group)
+        clean_articles = tuple({k: v for k, v in row.items() if k not in {"_published", "_cycle_at"}} for row in group)
+        cycle_times = [row["_cycle_at"] for row in group]
+        # A clustered event is available only when every article contributing
+        # to its source count and topics has arrived. Publication time alone
+        # would let later-collected coverage leak into an earlier forecast.
+        available_at = max(cycle_times) if all(cycle_times) else None
         events.append(Event(
             event_id=event_id,
             title=str(first["title"]),
             topics=topics,
-            first_observed_at=first["_published"].isoformat().replace("+00:00", "Z"),
+            available_at=available_at.isoformat().replace("+00:00", "Z") if available_at else None,
+            observation_time_basis="cycle_at" if available_at else "missing_cycle_at",
             source_ids=sources,
             articles=clean_articles,
             confirmation=confirmation,
         ))
+    events.sort(key=lambda event: (event.available_at is None, event.available_at or "", event.event_id))
     return events

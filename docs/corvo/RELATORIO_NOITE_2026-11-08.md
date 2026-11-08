@@ -433,3 +433,14 @@ O freio do corpus local antes deste registro ficou verde: 1288 URLs unicas, 522 
 O processo externo nao foi reiniciado: o ciclo 6 terminou em 20:20:08, com 24 feeds sem falhas e 10 itens novos; a coleta de precos terminou em 20:20:20 sem linhas novas (5.220 no total). O freio apos o ciclo marcou 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica, dentro dos limites.
 
 Reexecutei `corvo_munin_backtest.py --dry-run` com os arquivos locais. Resultado: 55 eventos, 100 perguntas, 0 previsoes e 100 abstencoes; 18 perguntas resolvidas por precos locais sem previsoes, 2 aguardam preco futuro e 80 aguardam instrumento. Brier, Brier da taxa-base, skill e ECE seguem N/A porque nao ha previsoes resolvidas. A chave de registro foi idempotente (`run_id` existente), sem duplicar entradas. O processo de coleta segue ativo, PID 13596; nenhuma afirmacao de acerto foi feita.
+
+
+### 9.21 Correcao do relogio temporal Munin (20:29 BRT)
+
+A revisao do fluxo encontrou uma fonte de vazamento: o backtest usava `published_at` como hora da pergunta, embora as linhas locais tenham `cycle_at`, a hora em que o coletor conheceu a noticia. Alem disso, o agrupamento contava fontes que podiam ter chegado depois da primeira publicacao. As 1.290 linhas brutas atuais possuem `cycle_at`; nao usei exemplos do lacre Hugin.
+
+Corrigi a disponibilidade do evento para o maior `cycle_at` entre as materias agrupadas (a primeira hora em que todas as fontes usadas sao conhecidas), ordenei o walk-forward por essa hora, gravei `observation_time_basis=cycle_at` e passei a omitir e contar eventos sem essa informacao, sem adivinhar pela publicacao. Testes novos cobrem a chegada tardia de uma fonte, reordenacao temporal e omissao de evento sem `cycle_at`.
+
+A bateria Munin direcionada ficou em **22 passed**. No painel real local, os 55 eventos continuam produzindo 100 perguntas, 0 previsoes e 100 abstencoes por `n<30`; nenhum evento foi omitido por falta de `cycle_at`. Resolucoes locais sem previsao cairam de 18 para 8, enquanto `awaiting_future_price` subiu de 2 para 12 e `awaiting_price` permaneceu 80. Esta mudanca reduz resultados historicos aparentes porque inicia o horizonte quando a informacao realmente estava disponivel; nao e ganho de precisao. Brier, skill e ECE seguem N/A, Munin M3 sem avaliacao preditiva real.
+
+Freio antes deste commit: 1288 URLs unicas, volume 24 h 522, 458 linhas/dia (562 a 5x), pressao critica 432/432; dentro dos limites. A coleta externa permanece ativa em `--dry-run`.

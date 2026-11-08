@@ -15,6 +15,7 @@ def synthetic_fixture(event_count=31):
             "title": f"Crypto incident token{index}",
             "url": f"https://synthetic.test/{index}",
             "published_at": stamp.isoformat().replace("+00:00", "Z"),
+            "cycle_at": stamp.isoformat().replace("+00:00", "Z"),
             "topics": ["cripto"],
             "verdict": "hot",
         })
@@ -74,6 +75,24 @@ def test_no_prices_produces_only_abstentions_and_no_fake_brier():
     assert result["brier_taxa_base"] is None and result["skill_vs_taxa_base"] is None and result["ece"] is None
     assert len(result["open_to_min_n"]) == 2
     assert all(value["additional_events_needed"] == 1 for value in result["open_to_min_n"].values())
+
+
+def test_backtest_skips_events_without_observed_at_instead_of_using_publication_time():
+    articles = [{
+        "source_id": "synthetic-wire",
+        "title": "Crypto incident with missing ingest time",
+        "url": "https://synthetic.test/no-cycle-time",
+        "published_at": "2026-06-01T00:00:00Z",
+        "topics": ["cripto"],
+        "verdict": "hot",
+    }]
+
+    result = run_backtest(articles, [])
+
+    assert result["events"] == 1
+    assert result["events_skipped_missing_cycle_at"] == 1
+    assert result["questions"] == 0
+    assert result["entries"] == []
 
 
 def test_local_registry_preserves_explicit_official_confirmation():

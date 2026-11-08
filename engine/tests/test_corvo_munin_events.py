@@ -8,11 +8,12 @@ def article(source, title, url, published, topics=("conflito_chave",)):
         "title": title,
         "url": url,
         "published_at": published,
+        "cycle_at": published,
         "topics": list(topics),
     }
 
 
-def test_independent_coverage_forms_one_event_and_keeps_earliest_publication():
+def test_independent_coverage_forms_one_event_and_uses_latest_arrival():
     rows = [
         article("wire-a", "Houthis say 25 killed in Yemen air strikes", "https://a.test/1", "2026-11-01T12:00:00Z"),
         article("wire-b", "Yemen: Houthis report 25 killed in air strike", "https://b.test/2", "2026-11-01T13:00:00Z"),
@@ -22,7 +23,7 @@ def test_independent_coverage_forms_one_event_and_keeps_earliest_publication():
     assert len(events) == 1
     assert events[0].source_ids == ("wire-a", "wire-b")
     assert events[0].confirmation == "multi_source"
-    assert events[0].first_observed_at == "2026-11-01T12:00:00Z"
+    assert events[0].available_at == "2026-11-01T13:00:00Z"
     assert events[0].event_id.startswith("evt_")
 
 
@@ -32,6 +33,34 @@ def test_event_match_requires_shared_topic_and_time_window():
     too_late = article("wire-c", "Bank raises interest rate after inflation", "https://c.test/3", "2026-11-04T13:00:00Z", ("banco_central",))
 
     assert len(build_events([base, unrelated_topic, too_late])) == 3
+
+
+def test_event_availability_waits_for_all_clustered_articles_to_arrive():
+    first = article("wire-a", "Bank raises rates after inflation report", "https://a.test/1", "2026-11-01T12:00:00Z")
+    second = article("wire-b", "Bank raises rates after inflation report", "https://b.test/2", "2026-11-01T13:00:00Z")
+    first["cycle_at"] = "2026-11-01T14:00:00Z"
+    second["cycle_at"] = "2026-11-01T16:00:00Z"
+
+    event = build_events([first, second])[0]
+
+    assert event.available_at == "2026-11-01T16:00:00Z"
+    assert event.observation_time_basis == "cycle_at"
+    assert event.source_ids == ("wire-a", "wire-b")
+
+
+def test_events_are_ordered_by_available_time_and_missing_cycle_time_is_not_guessed():
+    earlier_published = article("a", "Central bank raises policy rate", "https://a.test/1", "2026-11-01T12:00:00Z", ("banco_central",))
+    later_published = article("b", "Earthquake closes oil terminal", "https://b.test/2", "2026-11-01T13:00:00Z", ("energia",))
+    earlier_published["cycle_at"] = "2026-11-01T18:00:00Z"
+    later_published["cycle_at"] = "2026-11-01T14:00:00Z"
+    missing = article("c", "Exchange halts trading", "https://c.test/3", "2026-11-01T15:00:00Z", ("mercado",))
+    missing.pop("cycle_at")
+
+    events = build_events([earlier_published, later_published, missing])
+
+    assert [event.title for event in events] == [later_published["title"], earlier_published["title"], missing["title"]]
+    assert events[2].available_at is None
+    assert events[2].observation_time_basis == "missing_cycle_at"
 
 
 def test_duplicate_url_is_counted_once_and_official_requires_explicit_provenance():

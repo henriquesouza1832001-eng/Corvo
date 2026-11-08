@@ -43,7 +43,8 @@ def _entry(
     key = _key(question)
     common = {
         "event_id": event.event_id,
-        "event_time": event.first_observed_at,
+        "event_time": event.available_at,
+        "observation_time_basis": event.observation_time_basis,
         "source_ids": list(event.source_ids),
         "source_count": len(event.source_ids),
         "confirmation": event.confirmation,
@@ -122,7 +123,7 @@ def run_backtest(
 
     Only Hugin-approved ``hot``/``buffer`` rows become events. A resolved
     outcome enters the baseline after its resolution close and only before a
-    later event's publication time. The report is exploratory: this same local
+    later event's availability time. The report is exploratory: this same local
     history is not an untouched calibration test set.
     """
     rows = list(price_rows)
@@ -135,9 +136,10 @@ def run_backtest(
     model = BaseRateModel(min_n=min_n)
     entries: list[dict] = []
     pending: list[tuple[datetime, tuple[str, str, str], bool]] = []
+    skipped_without_cycle_at = sum(event.available_at is None for event in events)
 
     for event in events:
-        event_time = _utc(event.first_observed_at)
+        event_time = _utc(event.available_at)
         if event_time is None:
             continue
         ready = [item for item in pending if item[0] <= event_time]
@@ -148,7 +150,7 @@ def run_backtest(
         for question in questions_for_event(event, available_price_symbols=symbols):
             key = _key(question)
             prediction = model.predict(key)
-            resolution = resolve_question(question, event.first_observed_at, rows)
+            resolution = resolve_question(question, event.available_at, rows)
             prior_n = model.n(key)
             entries.append(_entry(event, question, resolution, prediction, len(event.source_ids), prior_n, min_n))
             end = _utc(resolution.end_at)
@@ -188,6 +190,7 @@ def run_backtest(
     run_id = _persist(output_path, entries) if output_path is not None else None
     return {
         "events": len(events),
+        "events_skipped_missing_cycle_at": skipped_without_cycle_at,
         "questions": len(entries),
         "forecasts": forecast_count,
         "abstentions": abstention_count,

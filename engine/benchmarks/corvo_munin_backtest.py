@@ -44,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print("CORVO MUNIN · PROVA LOCAL · DRY-RUN")
     print(f"Eventos: {result['events']} | perguntas: {result['questions']}")
+    print(f"Eventos omitidos sem cycle_at: {result['events_skipped_missing_cycle_at']}")
     print(f"Previsões: {result['forecasts']} | abstenções: {result['abstentions']}")
     print(f"Resoluções: {json.dumps(result['resolution_status'], ensure_ascii=False, sort_keys=True)}")
     print(f"Resultados de previsões resolvidos: {result['resolved_forecast_outcomes']}")
