@@ -1,12 +1,9 @@
 name: Turso check
 
 # Valida a conexão e o protocolo com o Turso usando os segredos do repositório (sem expô-los).
-# Roda só quando este arquivo ou o script mudam, ou manualmente.
+# LEGADO (era Pulso): os segredos TURSO_* do repositório apontam para o banco antigo e a checagem estourava o tempo em todo push.
+# Agora só roda manualmente (workflow_dispatch). O banco atual do CORVO é conferido pela rota /api/admin/turso-ping do Worker.
 on:
-  push:
-    paths:
-      - .github/workflows/turso-check.yml
-      - engine/scripts/turso_check.py
   workflow_dispatch:
 
 permissions:

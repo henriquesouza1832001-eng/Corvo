@@ -31,9 +31,14 @@
 | 2 | 2026-11-08 | T8: simulação de orçamento nas três pressões | freio anterior: só normal 484/692 linhas por dia (1×/5×) | n/a (sem ajuste Hugin) | normal 484/692; economia 480/672; crítico 432/432; todos verdes | concluído; nenhuma pressão estoura os limites | `b1c197e` |
 | 3 | 2026-11-08 | T12: cenários e invariantes de Munin | 2 cenários (calibrado/exagerado) → 6 (inclui base, conservador, n pequeno e vazamento) | n/a (dados só sintéticos) | n/a | M3 atingido; nenhum acerto real alegado | `61961de` |
 
-**Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: parar e registrar o que falta).
+**Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
-## O que falta aprender (preencha ao parar)
+## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
+| Hora | Rodada | Fazendo agora | Corpus (itens únicos) | Freio de banco |
+|---|---|---|---|---|
+| | | | | |
+
+## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
 - T3: rotular pares positivos e negativos para medir fusões erradas e economia de linhas antes de mexer na deduplicação.
 - T0/T5: obter janela de ciclos por fonte e confirmar com o dono os 14 rótulos marginais do snapshot; não inferir confiabilidade a partir de um único GET.
