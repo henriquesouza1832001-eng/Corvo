@@ -426,3 +426,10 @@ Sem abrir exemplos do lacre existente, comparei apenas URLs ja rotuladas com o c
 Rodei novamente `corvo_munin_eval.py --synthetic`; os seis cenarios foram explicitamente sinteticos, sem resultados reais: calibrado (`n=3000`, skill +0.353, ECE 0.014, confiavel); exagerado (`n=3000`, skill +0.089, ECE 0.211, calibrando); taxa-base (`n=3000`, skill 0); conservador (`n=3000`, skill +0.262, ECE 0.132, calibrando); pouca amostra (`n=12`, estado experimental e atualizacao HOLD); vazamento temporal foi bloqueado antes da pontuacao. Isso testa os freios da bancada, nao mede a qualidade de previsoes reais. Munin segue M3, sem previsao real avaliada.
 
 O freio do corpus local antes deste registro ficou verde: 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica. Nenhum arquivo de dados foi alterado; o snapshot temporario ficou fora do repositorio. Nenhuma regra foi promovida neste checkpoint.
+
+
+### 9.20 Ciclo 6 e repeticao do painel local (20:20 BRT)
+
+O processo externo nao foi reiniciado: o ciclo 6 terminou em 20:20:08, com 24 feeds sem falhas e 10 itens novos; a coleta de precos terminou em 20:20:20 sem linhas novas (5.220 no total). O freio apos o ciclo marcou 1288 URLs unicas, 522 itens em 24 h, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica, dentro dos limites.
+
+Reexecutei `corvo_munin_backtest.py --dry-run` com os arquivos locais. Resultado: 55 eventos, 100 perguntas, 0 previsoes e 100 abstencoes; 18 perguntas resolvidas por precos locais sem previsoes, 2 aguardam preco futuro e 80 aguardam instrumento. Brier, Brier da taxa-base, skill e ECE seguem N/A porque nao ha previsoes resolvidas. A chave de registro foi idempotente (`run_id` existente), sem duplicar entradas. O processo de coleta segue ativo, PID 13596; nenhuma afirmacao de acerto foi feita.
