@@ -37,6 +37,8 @@
 | 7 | 2026-11-08 | T12/Munin: clarify baseline interval as normal approximation to Beta posterior | metrics unchanged; six synthetic scenarios still pass; no real forecasts | n/a | n/a | documentation corrected; M3 retained; interval coverage still needs data validation | — |
 | 8 | 2026-11-08 | T3: pair-candidate availability audit on future-only titles | 173 items; 2 cross-source pairs Jaccard>=0.40; 0 at current 0.70; no pairs labeled | n/a (insufficient pair sample; no change) | 476/652 | hold dedup threshold; gather more cross-source pairs | — |
 
+| 9 | 2026-11-08 | P1 Munin events: conservative 0.30 title overlap; 48h, same topic, complete-link | fit-only challenge: 30 labeled pairs; TP 4, FP 0, FN 8, TN 18 (precision 1.00; recall 0.33) | Hugin sealed n/a (Munin event identity) | 458/day; baseline unchanged | implemented; false merges 0/30 (challenge set, not population estimate); conservative recall remains weak | pending |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
