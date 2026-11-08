@@ -140,7 +140,7 @@ Cada linha do `corpus.jsonl`: `cycle_at, source_id, url, title, published_at, ve
 ## 7. Plano da noite
 **Fase 0 (15 min), preparar.** Registre-se, rode os testes (devem passar), rode um ciclo e confirme que os 24 feeds respondem. Anote hora de início e versões.
 
-**Fase 1 (a noite toda, em segundo plano), coletar o corpus.** O laço é iniciado **pelo dono** (`scripts\corvo_corpus_loop.ps1`); se você tiver rede, pode iniciar o da seção 6 em outra janela. Trabalhe sobre `corpus.jsonl` enquanto ele cresce. Meta: ≥ 30 ciclos e ≥ 3.000 itens únicos, cobrindo horários de Ásia, Europa e Américas. Registre por ciclo: feeds com falha, tempo, itens novos.
+**Fase 1 (a noite toda, em segundo plano), coletar o corpus.** O laço é iniciado **pelo dono** (`scripts\corvo_corpus_loop.ps1`); se você tiver rede, pode iniciar o da seção 6 em outra janela. Trabalhe sobre `corpus.jsonl` enquanto ele cresce. Meta: ≥ 30 ciclos cobrindo horários de Ásia, Europa e Américas. O corpus parte de ~800 itens (o histórico dos feeds) e cresce só com o que é NOVO a cada ciclo (estimativa: 30 a 60 itens por ciclo), então espere ~1.800 a 2.500 ao fim de 6 h. Comece a rotular com ≥ 1.500. Registre por ciclo: feeds com falha, tempo, itens novos.
 
 **Fase 2 (≈1 h), rotular.** Com ≥ 1.500 itens, sorteie uma amostra **estratificada por fonte e por decisão atual** de ≥ 400 itens (mínimo 300) e rotule em `engine/data/corvo_corpus/labels.jsonl`: `{"url","label":"keep|marginal|drop","topic","kind":"fato|reportagem|rumor|opiniao|previsao","region"}`.
 - **keep:** tem **efeito plausível em preço de ativo** ou em risco que chega a ele. Ex.: decisão de juros ou ata do FOMC; dado de inflação ou emprego; tarifa, sanção, embargo; corte de produção de petróleo; escalada militar em região de energia ou rota de navio; terremoto ou furacão em polo industrial; exploit ou ruína de exchange de cripto; falência, calote ou rebaixamento relevante; queda abrupta de bolsa.
@@ -216,7 +216,7 @@ Pressão (lida do Worker): **normal** (<60% do teto diário), **economia** (60 a
 Pare e escreva no relatório (sem insistir) se: um servidor bloquear o projeto (403/429 repetido); os testes ficarem vermelhos por algo que você não entende; qualquer ação exigir segredo, deploy, escrita na API ou mudança de contrato; o corpus passar de ~200 MB. **Nenhuma ação irreversível.**
 
 ## 13. Definição de pronto
-- [ ] Corpus ≥ 3.000 itens únicos e ≥ 300 rótulos, com conjunto lacrado e semente registrada.
+- [ ] Corpus ≥ 1.500 itens únicos e ≥ 300 rótulos, com conjunto lacrado e semente registrada.
 - [ ] Script de avaliação reproduzível e linha de base salva.
 - [ ] Pelo menos T0, T1, T2, T3 e T8 entregues, com métricas antes e depois **no conjunto lacrado**.
 - [ ] Testes verdes; nenhum segredo, corpus ou `.sqlite` versionado.

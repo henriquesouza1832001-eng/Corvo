@@ -20,8 +20,10 @@ CORPUS_DIR = ENGINE / "data" / "corvo_corpus"
 CORPUS = CORPUS_DIR / "corpus.jsonl"
 SAMPLE = CORPUS_DIR / "corpus.sample.jsonl"
 AGENT = "codex-noite"
-CLAIMS = ["engine/corvo_engine/intake", "engine/corvo_engine/collect", "engine/corvo_engine/munin", "engine/corvo_engine/oracle",
-          "engine/benchmarks", "engine/tests", "docs/corvo"]
+# Testes: reserva por ARQUIVO (a pasta engine/tests inteira conflita com reservas antigas de outros agentes). Teste novo seu: `claim` nele ao criar.
+CLAIMS = ["engine/corvo_engine/intake", "engine/corvo_engine/collect", "engine/corvo_engine/munin", "engine/corvo_engine/oracle", "engine/benchmarks",
+          "engine/tests/test_intake_gate.py", "engine/tests/test_oracle_publisher.py", "engine/tests/test_collect_runner.py",
+          "engine/tests/test_munin.py", "engine/tests/test_corvo_bench.py", "docs/corvo"]
 TESTS = ["tests/test_intake_gate.py", "tests/test_oracle_publisher.py", "tests/test_collect_runner.py", "tests/test_munin.py", "tests/test_corvo_bench.py"]
 MIN_FOR_LABELING = 1500  # itens únicos para começar a rotular (brief, Fase 2)
 

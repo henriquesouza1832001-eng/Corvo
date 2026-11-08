@@ -33,7 +33,7 @@ O corpus é coletado por **outro processo** (`scripts/corvo_corpus_loop.ps1`, ro
 ## As dez regras que não se negociam
 1. Branch **`hen`** apenas. Nunca `main`, nunca branch nova, nunca `push --force`, nunca merge.
 2. **Local e em `--dry-run`.** Não rode `wrangler`, Turso, `gh secret`; não use `POST` na API; não toque em `.env`, `.dev.vars`, chave do git-crypt.
-3. Edite **só** `corvo_engine/{intake,collect,munin,oracle}`, `benchmarks/`, `tests/` e `../docs/corvo/`. **Não** edite `apps/worker`, `database/`, `packages/shared`, `.github/workflows` (outro dono; mudam contrato). Proponha no relatório.
+3. Edite **só** `corvo_engine/{intake,collect,munin,oracle}`, `benchmarks/`, os testes `tests/test_corvo_*` e os 5 já reservados, e `../docs/corvo/`. Ao criar teste novo, reserve o arquivo: `py scripts/agentbus.py claim codex-noite engine/tests/<arquivo>`. **Não** edite `apps/worker`, `database/`, `packages/shared`, `.github/workflows` (outro dono; mudam contrato). Proponha no relatório.
 4. **Conjunto lacrado:** ajuste só com o lado `fit`; rode `--split eval` **uma vez por rodada** e nunca olhe os itens `eval` para decidir uma regra.
 5. Rotule pelo **conteúdo**, nunca pela decisão do portão.
 6. Resultado ruim **vai para o relatório**; se piorou, reverta.
