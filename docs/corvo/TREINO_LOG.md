@@ -55,7 +55,7 @@
 
 | 17 | 2026-11-08 | P1 fit iteration: event threshold 0.25 to 0.235; rejected 0.23 | same 30 fit pairs: at 0.235 TP 7, FP 0, FN 5, TN 18 (recall 0.583); 0.23 would yield FP 1/30 (3.3%) | no Hugin sealed metric; no eval titles opened | 458/day; 562 at 5x; green | real approved corpus: events 56?55, multi-source stays 7; local proof 100 questions, 0 forecasts, 100 abstentions | `09b4c36` |
 
-| 18 | 2026-11-08 | T9 robustness integration matrix: bad XML/empty/HTML/oversize/timeout/403/503/redirect plus healthy feed | 8 failures recorded by feed; healthy feed fetched/sent/marked once; CORVO suite 76 passed | no Hugin sealed metric; collector boundary only | 458/day; freio green | cycle survived every simulated fault; no real network calls and no source bypass | pending |
+| 18 | 2026-11-08 | T9 robustness integration matrix: bad XML/empty/HTML/oversize/timeout/403/503/redirect plus healthy feed | 8 failures recorded by feed; healthy feed fetched/sent/marked once; CORVO suite 76 passed | no Hugin sealed metric; collector boundary only | 458/day; freio green | cycle survived every simulated fault; no real network calls and no source bypass | `310eb9b` |
 
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
