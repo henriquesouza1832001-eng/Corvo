@@ -2,7 +2,8 @@
 from datetime import datetime, timedelta, timezone
 import math
 
-from corvo_engine.munin.backtest import run_backtest
+from corvo_engine.munin.backtest import _key, run_backtest
+from corvo_engine.munin.questions import ClosedQuestion
 
 
 def synthetic_fixture(event_count=31, event_spacing_hours=72):
@@ -36,6 +37,23 @@ def synthetic_fixture(event_count=31, event_spacing_hours=72):
             "provenance": "synthetic",
         })
     return events, prices
+
+
+def test_opposite_directions_have_independent_synthetic_baseline_keys():
+    common = {
+        "question_id": "synthetic-question",
+        "event_id": "synthetic-event",
+        "topic": "cripto",
+        "asset": "BTC",
+        "horizon_hours": 24,
+        "text": "synthetic question",
+    }
+    up = ClosedQuestion(direction="up", **common)
+    down = ClosedQuestion(direction="down", **common)
+
+    assert _key(up) == ("cripto", "BTC:up", "24h")
+    assert _key(down) == ("cripto", "BTC:down", "24h")
+    assert _key(up) != _key(down)
 
 
 def test_end_to_end_walk_forward_abstains_until_30_resolved_events_and_registry_is_idempotent(tmp_path):

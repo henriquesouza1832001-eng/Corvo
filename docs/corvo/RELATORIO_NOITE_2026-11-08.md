@@ -496,3 +496,13 @@ A repeticao `corvo_munin_backtest.py --dry-run` permaneceu em 55 eventos, 100 pe
 ### 9.27 Chave de amostra por direcao (20:44 BRT)
 
 Alinhei `PREDITIVO.md`, o protocolo M6, a nota 8 e os docstrings de Munin com a chave real do baseline: `(tema, ativo, direcao da pergunta, horizonte)`. Uma resposta binaria a "subiu" nao pode ser misturada com a resposta a "caiu" ou "volatilidade"; cada direcao exige seus proprios 30 resultados independentes, em janelas nao sobrepostas. Esta foi uma correcao documental, sem alteracao de comportamento, registros ou contrato.
+
+
+### 9.28 Texto da pergunta alinhado ao instante de observacao (20:50 BRT)
+
+A pergunta fechada indicava que os 30 retornos de referencia eram anteriores a publicacao, mas o replay usa o instante em que todas as fontes do evento ficaram disponiveis (`cycle_at`). Troquei o texto para nomear esse instante e acrescentei assercoes ao teste de perguntas. Tambem acrescentei um caso sintetico que prova que chaves BTC `up` e `down` nao compartilham amostras. A regra de resolucao e os precos nao mudaram; nenhum placar real de previsao foi criado.
+
+
+### 9.29 Ciclo 9 e painel Munin (20:50 BRT)
+
+O ciclo 9 terminou com 24 feeds sem falhas, 3 itens novos e nenhum candle novo (5.220 linhas de preco). O corpus tem 1.293 URLs unicas; o freio segue verde em 460 linhas/dia, 572 a 5x e 432/432 sob pressao critica. O painel agora mostra 56 eventos, 100 perguntas, 0 previsoes, 100 abstencoes, 8 resolucoes sem forecast, 12 aguardando preco futuro e 80 aguardando instrumento. Continua sem Brier, skill ou ECE reais; seis janelas sobrepostas seguem fora da contagem e BTC/ETH ainda tem apenas um resultado independente cada.
