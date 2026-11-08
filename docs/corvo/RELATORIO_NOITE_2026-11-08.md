@@ -402,4 +402,6 @@ No corpus local aprovado, o agrupamento passou de 58 para 56 eventos; cobertura 
 
 O ciclo externo 5 terminou ?s 20:10 BRT: 24 feeds saud?veis, 11 itens recebidos e nenhuma altera??o de pre?o; corpus com 1.278 itens ?nicos. Freio: volume 24 h 514, 458 linhas/dia (562 a 5?), cr?tico 432/432, verde. Hugin permaneceu H2; a altera??o foi no agrupador de eventos Munin e n?o na relev?ncia Hugin. Nenhum lacre foi aberto para decidir o limiar.
 
+
+A mudan?a de limiar e seu teste de fronteira foram commitados em `715751a`; a bateria direcionada final teve 75 aprovados, e o freio permaneceu verde antes e depois do commit (1.278 itens, 458/562 linhas e 432/432 cr?tico).
 Pergunta ao dono: aceita manter 0,25 como limiar provis?rio enquanto se coletam mais pares fit independentes, dado recall de 0,417 e 0/30 fus?es falsas no desafio atual?
