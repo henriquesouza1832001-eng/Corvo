@@ -44,7 +44,7 @@ function topEntries(entries: HistEntry[]): HistEntry[] {
 }
 
 /**
- * Histórico de inteligência — no molde do PIZZA INTELLIGENCE HISTORY:
+ * Histórico de inteligência:
  * tabs de período e retorno aos dados ao vivo. Cada período mostra só
  * o momento mais importante de cada dia.
  */

@@ -40,3 +40,8 @@ __pycache__/
 
 # Quadro de coordenação entre agentes (barramento local, não vai para o git)
 .agents/
+
+# corpus local do CORVO (títulos e links coletados; nunca versionar)
+engine/data/corvo_corpus/
+*.sqlite
+corvo_seen*.sqlite

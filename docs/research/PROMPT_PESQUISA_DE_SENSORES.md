@@ -70,7 +70,7 @@ Para cada fonte registrada como utilizável, grave na ficha: URL exata consultad
 
 Sua missão é descobrir, pesquisar, classificar e, quando apropriado, integrar **novas fontes públicas de informação capazes de aumentar a capacidade de detecção antecipada do CORVO**.
 
-Pense no CORVO como um **Pizza Index extremamente expandido para o Brasil**. Não estamos construindo um portal de notícias; estamos construindo um **sistema de detecção de sinais e anomalias**. Queremos detectar "algo fora do normal está começando a acontecer aqui" e depois procurar evidências adicionais para: confirmar, refutar, contextualizar, localizar, medir intensidade, estimar evolução, atualizar confiança e alimentar modelos de nowcast/previsão.
+Pense no CORVO como um **sinal indireto extremamente expandido para o Brasil**. Não estamos construindo um portal de notícias; estamos construindo um **sistema de detecção de sinais e anomalias**. Queremos detectar "algo fora do normal está começando a acontecer aqui" e depois procurar evidências adicionais para: confirmar, refutar, contextualizar, localizar, medir intensidade, estimar evolução, atualizar confiança e alimentar modelos de nowcast/previsão.
 
 ## PRINCÍPIO CENTRAL
 Não procure apenas NOTÍCIAS. Procure **SENSORES**. Uma notícia é apenas um sensor. Queremos o máximo de fontes públicas independentes.
@@ -174,7 +174,7 @@ Investigue a fundo: API, event database, GKG, Geo, atualização, cobertura bras
 NASA FIRMS, NOAA, Copernicus, Sentinel, GOES: incêndios, fumaça, tempestades, anomalias térmicas.
 
 ## 30. Fontes incomuns (aqui quero criatividade)
-Pergunte: **"Que dado público muda antes de um grande acontecimento virar notícia?"** Exemplos: trânsito anormal, atrasos aeroportuários, metrô interrompido, consumo elétrico, queda de internet, alertas oficiais, atividade sísmica, chuva, nível de rios, rodovias, câmeras, aumento de buscas, Wikipedia, NOTAM, portos, interdições, emergências, status pages, dados meteorológicos, fechamentos extraordinários, cancelamentos. Descubra outros. Esse é o espírito do Pizza Index.
+Pergunte: **"Que dado público muda antes de um grande acontecimento virar notícia?"** Exemplos: trânsito anormal, atrasos aeroportuários, metrô interrompido, consumo elétrico, queda de internet, alertas oficiais, atividade sísmica, chuva, nível de rios, rodovias, câmeras, aumento de buscas, Wikipedia, NOTAM, portos, interdições, emergências, status pages, dados meteorológicos, fechamentos extraordinários, cancelamentos. Descubra outros. Esse é o espírito do sinal indireto.
 
 ---
 

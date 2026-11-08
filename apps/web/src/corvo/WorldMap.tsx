@@ -44,7 +44,7 @@ export function WorldMap({ items, selected, onSelect }: Props) {
 			<path d={LAND} className="map-land" />
 			{anchors.map((a) => (
 				<g key={a.id} transform={`translate(${a.xy![0]},${a.xy![1]})`} className="anchor">
-					<title>{`${a.label} (âncora do método Pizza Index, sensor ainda não ligado)`}</title>
+					<title>{`${a.label} (ponto de observação, coleta em preparação)`}</title>
 					<rect x="-3" y="-3" width="6" height="6" transform="rotate(45)" />
 				</g>
 			))}

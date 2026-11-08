@@ -3,7 +3,7 @@
 > Leia **`AGENTS.md`** (raiz) primeiro; ele é a lista de regras. Este arquivo dá o contexto, o que já foi feito, quem faz o quê e como entregar. Estado em tempo real: `docs/BACKEND_STATUS.md` (documento vivo; confira a data de atualização antes de confiar em qualquer informação).
 
 ## 1. Missão do produto
-Plataforma brasileira de inteligência situacional: transforma **sinais públicos** em **eventos** geolocalizados com **severidade**, **confiança** e **Corvo Score** explicáveis, e **antecipa** acontecimentos como **previsões probabilísticas calibradas** (no espírito do "Pizza Index"). Frase-guia: *observar, correlacionar, localizar, confirmar, explicar, visualizar.*
+Plataforma brasileira de inteligência situacional: transforma **sinais públicos** em **eventos** geolocalizados com **severidade**, **confiança** e **Corvo Score** explicáveis, e **antecipa** acontecimentos como **previsões probabilísticas calibradas** (no espírito do "sinal indireto"). Frase-guia: *observar, correlacionar, localizar, confirmar, explicar, visualizar.*
 
 ### Princípios inegociáveis
 1. **Sinal fraco não é fato.** Rede social detecta, não confirma sozinha (teto de confiança 40 só com social).

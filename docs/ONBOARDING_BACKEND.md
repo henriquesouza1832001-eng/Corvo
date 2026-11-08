@@ -3,7 +3,7 @@
 Este guia é para quem vai ajudar no backend. Você pode seguir sozinha ou usando um agente (Codex, Claude etc.); nesse caso, mande o agente ler também [OVERVIEW_PARA_AGENTES.md](OVERVIEW_PARA_AGENTES.md).
 
 ## 0. O que é o CORVO, em 1 minuto
-Uma plataforma que coleta **sinais públicos** (hoje, notícias por RSS; depois fontes oficiais e redes sociais), agrupa em **eventos**, mede **severidade**, **confiança** e **Corvo Score**, e quer **antecipar** acontecimentos como previsões probabilísticas honestas (no espírito do "Pizza Index"). Um sinal fraco nunca vira fato; toda previsão é uma probabilidade com evidências.
+Uma plataforma que coleta **sinais públicos** (hoje, notícias por RSS; depois fontes oficiais e redes sociais), agrupa em **eventos**, mede **severidade**, **confiança** e **Corvo Score**, e quer **antecipar** acontecimentos como previsões probabilísticas honestas (no espírito do "sinal indireto"). Um sinal fraco nunca vira fato; toda previsão é uma probabilidade com evidências.
 
 Três peças: **Engine** em Python (`engine/`), **Worker** da Cloudflare (`apps/worker`, a API) e **Web** em React (`apps/web`, feita por outra pessoa).
 

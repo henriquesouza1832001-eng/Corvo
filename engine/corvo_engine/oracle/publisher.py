@@ -68,6 +68,7 @@ class OraclePublisher:
         self.gate = gate or IntakeGate(clock=clock)
         self._clock = clock
         self._buckets: dict[str, Counter[str]] = {}
+        self.last_decisions: list[dict] = []  # decisão de CADA item do último ciclo (inclusive descartes), para auditoria e ajuste
 
     def pressure(self) -> Pressure:
         try:
@@ -81,9 +82,17 @@ class OraclePublisher:
         bucket = _iso(now - now % 3600)
         c = self._buckets.setdefault(bucket, Counter())
         news = []
+        self.last_decisions = []
         for item in items:
             v = self.gate.admit(item, pressure)
+            place_d = locate(item.title, item.text)
+            self.last_decisions.append({
+                "source_id": item.source_id, "url": item.url, "title": item.title, "published_at": _iso(item.published_at),
+                "verdict": v.decision.value, "reason": v.reason, "relevance": v.relevance, "topics": list(v.topics),
+                "region": place_d[0] if place_d else None, "pressure": pressure.value,
+            })
             c["received"] += 1
+            c[f"src:{item.source_id}"] += 1
             if v.decision is Decision.DROP:
                 c["dropped"] += 1
                 c[f"reason:{v.reason}"] += 1
@@ -115,6 +124,7 @@ class OraclePublisher:
         stats = [{
             "bucket": bucket, "pressure": pressure.value, "received": c["received"], "hot": c["hot"], "buffer": c["buffer"], "dropped": c["dropped"],
             "reasons": {n.removeprefix("reason:"): v for n, v in c.items() if n.startswith("reason:")},
+            "sources": {n.removeprefix("src:"): v for n, v in c.items() if n.startswith("src:")},
         }]
         result = self.transport.request("POST", "/api/corvo/ingest", {"news": news, "stats": stats})
         return {"pressure": pressure.value, "sent_news": len(news), "received": len(items), "api": result}

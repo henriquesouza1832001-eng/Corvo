@@ -12,7 +12,7 @@ interface ApiForecast {
 	forecast_id: string; question: string; probability: number; interval_low: number; interval_high: number;
 	evidences: number; sources: number; method: string; horizon: string; status: "aberta" | "calibrando" | "resolvida";
 }
-interface ApiStats { received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number> }
+interface ApiStats { received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number>; sources: Record<string, number> }
 export interface ApiFeed {
 	generated_at: string; pressure: Pressure; budget: { used: number; limit: number };
 	news: ApiNews[]; stats: ApiStats[]; forecasts: ApiForecast[];
@@ -23,6 +23,7 @@ export interface LiveView {
 	budget: { used: number; limit: number };
 	items: (NewsItem & { verdict: "hot" | "buffer"; reason: string })[];
 	totals: { received: number; hot: number; buffer: number; dropped: number; reasons: Record<string, number> };
+	sources: Record<string, number>;
 	forecasts: ForecastCard[];
 	generatedAt: string;
 }
@@ -30,15 +31,18 @@ export interface LiveView {
 export function toView(f: ApiFeed): LiveView {
 	const now = Date.now();
 	const totals = { received: 0, hot: 0, buffer: 0, dropped: 0, reasons: {} as Record<string, number> };
+	const sources: Record<string, number> = {};
 	for (const s of f.stats) {
 		totals.received += s.received; totals.hot += s.hot; totals.buffer += s.buffer; totals.dropped += s.dropped;
 		for (const [k, v] of Object.entries(s.reasons)) totals.reasons[k] = (totals.reasons[k] ?? 0) + v;
+		for (const [k, v] of Object.entries(s.sources ?? {})) sources[k] = (sources[k] ?? 0) + v;
 	}
 	return {
 		pressure: f.pressure,
 		budget: f.budget,
 		generatedAt: f.generated_at,
 		totals,
+		sources,
 		items: f.news.map((n) => ({
 			id: n.item_id, source: n.source_id, reliability: n.source_reliability, title: n.title,
 			minutesAgo: Math.max(0, Math.round((now - Date.parse(n.published_at)) / 60_000)),

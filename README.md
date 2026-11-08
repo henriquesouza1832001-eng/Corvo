@@ -4,7 +4,7 @@
 
 A ideia é prever **quase qualquer coisa que se possa medir**: política, catástrofes, conflitos, economia, câmbio, ações, cripto, commodities, energia e o que mais tiver sinal. Toda previsão sai com **probabilidade, incerteza, evidências e método**, e depois é conferida contra o que aconteceu de verdade.
 
-> Inspiração: o *Pizza Index*, um sinal indireto (movimento de pizzarias perto do Pentágono) que muda **antes** da manchete. O CORVO usa notícias como um sensor entre muitos, ao lado de trânsito, metrô, voos, energia, internet e atenção pública. Como o método funciona e seus limites: [docs/corvo/SENSORES.md](docs/corvo/SENSORES.md).
+> O CORVO usa notícias como um sensor entre muitos, ao lado de metrô, trânsito, voos, energia, internet e atenção pública: sinais indiretos que mudam **antes** da manchete. Como isso funciona e seus limites: [docs/corvo/SENSORES.md](docs/corvo/SENSORES.md). Como a notícia é tratada e armazenada: [docs/corvo/TRATAMENTO_NOTICIAS.md](docs/corvo/TRATAMENTO_NOTICIAS.md).
 
 ## O que o CORVO faz
 
@@ -49,7 +49,7 @@ O CORVO **não envia ordens de compra ou venda** e não é recomendação de inv
 
 ## Estado hoje (novembro de 2026)
 
-- **Pronto:** renomeação, portão de admissão com testes, API `corvo-api` e painel `corvo-web` no ar, publicador do lado do Oracle, arquivos de implantação.
+- **Pronto:** coleta global de 24 feeds (agências, bancos centrais, mercados, cripto), portão de admissão com testes, API `corvo-api` e painel `corvo-web` no ar, publicador do lado do Oracle, arquivos de implantação.
 - **Painel:** mostra dados de demonstração (avisa na tela) até chegar o primeiro lote real do Oracle.
 - **Herdado do Pulso:** o motor de eventos, anomalia, Sentinela e previsão foi feito para o Brasil (UFs, INMET, IBGE). A generalização para o mundo é o próximo grande passo.
 - **Falta:** fontes globais documentadas, impacto por ativo, previsões reais publicadas, catálogo de âncoras e sensores indiretos, e o adaptador do lado do MNEME.

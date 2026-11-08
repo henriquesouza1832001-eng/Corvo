@@ -1,6 +1,6 @@
 """Google Trends (RSS público "em alta" do Brasil): o que os brasileiros estão BUSCANDO agora.
 
-É um termômetro de atenção no estilo "pizza index": uma busca que explode costuma anteceder a manchete. O feed traz o
+É um termômetro de atenção no estilo "sinal indireto": uma busca que explode costuma anteceder a manchete. O feed traz o
 volume aproximado (`approx_traffic`) e as notícias que explicam o termo; usamos o título dessas notícias para
 classificar, geolocalizar e filtrar por importância (mesmo critério do resto do motor). Busca detecta, nunca confirma:
 classe SOCIAL (confiabilidade baixa), então um evento só ganha peso com fontes de imprensa ou oficiais juntas.

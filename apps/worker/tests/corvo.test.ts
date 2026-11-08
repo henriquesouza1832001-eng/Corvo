@@ -7,7 +7,7 @@ const news = (id: string, extra = {}) => ({
 	verdict: "hot", reason: "relevant", relevance: 0.9, kind: "fato", topics: ["banco_central"], assets: [{ symbol: "BTC", direction: "up", horizon: "24h" }], ...extra,
 });
 const fc = (extra = {}) => ({ forecast_id: "f1", question: "q?", probability: 0.6, interval_low: 0.4, interval_high: 0.8, evidences: 3, sources: 2, method: "m", horizon: "24h", status: "calibrando", ...extra });
-const stats = { bucket: NOW, pressure: "normal", received: 10, hot: 2, buffer: 3, dropped: 5, reasons: { duplicate_url: 3, irrelevant: 2 } };
+const stats = { bucket: NOW, pressure: "normal", received: 10, hot: 2, buffer: 3, dropped: 5, reasons: { duplicate_url: 3, irrelevant: 2 }, sources: { bbc: 6, g1: 4 } };
 
 describe("API do CORVO", () => {
 	it("recusa ingestão sem token", async () => {
@@ -26,6 +26,7 @@ describe("API do CORVO", () => {
 		expect(feed.news).toHaveLength(2);
 		expect(feed.news[0].topics).toEqual(["banco_central"]);
 		expect(feed.stats[0].reasons.duplicate_url).toBe(3);
+		expect(feed.stats[0].sources.bbc).toBe(6);
 		expect(feed.forecasts[0].probability).toBe(0.6);
 		expect(feed.budget.used).toBe(8); // 4 itens x 2 linhas
 		expect(feed.pressure).toBe("normal");

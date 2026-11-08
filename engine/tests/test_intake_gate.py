@@ -51,10 +51,12 @@ def test_source_quota_does_not_burn_on_junk():
 
 
 def test_pressure_tightens_gate():
-    t = "Congress debates election bill"  # política, relevância média
-    assert gate().admit(item(t)).decision is Decision.HOT
+    t = "Congress debates election bill"  # política, relevância média (~0,67)
+    assert gate().admit(item(t)).decision is Decision.BUFFER
     assert gate().admit(item(t), Pressure.ECONOMY).decision is Decision.BUFFER
     assert gate().admit(item(t), Pressure.CRITICAL).decision is Decision.DROP
+    t2 = "Fed announces surprise rate cut as inflation cools"  # banco central, alta relevância
+    assert gate().admit(item(t2), Pressure.ECONOMY).decision is Decision.HOT
 
 
 def test_critical_still_passes_top_news():

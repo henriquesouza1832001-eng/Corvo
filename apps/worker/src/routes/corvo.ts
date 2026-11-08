@@ -38,6 +38,7 @@ const statsSchema = z.object({
 	buffer: z.number().int().min(0),
 	dropped: z.number().int().min(0),
 	reasons: z.record(z.string().max(40), z.number().int().min(0)),
+	sources: z.record(z.string().max(60), z.number().int().min(0)).default({}),
 });
 const forecastSchema = z.object({
 	forecast_id: z.string().min(1).max(80),
@@ -96,10 +97,10 @@ corvo.post("/ingest", async (c) => {
 		...stats.map((s) =>
 			db
 				.prepare(
-					`INSERT INTO corvo_gate_stats (bucket,pressure,received,hot,buffer,dropped,reasons,updated_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)
-					 ON CONFLICT(bucket) DO UPDATE SET pressure=excluded.pressure, received=excluded.received, hot=excluded.hot, buffer=excluded.buffer, dropped=excluded.dropped, reasons=excluded.reasons, updated_at=excluded.updated_at`,
+					`INSERT INTO corvo_gate_stats (bucket,pressure,received,hot,buffer,dropped,reasons,updated_at,sources) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)
+					 ON CONFLICT(bucket) DO UPDATE SET pressure=excluded.pressure, received=excluded.received, hot=excluded.hot, buffer=excluded.buffer, dropped=excluded.dropped, reasons=excluded.reasons, updated_at=excluded.updated_at, sources=excluded.sources`,
 				)
-				.bind(s.bucket, s.pressure, s.received, s.hot, s.buffer, s.dropped, JSON.stringify(s.reasons), now),
+				.bind(s.bucket, s.pressure, s.received, s.hot, s.buffer, s.dropped, JSON.stringify(s.reasons), now, JSON.stringify(s.sources)),
 		),
 		...forecasts.map((f) =>
 			db
@@ -152,7 +153,7 @@ async function buildFeed(db: D1Database, limit: number) {
 		pressure: modeFor(used, limit),
 		budget: { used, limit },
 		news: news.results.map((r) => ({ ...r, topics: parseJson(String(r.topics), []), assets: parseJson(String(r.assets), []) })),
-		stats: stats.results.map((r) => ({ ...r, reasons: parseJson(String(r.reasons), {}) })),
+		stats: stats.results.map((r) => ({ ...r, reasons: parseJson(String(r.reasons), {}), sources: parseJson(String(r.sources), {}) })),
 		forecasts: forecasts.results,
 	};
 }

@@ -221,7 +221,7 @@ Frequência: 900 s.
 Fallback se cair: fica OFFLINE; as demais seguem. Sem termo importante = sem sinal (quiet_ok).
 Observação: validado ao vivo em 2026-10-03 (10 termos; filtro de importância deixa passar eleição, segurança, clima e derruba celebridade/entretenimento). A geolocalização usa só termo + manchete principal.
 Exibição pública permitida: headline_link (link da notícia original), com atribuição ao Google Trends.
-Papel: termômetro de ATENÇÃO (estilo pizza index). Classe SOCIAL (confiabilidade baixa): detecta, nunca confirma; só pesa quando casa com imprensa/oficial.
+Papel: termômetro de ATENÇÃO (estilo sinal indireto). Classe SOCIAL (confiabilidade baixa): detecta, nunca confirma; só pesa quando casa com imprensa/oficial.
 ```
 
 ## Ficha: Bluesky, busca de posts (`bluesky-politics`, `bluesky-clima`)
@@ -282,3 +282,18 @@ Atenção: o nível é um alerta de transmissão MODELADO, não contagem de caso
 Primeira leitura real (2026-10-03, baixa temporada): Belo Horizonte em alerta laranja (semana 38; 756 casos estimados, Rt 1,54); Recife e São Luís em amarelo.
 Papel: cobre a categoria HEALTH com dado oficial e objetivo, em vez de depender só da imprensa.
 ```
+
+
+## Catálogo global do CORVO (`engine/corvo_engine/collect/catalog.json`)
+Registro exigido por `AGENTS.md` antes de integrar fontes. Verificado em 2026-11-07: os 24 feeds responderam HTTP 200 e foram lidos sem erro.
+
+| Item | Situação |
+|---|---|
+| Tipo de acesso | RSS/Atom públicos de sindicação e feeds oficiais (Fed, BCE, Banco da Inglaterra, ONU, USGS). Sem chave, sem login, sem raspar HTML |
+| Dado usado | título, link e resumo curto, com atribuição à fonte; **o corpo da matéria nunca é lido nem guardado** |
+| Limite adotado | no máximo 1 leitura a cada 5 min por feed e 2 conexões simultâneas por servidor; `User-Agent` identificado do projeto |
+| Custo | zero |
+| Retenção | notícia aprovada: 30 dias no banco do painel; descartada: só contador por motivo (14 dias) e hash da URL (48 h) |
+| Exibição pública | título e link para a fonte original no painel `corvo-web` |
+| Termos | os feeds de imprensa costumam permitir uso **não comercial** de título e link com atribuição. **Rever os termos de cada veículo antes de qualquer uso comercial** (ex.: se o CORVO virar produto pago). Fontes oficiais de governo e bancos centrais: conteúdo público |
+| Excluídas | Reuters (401 sem chave), IMF (404), CBC (sem resposta), Middle East Eye (feed vazio), NYT (termos restritos a uso pessoal) |

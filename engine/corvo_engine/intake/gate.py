@@ -65,7 +65,7 @@ class GateConfig:
     near_dup_jaccard: float = 0.7
     dedup_window: int = 5000
     # relevância mínima para gravar já (HOT) e para entrar no buffer, por pressão do orçamento
-    hot_min: dict[Pressure, float] = field(default_factory=lambda: {Pressure.NORMAL: 0.6, Pressure.ECONOMY: 0.8, Pressure.CRITICAL: 0.95})
+    hot_min: dict[Pressure, float] = field(default_factory=lambda: {Pressure.NORMAL: 0.75, Pressure.ECONOMY: 0.85, Pressure.CRITICAL: 0.95})
     buffer_min: dict[Pressure, float] = field(default_factory=lambda: {Pressure.NORMAL: 0.3, Pressure.ECONOMY: 0.5, Pressure.CRITICAL: 0.95})
 
 

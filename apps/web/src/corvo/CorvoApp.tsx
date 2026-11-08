@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DEMO_BUDGET, DEMO_FORECASTS, DEMO_NEWS } from "./demo";
+import { DEMO_BUDGET, DEMO_FORECASTS, DEMO_NEWS, DEMO_SOURCES } from "./demo";
 import { useLiveFeed } from "./feed";
 import { WorldMap } from "./WorldMap";
 import {
@@ -61,13 +61,16 @@ export function CorvoApp() {
 	const shown = rows.filter((r) => (filter === "all" ? true : r.verdict === filter));
 	const ticker = rows.filter((r) => r.verdict === "hot");
 	const usedPct = Math.min(100, (budget.used / budget.limit) * 100);
+	const sources = live ? live.sources : DEMO_SOURCES;
+	const sourceList = Object.entries(sources).sort((x, y) => y[1] - x[1]);
+	const read24h = sourceList.reduce((n, [, v]) => n + v, 0);
 	const located = rows.filter((r) => r.verdict !== "drop" && r.n.lat != null).length;
 
 	return (
 		<div className="console">
 			<header className="bar">
 				<div className="logo">
-					<span className="logo-mark" aria-hidden="true">▌</span>CORVO<span className="dim"> // HUGIN · MUNIN</span>
+					<span className="logo-mark" aria-hidden="true">▌</span>CORVO<span className="dim"> // HUGIN LÊ · MUNIN LEMBRA</span>
 				</div>
 				<div className="status">
 					<Clock />
@@ -90,9 +93,38 @@ export function CorvoApp() {
 				</div>
 			)}
 
+			<section className="ravens" aria-labelledby="t-ravens">
+				<h2 id="t-ravens" className="vh">Como o Corvo funciona</h2>
+				<article className="raven-card">
+					<h3>HUGIN <small>pensamento · lê o mundo</small></h3>
+					<p>
+						Na mitologia nórdica, Hugin e Munin são os dois corvos de Odin: saem todo dia para sobrevoar os nove reinos e voltam ao amanhecer para contar o que viram.
+						Hugin é o pensamento. Aqui ele lê as fontes, tira o ruído e entende o que cada notícia significa.
+					</p>
+					<ol className="flow">
+						<li><b>Lê</b> {sourceList.length} fontes: agências, bancos centrais e imprensa de todos os continentes.</li>
+						<li><b>Filtra</b> o que já viu, o que é velho, repetido ou fora do assunto. Sobra {total > 0 ? pct(1 - counts.c.drop / total) : "pouco"} do que chegou.</li>
+						<li><b>Classifica</b> fato, reportagem, rumor ou opinião. Na dúvida, é só reportagem.</li>
+						<li><b>Localiza</b> no mapa e liga o fato aos ativos que ele pode mexer.</li>
+					</ol>
+				</article>
+				<article className="raven-card">
+					<h3>MUNIN <small>memória · lembra e aprende</small></h3>
+					<p>
+						Munin é a memória. Ele guarda o que importa, registra cada previsão antes do resultado e depois compara com o que aconteceu, para saber em quais tipos de previsão o Corvo acerta e em quais não.
+					</p>
+					<ol className="flow">
+						<li><b>Guarda</b> só as notícias aprovadas. Descartada vira apenas um contador e um código curto da URL, por 48 horas.</li>
+						<li><b>Registra</b> cada previsão com probabilidade, incerteza, evidências e método.</li>
+						<li><b>Confere</b> o resultado e calcula o acerto (hoje: {forecasts.filter((f) => f.status === "calibrando").length} em calibração, sem histórico suficiente).</li>
+						<li><b>Esquece</b> com prazo: notícias com 30 dias e estatísticas com 14 dias são apagadas.</li>
+					</ol>
+				</article>
+			</section>
+
 			<div className="grid">
 				<section className="box map-box" aria-labelledby="t-map">
-					<h2 id="t-map">MAPA-MÚNDI <small>{located} notícias localizadas · losangos = âncoras do Pizza Index (sensores ainda desligados)</small></h2>
+					<h2 id="t-map">MAPA-MÚNDI <small>{located} notícias localizadas · losangos = pontos de observação (coleta em preparação)</small></h2>
 					<WorldMap items={rows.map((r) => ({ n: r.n, verdict: r.verdict }))} selected={selected} onSelect={setSelected} />
 					<ul className="key" aria-label="Legenda de temas">
 						{(Object.keys(TOPIC_LABEL) as (keyof typeof TOPIC_LABEL)[]).map((t) => (
@@ -103,7 +135,7 @@ export function CorvoApp() {
 
 				<section className="box gate-box" aria-labelledby="t-gate">
 					<h2 id="t-gate">PORTÃO DE ADMISSÃO</h2>
-					<p className="muted">Cada notícia passa por: frescor, URL repetida, quase-duplicata, relevância, cota da fonte e pressão do banco.</p>
+					<p className="muted">O robô avalia cada notícia ANTES de gravar qualquer coisa: frescor, URL repetida, quase-duplicata, relevância, cota da fonte e pressão do banco.</p>
 					<div className="meter" role="img" aria-label={`${budget.used} de ${budget.limit} linhas gravadas hoje`}>
 						<div style={{ width: `${usedPct}%` }} className={`fill p-${pressure}`} />
 					</div>
@@ -152,12 +184,22 @@ export function CorvoApp() {
 					</ul>
 				</section>
 
+				<section className="box src-box" aria-labelledby="t-src">
+					<h2 id="t-src">FONTES ATIVAS <small>{sourceList.length} fontes · {read24h.toLocaleString("pt-BR")} notícias lidas em 24 h</small></h2>
+					<ul className="sources">
+						{sourceList.slice(0, 12).map(([id, n]) => (
+							<li key={id}><span className="sname">{id}</span><span className="sbar"><i style={{ width: `${(n / (sourceList[0]?.[1] || 1)) * 100}%` }} /></span><span className="mono">{n.toLocaleString("pt-BR")}</span></li>
+						))}
+					</ul>
+					{sourceList.length === 0 && <p className="muted">Nenhuma fonte reportou ainda.</p>}
+				</section>
+
 				<section className="box fc-box" aria-labelledby="t-fc">
 					<h2 id="t-fc">PREVISÕES <small>probabilidade · incerteza · evidências · método</small></h2>
 					{forecasts.length === 0 && <p className="muted">Nenhuma previsão publicada ainda.</p>}
 					{forecasts.map((f) => <Forecast key={f.id} f={f} />)}
-					<h2 className="sub">ÂNCORAS (PIZZA INDEX)</h2>
-					<p className="muted">Lugares onde decisões acontecem. O sensor de cada um ainda não está ligado: <a href="https://github.com/henriquesouza1832001-eng/Corvo/blob/hen/docs/corvo/SENSORES.md" rel="noreferrer">como funciona</a>.</p>
+					<h2 className="sub">PONTOS DE OBSERVAÇÃO</h2>
+					<p className="muted">Lugares onde decisões acontecem. A coleta de cada um ainda está em preparação.</p>
 					<ul className="anchors">{ANCHORS.map((a) => <li key={a.id}>◇ {a.label}</li>)}</ul>
 				</section>
 			</div>

@@ -27,3 +27,6 @@ export const DEMO_FORECASTS: ForecastCard[] = [
 
 /** Contadores do dia, fictícios, para o funil. */
 export const DEMO_BUDGET = { used: 18_400, limit: 100_000 };
+
+/** Fontes de demonstração (notícias lidas nas últimas 24 h). */
+export const DEMO_SOURCES: Record<string, number> = { "banco-central-exemplo": 12, "agencia-global-exemplo": 340, "portal-cripto-exemplo": 188, "jornal-politico-exemplo": 95, "blog-mercado-exemplo": 40 };

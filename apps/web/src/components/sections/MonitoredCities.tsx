@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { CorvoEvent } from "@corvo/shared";
 
 /**
- * Cidades sob observação — o equivalente às pizzarias monitoradas do pizzint.
+ * Cidades sob observação.
  * Fileira uniforme de cards: nome, badge de status (vocabular SPIKE/ELEVADO/
  * NORMAL/QUIET), mini-histograma 24h e contagem. A única fileira de cards da página.
  */

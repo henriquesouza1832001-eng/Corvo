@@ -15,5 +15,19 @@ services:
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
+  coletor:
+    build:
+      context: ../..
+      dockerfile: deploy/oracle/Dockerfile
+    command: ["python", "-m", "corvo_engine.collect", "--interval", "600", "--state", "/state/seen.sqlite"]
+    restart: always
+    env_file: .env
+    volumes:
+      - corvo-state:/state
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 volumes:
   corvo-state:

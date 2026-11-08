@@ -7,7 +7,7 @@ export type Verdict = "hot" | "buffer" | "drop";
 export type Kind = "fato" | "reportagem" | "rumor" | "opiniao" | "previsao";
 export type Topic = "catastrofe" | "geopolitica" | "politica" | "banco_central" | "cripto" | "mercado";
 
-export const HOT_MIN: Record<Pressure, number> = { normal: 0.6, economy: 0.8, critical: 0.95 };
+export const HOT_MIN: Record<Pressure, number> = { normal: 0.75, economy: 0.85, critical: 0.95 };
 export const BUFFER_MIN: Record<Pressure, number> = { normal: 0.3, economy: 0.5, critical: 0.95 };
 
 export type DropReason = "duplicate_url" | "near_duplicate" | "stale" | "irrelevant" | "source_quota" | "malformed";
@@ -84,7 +84,7 @@ export const KIND_LABEL: Record<Kind, string> = {
 	previsao: "previsão de terceiros",
 };
 
-/** Âncoras do método Pizza Index: lugares onde decisões acontecem. Ainda SEM sensor ligado (ver docs/corvo/SENSORES.md). */
+/** Pontos de observação: lugares onde decisões acontecem. Ainda SEM coleta ligada (ver docs/corvo/SENSORES.md). */
 export const ANCHORS = [
 	{ id: "pentagono", label: "Pentágono · Casa Branca", lat: 38.87, lon: -77.05 },
 	{ id: "wallstreet", label: "Wall Street · Fed NY", lat: 40.71, lon: -74.01 },

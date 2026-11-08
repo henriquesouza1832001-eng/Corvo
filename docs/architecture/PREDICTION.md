@@ -1,4 +1,4 @@
-# Previsão no CORVO (o "Pizza Index do Brasil")
+# Previsão no CORVO (o "sinal indireto do Brasil")
 
 ## Decisão
 O CORVO **prevê**. Qualquer pergunta sobre o futuro cuja resposta seja verificável com informação pública pode virar uma previsão: política, eleições, economia, segurança, clima, trânsito, infraestrutura, relações internacionais, saúde, eventos. Esta decisão substitui a regra anterior que proibia previsões políticas (ver ADR 0002).
