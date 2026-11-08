@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { engineAuthorized } from "../lib/auth";
-import { budgetMode, DAILY_LIMIT, utcDay } from "../lib/budget";
+import { utcDay, type BudgetMode } from "../lib/budget";
 import { cacheControl } from "../lib/cache";
 
 /**
@@ -54,6 +54,12 @@ const batchSchema = z.object({
 	forecasts: z.array(forecastSchema).max(50).default([]),
 });
 
+/** Limite diário de linhas gravadas. D1 grátis = 100 mil; no Turso o limite é mensal, então ajuste DAILY_WRITE_LIMIT (ex.: 300000). */
+const dailyLimit = (env: { DAILY_WRITE_LIMIT?: string }) => Math.max(1000, Number(env.DAILY_WRITE_LIMIT) || 100_000);
+const modeFor = (used: number, limit: number): BudgetMode => (used >= limit * 0.85 ? "critical" : used >= limit * 0.6 ? "economy" : "normal");
+const RETAIN_NEWS_DAYS = 30;
+const RETAIN_STATS_DAYS = 14;
+
 const FEED_KEY = "corvo:feed:v1";
 const FEED_TTL = 60; // o mínimo do KV é 60 s
 
@@ -67,8 +73,15 @@ corvo.post("/ingest", async (c) => {
 	}
 	const db = c.env.DB;
 	const now = new Date().toISOString();
+	// Teto de escrita: o Worker é a última defesa, mesmo que o Oracle erre. economia = sem buffer; crítico = só HOT muito relevante; no limite = sem notícias.
+	const limit = dailyLimit(c.env);
+	const usedRow = await db.prepare("SELECT rows FROM write_budget WHERE day = ?1").bind(utcDay()).first<{ rows: number }>();
+	const used = usedRow?.rows ?? 0;
+	const mode = modeFor(used, limit);
+	const admitted = used >= limit ? [] : mode === "normal" ? news : mode === "economy" ? news.filter((n) => n.verdict === "hot") : news.filter((n) => n.verdict === "hot" && n.relevance >= 0.95);
+	const shed = news.length - admitted.length;
 	const stmts = [
-		...news.map((n) =>
+		...admitted.map((n) =>
 			db
 				.prepare(
 					`INSERT INTO corvo_news (item_id,source_id,source_reliability,title,url,published_at,ingested_at,verdict,reason,relevance,kind,topics,assets)
@@ -103,8 +116,16 @@ corvo.post("/ingest", async (c) => {
 		db.prepare("INSERT INTO write_budget (day,rows) VALUES (?1,?2) ON CONFLICT(day) DO UPDATE SET rows = rows + excluded.rows").bind(utcDay(), written * 2),
 	);
 	await db.batch(stmts);
+	// retenção: uma vez por dia (03 UTC) apaga o que passou do prazo; DELETE de 0 linhas não gasta cota
+	if (new Date().getUTCHours() === 3) {
+		const cut = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+		await db.batch([
+			db.prepare("DELETE FROM corvo_news WHERE published_at < ?1").bind(cut(RETAIN_NEWS_DAYS)),
+			db.prepare("DELETE FROM corvo_gate_stats WHERE bucket < ?1").bind(cut(RETAIN_STATS_DAYS)),
+		]);
+	}
 	await c.env.KV?.delete(FEED_KEY); // o próximo GET remonta o instantâneo
-	return c.json({ ok: true, written });
+	return c.json({ ok: true, written, shed, mode });
 });
 
 const parseJson = <T,>(s: string, fallback: T): T => {
@@ -115,7 +136,7 @@ const parseJson = <T,>(s: string, fallback: T): T => {
 	}
 };
 
-async function buildFeed(db: D1Database) {
+async function buildFeed(db: D1Database, limit: number) {
 	const [news, stats, forecasts, budget] = await Promise.all([
 		db.prepare("SELECT * FROM corvo_news ORDER BY published_at DESC LIMIT 100").all<Record<string, unknown>>(),
 		db.prepare("SELECT * FROM corvo_gate_stats ORDER BY bucket DESC LIMIT 24").all<Record<string, unknown>>(),
@@ -125,8 +146,8 @@ async function buildFeed(db: D1Database) {
 	const used = budget?.rows ?? 0;
 	return {
 		generated_at: new Date().toISOString(),
-		pressure: budgetMode(used),
-		budget: { used, limit: DAILY_LIMIT },
+		pressure: modeFor(used, limit),
+		budget: { used, limit },
 		news: news.results.map((r) => ({ ...r, topics: parseJson(String(r.topics), []), assets: parseJson(String(r.assets), []) })),
 		stats: stats.results.map((r) => ({ ...r, reasons: parseJson(String(r.reasons), {}) })),
 		forecasts: forecasts.results,
@@ -138,7 +159,7 @@ corvo.get("/feed", async (c) => {
 	c.header("Cache-Control", cacheControl(15));
 	const cached = await c.env.KV?.get(FEED_KEY);
 	if (cached) return c.body(cached, 200, { "Content-Type": "application/json", "X-Corvo-Cache": "hit" });
-	const body = JSON.stringify(await buildFeed(c.env.DB));
+	const body = JSON.stringify(await buildFeed(c.env.DB, dailyLimit(c.env)));
 	await c.env.KV?.put(FEED_KEY, body, { expirationTtl: FEED_TTL });
 	return c.body(body, 200, { "Content-Type": "application/json", "X-Corvo-Cache": "miss" });
 });
@@ -148,5 +169,6 @@ corvo.get("/pressure", async (c) => {
 	if (!engineAuthorized(c.req.header("Authorization"), c.env.INGEST_TOKEN)) return c.json({ error: "unauthorized" }, 401);
 	const row = await c.env.DB.prepare("SELECT rows FROM write_budget WHERE day = ?1").bind(utcDay()).first<{ rows: number }>();
 	const used = row?.rows ?? 0;
-	return c.json({ pressure: budgetMode(used), used, limit: DAILY_LIMIT });
+	const limit = dailyLimit(c.env);
+	return c.json({ pressure: modeFor(used, limit), used, limit });
 });

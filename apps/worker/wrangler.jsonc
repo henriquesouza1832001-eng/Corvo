@@ -11,8 +11,10 @@
 		"ALLOWED_ORIGINS": "http://localhost:5173,https://corvo-web.henriquesouza.workers.dev",
 		// Repositório cujo workflow "collect.yml" o Cron Trigger aciona. Não é segredo.
 		"GITHUB_REPO": "henriquesouza1832001-eng/Corvo",
-		// Banco: D1 (cloudflare) + KV. O Oracle é a base; o D1 recebe só o que o painel mostra. Para usar o Turso de novo, defina DB_BACKEND=turso.
-		"DB_BACKEND": "d1"
+		// Banco: Turso (segredos TURSO_URL e TURSO_TOKEN). Enquanto os segredos não existirem, o Worker cai no D1/KV abaixo, que serão removidos depois.
+		"DB_BACKEND": "turso",
+		// Teto diário de linhas (Turso grátis: ~10 mi/mês). Ajuste depois de ver o consumo real.
+		"DAILY_WRITE_LIMIT": "300000"
 	},
 	// A cada 5 min a Cloudflare aciona a coleta (mais pontual que o agendador do GitHub).
 	"triggers": { "crons": [] },

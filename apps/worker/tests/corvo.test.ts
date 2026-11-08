@@ -54,3 +54,26 @@ describe("API do CORVO", () => {
 		expect(await r.json()).toMatchObject({ pressure: "normal", limit: 100000 });
 	});
 });
+
+describe("teto de escrita do CORVO", () => {
+	const post = (t: ReturnType<typeof setup>, body: unknown, extra: Record<string, string> = {}) =>
+		t.raw("/api/corvo/ingest", { method: "POST", headers: { Authorization: "Bearer segredo-de-teste" }, body: JSON.stringify(body) }, extra);
+	const day = new Date().toISOString().slice(0, 10);
+
+	it("em economia só passa HOT; no limite não passa notícia, mas as estatísticas continuam", async () => {
+		const t = setup();
+		t.sqlite.exec(`INSERT INTO write_budget (day,rows) VALUES ('${day}', 7000)`); // 70% de 10000
+		const r = (await (await post(t, { news: [news("a"), news("b", { verdict: "buffer", relevance: 0.4 })], stats: [stats] }, { DAILY_WRITE_LIMIT: "10000" })).json()) as any;
+		expect(r).toMatchObject({ shed: 1, mode: "economy" });
+		t.sqlite.exec(`UPDATE write_budget SET rows = 10000 WHERE day = '${day}'`);
+		const r2 = (await (await post(t, { news: [news("c")], stats: [stats] }, { DAILY_WRITE_LIMIT: "10000" })).json()) as any;
+		expect(r2).toMatchObject({ shed: 1, mode: "critical", written: 1 });
+	});
+
+	it("a pressão usa o limite configurado", async () => {
+		const t = setup();
+		t.sqlite.exec(`INSERT INTO write_budget (day,rows) VALUES ('${day}', 7000)`);
+		const r = await t.raw("/api/corvo/pressure", { headers: { Authorization: "Bearer segredo-de-teste" } }, { DAILY_WRITE_LIMIT: "10000" });
+		expect(await r.json()).toMatchObject({ pressure: "economy", limit: 10000 });
+	});
+});
