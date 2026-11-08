@@ -1,7 +1,7 @@
 """Hipóteses de impacto (proposta M3): do TEMA do Hugin aos ATIVOS que ele pode mexer, com direção e horizonte.
 
 Tabela EDITÁVEL e AUDITÁVEL; nada de modelo de linguagem decidindo. **Direção e ativo são HIPÓTESES**: só viram peso depois que Munin
-medir, com amostra mínima (30 por tema, ativo e horizonte), que a hipótese se sustenta. Até lá, são só perguntas a testar.
+medir, com amostra mínima (30 eventos independentes por tema, ativo, direção e horizonte), que a hipótese se sustenta. Até lá, são só perguntas a testar.
 Os temas são os de `intake/gate.py` (`TOPICS`); um teste garante que a tabela não cita tema inexistente.
 """
 from __future__ import annotations

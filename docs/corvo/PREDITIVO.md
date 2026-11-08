@@ -39,7 +39,7 @@ A **taxa-base** é a frequência com que algo aconteceu antes: "depois de um cor
 2. **Dizer "não sei" é natural:** abaixo de 30 casos, o CORVO **se abstém** (`dados insuficientes`) em vez de inventar.
 3. **É auditável:** qualquer pessoa refaz a conta.
 
-**Como a probabilidade é calculada (v1).** Para cada chave *(tema, ativo, horizonte)* guarda-se quantas vezes a resposta foi "sim" e "não". A estimativa é a média de uma distribuição beta com *prior* fraco (1, 1): `p = (sim + 1) / (sim + não + 2)`. O intervalo central de 80% usa aproximação normal da posterior Beta, não quantis Beta exatos; sua cobertura ainda precisa ser validada com dados. Ele encolhe com mais dados. O código está em `engine/corvo_engine/munin/baseline.py`.
+**Como a probabilidade é calculada (v1).** Para cada chave *(tema, ativo, direção da pergunta, horizonte)* guarda-se quantas vezes a resposta binária foi "sim" e "não". A direção integra a chave porque "subiu" e "caiu" são alvos diferentes. A estimativa é a média de uma distribuição beta com prior fraco (1, 1): `p = (sim + 1) / (sim + não + 2)`. O intervalo central de 80% usa aproximação normal da posterior Beta, não quantis Beta exatos; a cobertura ainda precisa de validação. O código está em `engine/corvo_engine/munin/baseline.py`.
 
 **Quando passar da taxa-base a um modelo.** Só se uma versão com características (relevância, número de fontes, hora do dia, regime de volatilidade, "surpresa" contra o consenso) **bater a taxa-base no conjunto lacrado, dividido no tempo**, com Brier menor e calibração aceitável. Primeiro candidato: regressão logística regularizada, simples e explicável. Redes ou ensembles só depois, e só se ganharem do simples.
 
@@ -55,7 +55,7 @@ Uma tabela **editável e auditável** (nada de modelo de linguagem decidindo): `
 Para conferir, é preciso o **preço real** no horizonte. Fonte pública e gratuita, a registrar antes em `docs/sources/SOURCES.md` (acesso, termos, limite, retenção): candles públicos de cripto e cotações de referência de câmbio. **Sem essa fonte registrada, nada é resolvido** e as previsões ficam abertas. Regras de resolução: janela contada a partir do horário do evento, retorno **anormal** (acima de k desvios da volatilidade recente, não acima de zero), mercado fechado = previsão anulada, nunca "não".
 
 ### 4.4 Quanto tempo leva ter amostra
-Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos por dia. Para **30 casos por (tema, ativo, horizonte)** são **semanas**, não horas. Por isso a primeira versão mira **poucos pares** (3 temas × 3 ativos × 2 horizontes) e deixa o resto em "dados insuficientes".
+Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos por dia. Para **30 casos independentes por (tema, ativo, direção, horizonte)** são **semanas**, não horas. Por isso a primeira versão mira **poucos pares** (3 temas × 3 ativos × 2 direções × 2 horizontes) e deixa o resto em "dados insuficientes".
 
 ## 5. Como evitar enganar a si mesmo
 

@@ -339,7 +339,7 @@ Comece com uma **tabela editável e auditável** (nada de LLM):
 
 #### Regra operacional proposta
 
-1. Conte **eventos independentes resolvidos**, nao artigos repetidos nem janelas de preco sobrepostas. Uma hipotese e a chave `(tema, ativo, horizonte)`; estimativa por fonte tambem exige 30 eventos resolvidos daquela fonte. Na mesma chave, aceite um resultado historico so se sua janela comecar no fechamento da ultima janela aceita. Com `n < 30`, mantenha o peso anterior e retorne `INSUFFICIENT_DATA`.
+1. Conte **eventos independentes resolvidos**, nao artigos repetidos nem janelas de preco sobrepostas. Uma pergunta binaria e a chave `(tema, ativo, direcao, horizonte)`; estimativa por fonte tambem exige 30 eventos resolvidos daquela fonte. Na mesma chave, aceite um resultado historico so se sua janela comecar no fechamento da ultima janela aceita. Com `n < 30`, mantenha o peso anterior e retorne `INSUFFICIENT_DATA`.
 2. Ordene por `resolved_at`: use os 70% mais antigos para ajuste e os 30% seguintes como prova futura. Não embaralhe nem reabra a janela de prova para escolher pesos. Depois, avance a janela e repita como walk-forward.
 3. Em cada janela, compare Brier com a taxa-base calculada somente no passado. Reporte Brier skill, ECE, cobertura do intervalo, número de eventos e número de hipóteses testadas. A amostra de pouca dimensão continua `EXPERIMENTAL`, mesmo se uma métrica parecer boa.
 4. Para a família de hipóteses testadas na janela, aplique Benjamini-Hochberg com FDR `q = 0.05`; publique a lista completa e os valores ajustados, inclusive os que não passaram. Só proponha atualizar um peso se `n >= 30`, Brier skill for positivo, ECE `<= 0.05` e o resultado passar a correção em **duas janelas futuras consecutivas**. Caso contrário, `HOLD`.

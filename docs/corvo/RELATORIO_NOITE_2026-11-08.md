@@ -491,3 +491,8 @@ O T0 cobre os 31 itens gravados reportados no bucket; a fotografia esta cerca de
 O ciclo 8 terminou as 20:40:08: 24 feeds sem falhas, 1 item novo e nenhum preco novo (5.220 candles). O freio local ficou verde: 1.290 URLs unicas, volume 24 h 515, 458 linhas/dia (562 a 5x) e 432/432 em pressao critica.
 
 A repeticao `corvo_munin_backtest.py --dry-run` permaneceu em 55 eventos, 100 perguntas, 0 previsoes e 100 abstencoes. Ha 8 resolucoes locais sem forecast, 12 aguardando preco futuro e 80 aguardando instrumento; 6 janelas sobrepostas foram excluidas do baseline. BTC/ETH tem 1 resultado independente cada, faltando 29 para `n=30`. Brier, taxa-base, skill e ECE seguem N/A. A raspagem externa segue ativa em `--dry-run`, PID 13596.
+
+
+### 9.27 Chave de amostra por direcao (20:44 BRT)
+
+Alinhei `PREDITIVO.md`, o protocolo M6, a nota 8 e os docstrings de Munin com a chave real do baseline: `(tema, ativo, direcao da pergunta, horizonte)`. Uma resposta binaria a "subiu" nao pode ser misturada com a resposta a "caiu" ou "volatilidade"; cada direcao exige seus proprios 30 resultados independentes, em janelas nao sobrepostas. Esta foi uma correcao documental, sem alteracao de comportamento, registros ou contrato.
