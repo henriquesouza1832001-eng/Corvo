@@ -18,7 +18,7 @@ Abaixo de 8 se: qualquer entrega preditiva for só texto (sem código e teste), 
 ## 2. O que significa "preditivo palpável" nesta rodada
 Não é prever bem (isso exige semanas de dados). É **o robô já fazer o caminho inteiro e mostrar o resultado**:
 
-1. **Evento** (`munin/events.py`): agrupa as notícias aprovadas do corpus em eventos (mesmo fato, várias fontes). Id estável, horário da **primeira** fonte, número de fontes independentes, nível de confirmação. Mede **fusões erradas** em pares rotulados (meta ≤ 2%).
+1. **Evento** (`munin/events.py`): agrupa noticias aprovadas por fato; ID estavel ancorado na primeira publicacao/URL. Para o replay, `available_at` e o maior `cycle_at` do grupo (todas as fontes ja conhecidas); use-o para ordenar eventos e iniciar a janela de preco. Se faltar `cycle_at`, conte e omita o evento do replay, sem adivinhar por `published_at`. Mede fusoes erradas em pares rotulados (meta <= 2%).
 2. **Hipótese** (`munin/impact.py`): para cada evento, lista tema → ativos candidatos (já existe a tabela; revise com o corpus real e anote o que não faz sentido).
 3. **Pergunta fechada com regra de resolução** (`munin/questions.py`): texto, ativo, horizonte, limiar de retorno anormal, o que anula (mercado fechado) e quando resolve. Determinística.
 4. **Probabilidade** (`munin/baseline.py`, já pronto): taxa-base por (tema, ativo, horizonte); **abstenção explícita** com n < 30.

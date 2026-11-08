@@ -135,17 +135,27 @@ def run_backtest(
     symbols = {str(row.get("ativo", "")).strip() for row in rows if row.get("ativo")}
     model = BaseRateModel(min_n=min_n)
     entries: list[dict] = []
-    pending: list[tuple[datetime, tuple[str, str, str], bool]] = []
+    pending: list[tuple[datetime, datetime, tuple[str, str, str], bool]] = []
+    last_independent_window_end: dict[tuple[str, str, str], datetime] = {}
+    overlapping_outcomes_excluded = 0
     skipped_without_cycle_at = sum(event.available_at is None for event in events)
 
     for event in events:
         event_time = _utc(event.available_at)
         if event_time is None:
             continue
-        ready = [item for item in pending if item[0] <= event_time]
-        pending = [item for item in pending if item[0] > event_time]
-        for _, key, outcome in ready:
+        ready = sorted(
+            (item for item in pending if item[1] <= event_time),
+            key=lambda item: (item[0], item[1], item[2]),
+        )
+        pending = [item for item in pending if item[1] > event_time]
+        for start, end, key, outcome in ready:
+            previous_end = last_independent_window_end.get(key)
+            if previous_end is not None and start < previous_end:
+                overlapping_outcomes_excluded += 1
+                continue
             model.update(key, outcome)
+            last_independent_window_end[key] = end
 
         for question in questions_for_event(event, available_price_symbols=symbols):
             key = _key(question)
@@ -154,8 +164,9 @@ def run_backtest(
             prior_n = model.n(key)
             entries.append(_entry(event, question, resolution, prediction, len(event.source_ids), prior_n, min_n))
             end = _utc(resolution.end_at)
-            if resolution.status == "resolved" and resolution.outcome is not None and end is not None:
-                pending.append((end, key, resolution.outcome))
+            start = _utc(resolution.start_at)
+            if resolution.status == "resolved" and resolution.outcome is not None and start is not None and end is not None and end > start:
+                pending.append((start, end, key, resolution.outcome))
 
     scored_entries = [
         entry
@@ -191,6 +202,7 @@ def run_backtest(
     return {
         "events": len(events),
         "events_skipped_missing_cycle_at": skipped_without_cycle_at,
+        "overlapping_outcomes_excluded": overlapping_outcomes_excluded,
         "questions": len(entries),
         "forecasts": forecast_count,
         "abstentions": abstention_count,

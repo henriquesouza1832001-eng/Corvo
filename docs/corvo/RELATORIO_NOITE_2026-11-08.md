@@ -444,3 +444,14 @@ Corrigi a disponibilidade do evento para o maior `cycle_at` entre as materias ag
 A bateria Munin direcionada ficou em **22 passed**. No painel real local, os 55 eventos continuam produzindo 100 perguntas, 0 previsoes e 100 abstencoes por `n<30`; nenhum evento foi omitido por falta de `cycle_at`. Resolucoes locais sem previsao cairam de 18 para 8, enquanto `awaiting_future_price` subiu de 2 para 12 e `awaiting_price` permaneceu 80. Esta mudanca reduz resultados historicos aparentes porque inicia o horizonte quando a informacao realmente estava disponivel; nao e ganho de precisao. Brier, skill e ECE seguem N/A, Munin M3 sem avaliacao preditiva real.
 
 Freio antes deste commit: 1288 URLs unicas, volume 24 h 522, 458 linhas/dia (562 a 5x), pressao critica 432/432; dentro dos limites. A coleta externa permanece ativa em `--dry-run`.
+
+
+### 9.22 Janelas independentes no baseline (20:30 BRT)
+
+A regra M6 pedia 30 eventos independentes, mas o replay ainda podia contar duas resolucoes da mesma chave cujas janelas de preco se sobrepunham. Acrescentei um filtro conservador por `(tema, ativo, direcao, horizonte)`: uma resolucao so entra no baseline se a janela dela comecar no fechamento da ultima janela aceita. Resultados sobrepostos continuam registrados como resolvidos, mas nao aumentam `n`.
+
+Teste sintetico marcado `synthetic` usa eventos a cada 3 horas com horizonte de 6 horas: janelas sobrepostas nao levam uma chave de `n=1` a `n=2`; o replay informa a exclusao. A bateria direcionada Munin ficou em **23 passed**. No corpus local, 6 resultados sobrepostos foram retirados das contagens de amostra; BTC e ETH cripto ficam com 1 resultado independente cada e precisam de mais 29 para `n=30` (antes, o painel contava 4). As resolucoes de preco permanecem 8 `resolved`, 12 `awaiting_future_price` e 80 `awaiting_price`; previsoes continuam 0, absten??es 100 e Brier/ECE N/A.
+
+Atualizei o protocolo M6 e a documentacao preditiva para definir independencia como janelas nao sobrepostas por chave; atualizei tambem a nota 8 para separar ID ancorado na publicacao da hora local de disponibilidade (`cycle_at`). Esta e uma regra de amostragem mais cautelosa, nao uma melhora de acerto. Munin segue M3, Hugin H2.
+
+O ciclo 7 terminou as 20:30:07 com 24 feeds sem falhas e 1 item novo; precos sem novas linhas (5.220). Freio antes do commit: 1.289 URLs unicas, volume 24 h 520, 458 linhas/dia (562 a 5x), pressao critica 432/432; verde. A coleta permanece ativa.

@@ -5,14 +5,14 @@ import math
 from corvo_engine.munin.backtest import run_backtest
 
 
-def synthetic_fixture(event_count=31):
+def synthetic_fixture(event_count=31, event_spacing_hours=72):
     first_event = datetime(2026, 6, 1, tzinfo=timezone.utc)
     events = []
     for index in range(event_count):
-        stamp = first_event + timedelta(hours=72 * index)
+        stamp = first_event + timedelta(hours=event_spacing_hours * index)
         events.append({
             "source_id": "synthetic-wire",
-            "title": f"Crypto incident token{index}",
+            "title": f"quasar{index} nebula{index}",
             "url": f"https://synthetic.test/{index}",
             "published_at": stamp.isoformat().replace("+00:00", "Z"),
             "cycle_at": stamp.isoformat().replace("+00:00", "Z"),
@@ -21,7 +21,7 @@ def synthetic_fixture(event_count=31):
         })
 
     start = first_event - timedelta(hours=300)
-    end = first_event + timedelta(hours=72 * (event_count - 1) + 8)
+    end = first_event + timedelta(hours=event_spacing_hours * (event_count - 1) + 8)
     hours = int((end - start).total_seconds() // 3600)
     price = 100.0
     prices = []
@@ -93,6 +93,18 @@ def test_backtest_skips_events_without_observed_at_instead_of_using_publication_
     assert result["events_skipped_missing_cycle_at"] == 1
     assert result["questions"] == 0
     assert result["entries"] == []
+
+
+def test_overlapping_price_windows_do_not_count_as_independent_baseline_samples():
+    events, prices = synthetic_fixture(event_count=4, event_spacing_hours=3)
+
+    result = run_backtest(events, prices, min_n=2)
+
+    btc_entries = [entry for entry in result["entries"] if entry["asset"] == "BTC"]
+    assert btc_entries[-1]["record_type"] == "abstention"
+    assert btc_entries[-1]["n_prior_resolved_events"] == 1
+    assert btc_entries[-1]["remaining_to_min_n"] == 1
+    assert result["overlapping_outcomes_excluded"] >= 1
 
 
 def test_local_registry_preserves_explicit_official_confirmation():
