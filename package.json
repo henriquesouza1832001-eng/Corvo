@@ -1,5 +1,5 @@
 {
-  "name": "pulso",
+  "name": "corvo",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -7,10 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "npm run dev -w @pulso/web",
-    "dev:worker": "npm run dev -w @pulso/worker",
-    "db:migrate": "npm run db:migrate -w @pulso/worker",
-    "db:seed": "npm run db:seed -w @pulso/worker",
+    "dev:web": "npm run dev -w @corvo/web",
+    "dev:worker": "npm run dev -w @corvo/worker",
+    "db:migrate": "npm run db:migrate -w @corvo/worker",
+    "db:seed": "npm run db:seed -w @corvo/worker",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"

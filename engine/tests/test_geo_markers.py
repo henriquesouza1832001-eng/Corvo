@@ -1,6 +1,6 @@
 import pytest
 
-from pulso_engine.processing.geo import locate, state_place
+from corvo_engine.processing.geo import locate, state_place
 
 
 @pytest.mark.parametrize("text,uf,precision", [

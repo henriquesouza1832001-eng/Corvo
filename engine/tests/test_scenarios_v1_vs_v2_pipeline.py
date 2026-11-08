@@ -2,8 +2,8 @@
 desligadas e ligadas e compara. O V1 é a referência: o V2 só pode acrescentar informação, nunca criar alarme num dia normal."""
 import pytest
 
-from pulso_engine.pipeline import run_once, signal_dict
-from pulso_engine.simulation import SCENARIOS
+from corvo_engine.pipeline import run_once, signal_dict
+from corvo_engine.simulation import SCENARIOS
 
 V2_FLAGS = ("SEASONAL_BASELINE_V2", "CLUSTER_REFINE")
 

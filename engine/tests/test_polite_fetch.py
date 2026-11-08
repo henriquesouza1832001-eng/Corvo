@@ -4,8 +4,8 @@ import time
 import urllib.error
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.news import rss
-from pulso_engine.pipeline import run_once
+from corvo_engine.collectors.news import rss
+from corvo_engine.pipeline import run_once
 
 
 class _Resp(io.BytesIO):

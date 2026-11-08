@@ -66,7 +66,7 @@ Termos: guia para jornalistas (terms_url): reprodução livre de notícias com a
 Exibição pública: título + link com crédito "Agência Câmara Notícias" (headline_link)
 Classe OFFICIAL: mesma justificativa da Agência Senado.
 ```
-**Ativação (2026-10-03):** Senado, Câmara e INMET ligados por decisão de Arthur266760 (`reviewed_by`), com piloto de poucas horas em vez das 48 h do protocolo §3 (Senado/Câmara ONLINE no Actions; INMET testado localmente). Acompanhar `source_health` nos primeiros dias; se houver erro recorrente ou falso positivo, voltar `enabled: false` (o painel remove a fonte sozinho). Piloto: `py -m pulso_engine.pipeline --source agencia-senado --source agencia-camara`.
+**Ativação (2026-10-03):** Senado, Câmara e INMET ligados por decisão de Arthur266760 (`reviewed_by`), com piloto de poucas horas em vez das 48 h do protocolo §3 (Senado/Câmara ONLINE no Actions; INMET testado localmente). Acompanhar `source_health` nos primeiros dias; se houver erro recorrente ou falso positivo, voltar `enabled: false` (o painel remove a fonte sozinho). Piloto: `py -m corvo_engine.pipeline --source agencia-senado --source agencia-camara`.
 
 ## INMET — avisos meteorológicos — ATIVA
 ```
@@ -103,7 +103,7 @@ Mesmo modelo dos sensores de política (mesmas comunidades e `subreddit_states` 
 - Dados: título de até 300 caracteres (sem links; `@menções` viram `@usuário`), URL e data, sem autor/texto integral/perfil; retenção 1 dia apenas proposta. [Acordo de desenvolvedor](https://docs.x.com/developer-terms/agreement): conferir exibição, remoção/edição de posts, uso analítico, direitos sobre dados derivados e histórico antes de ativar. Exibição pública e previsões pendentes de aprovação/revisão humana.
 - Fallback: RSS de notícias; 401/403/429: parar e alertar, nunca contornar limites. Revisão: PENDENTE.
 
-**Como rodar o piloto (local ou Actions, sem enviar):** exporte as credenciais e rode `py -m pulso_engine.pipeline --source reddit-politics --source x-politics`. A CLI aceita fonte desativada nesse modo e recusa `--push`. Respostas 429 viram `RATE_LIMITED` e 401/403 `AUTH_ERROR` em `source_health`, sem nova tentativa no ciclo. Decisão: `docs/decisions/0003-sensores-sociais-reddit-x.md`.
+**Como rodar o piloto (local ou Actions, sem enviar):** exporte as credenciais e rode `py -m corvo_engine.pipeline --source reddit-politics --source x-politics`. A CLI aceita fonte desativada nesse modo e recusa `--push`. Respostas 429 viram `RATE_LIMITED` e 401/403 `AUTH_ERROR` em `source_health`, sem nova tentativa no ciclo. Decisão: `docs/decisions/0003-sensores-sociais-reddit-x.md`.
 
 **Piloto automático no Actions:** o `collect.yml` tem o passo "Piloto dos sensores sociais (sem envio)". Ele não faz nada até existirem os secrets; criado `REDDIT_CLIENT_ID`+`REDDIT_CLIENT_SECRET` e/ou `X_BEARER_TOKEN`, a fonte correspondente passa a rodar na sua janela de `interval_s` (`--respect-interval`), sem `--push`, e o log mostra só saúde e contagem por categoria (fonte `metrics_only`; o repositório é público). Para encerrar o piloto, apague o secret. Avaliar as 48 h pelos logs do workflow "Coleta".
 
@@ -239,7 +239,7 @@ Papel: detector rápido de eventos de clima, emergência e política.
 ```
 
 ## Fontes de alerta (`alert_source`)
-As fontes marcadas com `"alert_source": true` (`inmet-avisos`, `defesa-civil-idap`) são canais oficiais de alerta de desastre: um alerta delas classificado como EMERGENCY (risco extremo) dá ao evento um piso de nível PULSO 3 (ver `docs/SCORING.md`). Não marque como `alert_source` uma fonte de comunicados ou notícias.
+As fontes marcadas com `"alert_source": true` (`inmet-avisos`, `defesa-civil-idap`) são canais oficiais de alerta de desastre: um alerta delas classificado como EMERGENCY (risco extremo) dá ao evento um piso de nível CORVO 3 (ver `docs/SCORING.md`). Não marque como `alert_source` uma fonte de comunicados ou notícias.
 
 ## Fontes de limiar (`quiet_ok`)
 Fontes que só emitem quando passam de um limiar (`inmet-avisos`, `inpe-queimadas`, `bcb-ptax`) levam `"quiet_ok": true` em `sources.json`: sem ocorrência no limiar a saúde é ONLINE ("sem ocorrências no limiar"), e não DEGRADED. Fonte de feed contínuo (RSS) sem itens continua DEGRADED.
@@ -264,7 +264,7 @@ Testadas 10 instâncias e as hashtags `chuva`, `enchente`, `incendio`, `brasil` 
 
 ### Fontes que funcionam de uma rede e são bloqueadas da outra (2026-10-03)
 - `metsul` (MetSul Meteorologia): o feed responde da rede local, mas devolve **HTTP 403 a partir do GitHub Actions** (bloqueio de IP de nuvem). Está **desligada** em `sources.json` (campo `note`). Não se contorna bloqueio (COLLECTION_PROTOCOL §1). Reabrir se o veículo liberar o acesso (contato) ou se a coleta passar a rodar de outro ambiente.
-- Lição de teste: validar uma fonte **só da máquina local não basta**. O ambiente que importa é o do GitHub Actions; `py -m pulso_engine.audit` rodado lá (ou o painel `/api/health` depois do deploy) é a verificação real. O verificador de saúde automático (`healthcheck.yml`) aponta fontes OFFLINE.
+- Lição de teste: validar uma fonte **só da máquina local não basta**. O ambiente que importa é o do GitHub Actions; `py -m corvo_engine.audit` rodado lá (ou o painel `/api/health` depois do deploy) é a verificação real. O verificador de saúde automático (`healthcheck.yml`) aponta fontes OFFLINE.
 - Falhas de rede transitórias (timeout, conexão resetada) têm UMA nova tentativa; erros HTTP (403, 429, 5xx) não são repetidos.
 
 ## Ficha: InfoDengue (`infodengue-capitais`)

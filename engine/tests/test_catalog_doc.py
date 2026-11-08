@@ -1,7 +1,7 @@
 import json
 
-from pulso_engine.catalog_doc import render
-from pulso_engine.pipeline import DEFAULT_SOURCES
+from corvo_engine.catalog_doc import render
+from corvo_engine.pipeline import DEFAULT_SOURCES
 
 
 def test_catalog_lists_every_configured_source_and_counts_active_ones():

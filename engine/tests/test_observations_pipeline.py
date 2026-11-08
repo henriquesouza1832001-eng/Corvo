@@ -1,7 +1,7 @@
 """Passo 1 do Sentinela no pipeline: contagem de duplicatas, janela de reenvio e o lote final."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import OBS_MAX, chunks, run_once, select_observations
+from corvo_engine.pipeline import OBS_MAX, chunks, run_once, select_observations
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)  # minuto 2: dentro da janela de envio
 

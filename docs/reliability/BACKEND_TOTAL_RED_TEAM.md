@@ -4,7 +4,7 @@ Data de corte: 2026-10-03. HEAD remoto principal: `098327e` (`origin/main`). A a
 
 ## 1. Executive Summary
 
-O PULSO tem defesas úteis, mas não há evidência para chamá-lo confiável ponta a ponta ou para promover Forecast V2. A campanha confirmou correções de vazamento temporal, hardening de API e idempotência local; ainda há caminhos onde saúde ou inteligência podem apenas parecer corretas. Forecast V2 permanece `SHADOW`/`EXPERIMENTAL`; V1 permanece experimental.
+O CORVO tem defesas úteis, mas não há evidência para chamá-lo confiável ponta a ponta ou para promover Forecast V2. A campanha confirmou correções de vazamento temporal, hardening de API e idempotência local; ainda há caminhos onde saúde ou inteligência podem apenas parecer corretas. Forecast V2 permanece `SHADOW`/`EXPERIMENTAL`; V1 permanece experimental.
 
 Não houve novo vazamento temporal explorável. A corrupção/idempotência foi reproduzida localmente e corrigida para as tabelas principais, mas o ensaio ainda não cobre o servidor Turso remoto nem o binding D1 real.
 
@@ -25,12 +25,12 @@ Concluído e já mergeado na `main`: Forecast V2 em shadow; track-record com mé
 
 ## 4. P0 Findings
 
-### PULSO-RT-001 — outcome futuro dentro do replay (corrigido; regressão mantida)
+### CORVO-RT-001 — outcome futuro dentro do replay (corrigido; regressão mantida)
 
 | Campo | Evidência |
 |---|---|
 | Severity / component | P0 corrigido / replay temporal |
-| File | `engine/pulso_engine/validation/replay.py` |
+| File | `engine/corvo_engine/validation/replay.py` |
 | Observed | `payload` genérico aceitava desfecho e podia otimizar a avaliação. |
 | Expected | desfecho e resolução não entram antes do cutoff. |
 | Reproduction / test | `engine/tests/reliability/test_data_leakage.py` injeta `outcome`, `resolved_at`, `resolution` e variações. |
@@ -42,12 +42,12 @@ Concluído e já mergeado na `main`: Forecast V2 em shadow; track-record com mé
 
 ## 5. P1 Findings
 
-### PULSO-RT-002 — HTTP 200 pode mascarar conteúdo estagnado
+### CORVO-RT-002 — HTTP 200 pode mascarar conteúdo estagnado
 
 | Campo | Evidência |
 |---|---|
 | Severity / component | P1 / saúde de fonte e observabilidade |
-| File | `engine/pulso_engine/pipeline.py`, `apps/worker/src/routes/health.ts` |
+| File | `engine/corvo_engine/pipeline.py`, `apps/worker/src/routes/health.ts` |
 | Observed | `source_health` registra transporte; freshness de conteúdo por fonte não foi provada. Em produção, `/api/health` respondeu 200 com ciclo de 345 s, mas expõe apenas `last_success`, não um estado separado de freshness/cobertura. |
 | Expected | `TRANSPORT_HEALTH`, `DATA_FRESHNESS`, `DATA_QUALITY` e `EVENT_EVIDENCE` separados. |
 | Reproduction / test | ataque `200` com payload repetido/stale ainda não automatizado ponta a ponta. |
@@ -55,7 +55,7 @@ Concluído e já mergeado na `main`: Forecast V2 em shadow; track-record com mé
 | Suggested fix area | idade de conteúdo e cobertura até status, Sentinela e forecast. |
 | Do not modify | fonte `quiet_ok` não falha só por não emitir evento. |
 
-### PULSO-RT-003 — Sentinela abre investigações em dia ruidoso normal
+### CORVO-RT-003 — Sentinela abre investigações em dia ruidoso normal
 
 | Campo | Evidência |
 |---|---|
@@ -68,12 +68,12 @@ Concluído e já mergeado na `main`: Forecast V2 em shadow; track-record com mé
 | Suggested fix area | `claude-motor`: baseline/contexto e política de investigação. |
 | Do not modify | cenário negativo adversarial. |
 
-### PULSO-RT-004 — Forecast sem evidência científica de skill
+### CORVO-RT-004 — Forecast sem evidência científica de skill
 
 | Campo | Evidência |
 |---|---|
 | Severity / component | P1 / forecast e calibração |
-| File | `docs/research/PREDICTIVE_VALIDATION.md`, `engine/pulso_engine/validation/` |
+| File | `docs/research/PREDICTIVE_VALIDATION.md`, `engine/corvo_engine/validation/` |
 | Observed | produção: 20 resolvidas, 0 positivas, 4 abertas, 4 anuladas; Brier 0,01961455, p média 0,09928 e baseline Brier 0. |
 | Expected | Brier Skill fora do tempo, calibração, FPR/recall, lead time e N por horizonte. |
 | Reproduction / test | métricas/splits/gate têm testes; não há corpus real COMPLETE nem shadow resolvido. |
@@ -83,7 +83,7 @@ Concluído e já mergeado na `main`: Forecast V2 em shadow; track-record com mé
 
 Brier absoluto não prova valor: com todos os desfechos negativos a referência é zero e Brier Skill é indefinido. Há sinal de sobreprevisão inicial, mas N=20 não justifica tuning.
 
-### PULSO-RT-005 — autoridade e recuperação de storage não comprovadas
+### CORVO-RT-005 — autoridade e recuperação de storage não comprovadas
 
 | Campo | Evidência |
 |---|---|
@@ -96,7 +96,7 @@ Brier absoluto não prova valor: com todos os desfechos negativos a referência 
 | Suggested fix area | aplicar/validar no backend real; tornar orçamento parte da mesma transação ou reconciliá-lo. |
 | Do not modify | migrations aplicadas ou dados de produção. |
 
-### PULSO-RT-006 — fontes não são confiabilidade validada
+### CORVO-RT-006 — fontes não são confiabilidade validada
 
 | Campo | Evidência |
 |---|---|
@@ -111,7 +111,7 @@ Brier absoluto não prova valor: com todos os desfechos negativos a referência 
 
 ## 6. P2 Findings
 
-### PULSO-RT-007 — hardening administrativo não demonstrado
+### CORVO-RT-007 — hardening administrativo não demonstrado
 
 | Campo | Evidência |
 |---|---|
@@ -124,7 +124,7 @@ Brier absoluto não prova valor: com todos os desfechos negativos a referência 
 | Suggested fix area | criar `ADMIN_TOKEN`/`PULSO_ADMIN_TOKEN`, confirmar `admin_token_separate=true`, configurar rate limit/WAF. |
 | Do not modify | segredos e `.dev.vars`. |
 
-### PULSO-RT-008 — métricas de clustering/provenance/performance ausentes
+### CORVO-RT-008 — métricas de clustering/provenance/performance ausentes
 
 Não há corpus medido para `false_merge_rate`, `false_split_rate`, `duplicate_origin_ratio`, custo por sinal útil, nem p50/p95/p99 em 100--100k observações. Teste unitário verde não prova estabilidade sob syndication ou volume.
 

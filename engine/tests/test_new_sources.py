@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.registry import build_adapter
+from corvo_engine.collectors.registry import build_adapter
 
 NOW = datetime(2026, 10, 2, 15, 0, tzinfo=timezone.utc)
 

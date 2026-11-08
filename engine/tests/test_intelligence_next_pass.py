@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.events import is_publishable, stats_for, status_for
-from pulso_engine.models import Signal
-from pulso_engine.processing.clustering import Cluster, cluster_signals
-from pulso_engine.processing.importance import EDITORIAL_ONLY, POTENTIAL_INCIDENT, SCHEDULED_CONTEXT, assess
+from corvo_engine.events import is_publishable, stats_for, status_for
+from corvo_engine.models import Signal
+from corvo_engine.processing.clustering import Cluster, cluster_signals
+from corvo_engine.processing.importance import EDITORIAL_ONLY, POTENTIAL_INCIDENT, SCHEDULED_CONTEXT, assess
 
 NOW = datetime(2026, 10, 3, 18, 0, tzinfo=timezone.utc)
 

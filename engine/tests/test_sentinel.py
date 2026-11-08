@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.radar import analyze
-from pulso_engine.research.sentinel import SentinelConfig, advance, detect_candidates, find_active, should_investigate
+from corvo_engine.models import Signal
+from corvo_engine.radar import analyze
+from corvo_engine.research.sentinel import SentinelConfig, advance, detect_candidates, find_active, should_investigate
 
 NOW = datetime(2026, 10, 4, 6, 20, tzinfo=timezone.utc)  # domingo 03:20 em Brasília
 CFG = SentinelConfig()

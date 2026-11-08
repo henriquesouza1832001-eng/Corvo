@@ -20,10 +20,10 @@ Atenção especial: INPE, Defesa Civil (IDAP), InfoDengue, Banco Central e USGS 
 ## 3. Acompanhar nos primeiros dias
 - **Cloudflare D1** (painel > D1 > pulso > Metrics): linhas **escritas** (limite gratuito 100 mil/dia) e **lidas** (5 milhões/dia). A estimativa é ~12 mil escritas e 3 a 4 milhões de leituras por dia, mas só o painel confirma. Se as leituras passarem de ~4 milhões, espaçar o ciclo para 10 min ou migrar para o plano pago (ver `docs/decisions/0006`, "Orçamento do D1").
 - **E-mails de falha do GitHub Actions**: o workflow `Saúde da produção` falha e avisa quando a coleta para, o banco cai ou a maioria das fontes sai do ar. Diagnóstico: `docs/RUNBOOK.md`.
-- **Previsões**: aparecem sozinhas quando houver histórico (Pulso: ~3,5 h; volume por categoria: > 25 h). O histórico de acertos fica em `/api/forecasts/track-record`. Nada disso é acurácia comprovada até haver semanas de dados.
+- **Previsões**: aparecem sozinhas quando houver histórico (Corvo: ~3,5 h; volume por categoria: > 25 h). O histórico de acertos fica em `/api/forecasts/track-record`. Nada disso é acurácia comprovada até haver semanas de dados.
 
 ## 4. Datas e riscos conhecidos
-- **Domingo, 4/10/2026: primeiro turno das eleições.** A coleta deve ter pico de política e internacional. O PULSO não coleta a apuração do TSE (formato do arquivo de resultados de 2026 não verificado); a cobertura vem da imprensa e do Senado/Câmara. Integrar a apuração oficial do TSE é a próxima fonte natural (verificar o endereço dos arquivos de resultado assim que o TSE publicar).
+- **Domingo, 4/10/2026: primeiro turno das eleições.** A coleta deve ter pico de política e internacional. O CORVO não coleta a apuração do TSE (formato do arquivo de resultados de 2026 não verificado); a cobertura vem da imprensa e do Senado/Câmara. Integrar a apuração oficial do TSE é a próxima fonte natural (verificar o endereço dos arquivos de resultado assim que o TSE publicar).
 - **`GH_DISPATCH_TOKEN` vence em 31/12/2026**: renovar antes (o Cron deixa de disparar a coleta).
 - **Um token da Cloudflare foi colado em chat** (registrado no `BACKEND_STATUS.md`): deve ser **revogado** se ainda não foi.
 - **Fontes bloqueadas de nuvem**: o MetSul responde da sua rede e dá 403 no GitHub Actions; está desligado. Não se contorna bloqueio.

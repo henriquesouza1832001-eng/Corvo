@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.intelligence.trends import persistence_min, trend_state, trends, window_metrics
-from pulso_engine.models import Signal
+from corvo_engine.intelligence.trends import persistence_min, trend_state, trends, window_metrics
+from corvo_engine.models import Signal
 
 NOW = datetime(2026, 10, 3, 15, 0, tzinfo=timezone.utc)
 

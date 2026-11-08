@@ -1,4 +1,4 @@
--- PULSO schema v2 (Fase 1). Câmeras e trânsito entram em migrations próprias (Fase 2/3).
+-- CORVO schema v2 (Fase 1). Câmeras e trânsito entram em migrations próprias (Fase 2/3).
 -- Timestamps em ISO-8601 UTC (TEXT). Nunca alterar produção sem migration correspondente.
 
 CREATE TABLE sources (

@@ -1,5 +1,5 @@
 {
-  "name": "@pulso/worker",
+  "name": "@corvo/worker",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
     "db:seed": "wrangler d1 execute pulso --local --file ../../database/seeds/dev.sql"
   },
   "dependencies": {
-    "@pulso/shared": "*",
+    "@corvo/shared": "*",
     "hono": "^4.9.0",
     "zod": "^4.1.0"
   },

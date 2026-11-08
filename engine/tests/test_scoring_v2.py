@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.events import build_event, stats_for
-from pulso_engine.models import EventStats, Signal
-from pulso_engine.processing.clustering import cluster_signals
-from pulso_engine.scoring.confidence import confidence
-from pulso_engine.scoring.pulse import WEIGHTS, WEIGHTS_V2, pulse_score
+from corvo_engine.events import build_event, stats_for
+from corvo_engine.models import EventStats, Signal
+from corvo_engine.processing.clustering import cluster_signals
+from corvo_engine.scoring.confidence import confidence
+from corvo_engine.scoring.pulse import WEIGHTS, WEIGHTS_V2, pulse_score
 
 NOW = datetime(2026, 10, 4, 12, 0, tzinfo=timezone.utc)
 V1_WEIGHTS = [("severity", 20), ("confidence", 15), ("velocity", 15), ("sources", 15), ("anomaly", 15),

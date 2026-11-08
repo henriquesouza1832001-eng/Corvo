@@ -13,7 +13,7 @@ export function Markets({ items }: { items: Forecast[] }) {
 					<span className="mkt-title">MERCADOS</span>
 					<span className="dim">ODDS</span>
 				</div>
-				<p className="state">MODELO PREDITIVO OFFLINE · PULSO-ML AINDA NÃO TREINADO COM DADOS REAIS</p>
+				<p className="state">MODELO PREDITIVO OFFLINE · CORVO-ML AINDA NÃO TREINADO COM DADOS REAIS</p>
 			</div>
 		);
 	return (

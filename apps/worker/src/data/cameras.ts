@@ -1,6 +1,6 @@
 // GERADO por engine/scripts/gen_cameras_ts.py a partir de engine/config/cameras.json. Não edite à mão.
-// O PULSO é apenas o placeholder: mostra a prévia do próprio provedor (quando ele permite) e leva o clique à página de origem.
-import type { CameraFeed } from "@pulso/shared";
+// O CORVO é apenas o placeholder: mostra a prévia do próprio provedor (quando ele permite) e leva o clique à página de origem.
+import type { CameraFeed } from "@corvo/shared";
 
 export const CAMERAS: CameraFeed[] = [
 	{ id: "realdata-1", label: "Bairro Industrial (Contagem)", city: "Contagem", state: "MG", provider: "RealData Telecom", attribution: "RealData Internet", page_url: "https://realdata.com.br/cameras-ao-vivo/", preview: { type: "iframe", url: "https://monitore.realdata.com.br/#/cembed/5d326b838ea84f3fc93511410e413d252819164665e34d751733ba0c5240baa1a7fd96d5c4cae01d172ed56045ec" }, lat: null, lon: null },

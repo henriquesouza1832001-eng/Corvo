@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.validation.replay import ReplayClock, ReplayDataset, ReplayItem
+from corvo_engine.validation.replay import ReplayClock, ReplayDataset, ReplayItem
 
 
 def at(hour: int, minute: int = 0) -> datetime:

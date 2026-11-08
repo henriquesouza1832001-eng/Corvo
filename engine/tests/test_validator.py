@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.research.sentinel import Investigation
-from pulso_engine.research.validator import apply_validation, find_contradictions, validate
+from corvo_engine.models import Signal
+from corvo_engine.research.sentinel import Investigation
+from corvo_engine.research.validator import apply_validation, find_contradictions, validate
 
 NOW = datetime(2026, 10, 4, 6, 20, tzinfo=timezone.utc)
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { Blocks } from "../ui/Blocks";
 import { levelVar } from "../ui/LevelTag";
 
@@ -17,11 +17,11 @@ export function StateList({
 	events,
 	onStateSelect,
 }: {
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	onStateSelect: (uf: string) => void;
 }) {
 	const rows = useMemo(() => {
-		const m = new Map<string, { count: number; level: number; pulse: number; worst: PulsoEvent }>();
+		const m = new Map<string, { count: number; level: number; pulse: number; worst: CorvoEvent }>();
 		for (const e of events) {
 			if (!e.state) continue;
 			const cur = m.get(e.state);

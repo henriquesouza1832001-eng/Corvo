@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import type { EventDetail as EventDetailData, SignalRow } from "../../lib/api";
 import { api } from "../../lib/api";
 import { ago } from "../../lib/format";
@@ -28,7 +28,7 @@ export function EventPeek({
 	onDossier,
 	showSummary = true,
 }: {
-	event: PulsoEvent;
+	event: CorvoEvent;
 	onDossier: (id: string) => void;
 	showSummary?: boolean;
 }) {

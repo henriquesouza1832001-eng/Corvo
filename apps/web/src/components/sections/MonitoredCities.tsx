@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 
 /**
  * Cidades sob observação — o equivalente às pizzarias monitoradas do pizzint.
@@ -10,11 +10,11 @@ export function MonitoredCities({
 	events,
 	onSelect,
 }: {
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 	onSelect: (id: string) => void;
 }) {
 	const cities = useMemo(() => {
-		const byKey = new Map<string, PulsoEvent[]>();
+		const byKey = new Map<string, CorvoEvent[]>();
 		for (const e of events) {
 			const k = e.city ? `${e.city}|${e.state}` : `${e.state}|`;
 			if (!byKey.has(k)) byKey.set(k, []);
@@ -62,7 +62,7 @@ export function MonitoredCities({
 						</span>
 						<Histo events={c.evs} level={lv} />
 						<span className="cy-meta">
-							<span className={`l${lv}`}>PULSO {c.worst.pulse}</span>
+							<span className={`l${lv}`}>CORVO {c.worst.pulse}</span>
 							{recentSig > 0 ? (
 								<span className="cy-delta">▲ {recentSig}/2H</span>
 							) : (
@@ -77,7 +77,7 @@ export function MonitoredCities({
 }
 
 /** Mini-histograma 24h por cidade: todos os eventos agregados, tooltip por hora. */
-function Histo({ events, level }: { events: PulsoEvent[]; level: number }) {
+function Histo({ events, level }: { events: CorvoEvent[]; level: number }) {
 	const bars = new Array(24).fill(0) as number[];
 	const now = Date.now();
 	for (const e of events) {

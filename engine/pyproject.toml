@@ -1,7 +1,7 @@
 [project]
-name = "pulso-engine"
+name = "corvo-engine"
 version = "0.1.0"
-description = "PULSO Engine: coleta, NLP, geolocalização, clustering e scoring."
+description = "CORVO Engine: coleta, NLP, geolocalização, clustering e scoring."
 requires-python = ">=3.11"
 dependencies = []  # Fase 1 usa só a biblioteca padrão; dependências entram por módulo, justificadas em docs/decisions.
 
@@ -13,10 +13,10 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["pulso_engine*"]
+include = ["corvo_engine*"]
 
 [tool.setuptools.package-data]
-pulso_engine = ["processing/*.json"]
+corvo_engine = ["processing/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

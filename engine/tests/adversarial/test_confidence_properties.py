@@ -4,10 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.intelligence.coverage import by_family, coverage_ratio, degrade, factor, view_state
-from pulso_engine.models import Signal
-from pulso_engine.scoring.confidence_v2 import confidence_v2
-from pulso_engine.source_freshness import SourceReading, assess
+from corvo_engine.intelligence.coverage import by_family, coverage_ratio, degrade, factor, view_state
+from corvo_engine.models import Signal
+from corvo_engine.scoring.confidence_v2 import confidence_v2
+from corvo_engine.source_freshness import SourceReading, assess
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)
 WORDS = ("rua avenida ponte viaduto praça bairro escola mercado posto terminal rodovia túnel obra galeria represa córrego favela condomínio "
@@ -114,9 +114,9 @@ def test_unknown_stale_and_empty_are_lost_coverage_quiet_is_neutral():
 
 
 def test_coverage_reaches_anomaly_and_sentinel():
-    from pulso_engine.baseline import SeasonalBaseline
-    from pulso_engine.intelligence.anomaly_v2 import anomaly_v2
-    from pulso_engine.research.sentinel import Candidate, should_investigate
+    from corvo_engine.baseline import SeasonalBaseline
+    from corvo_engine.intelligence.anomaly_v2 import anomaly_v2
+    from corvo_engine.research.sentinel import Candidate, should_investigate
 
     base = SeasonalBaseline(16.8, 4.0, 14, "dow_hour", 14, (14, 18, 17, 15, 19, 17, 16, 18, 17, 16, 15, 17, 18, 16))
     full, partial = anomaly_v2(39, 15, base, 1.0), anomaly_v2(39, 15, base, 0.4)

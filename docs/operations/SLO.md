@@ -1,6 +1,6 @@
-# SLIs e SLOs iniciais do PULSO
+# SLIs e SLOs iniciais do CORVO
 
-> Metas **iniciais, para começar a medir**, não promessas. Nenhuma foi calibrada com série longa: a primeira tarefa operacional é registrar o SLI e só depois apertar a meta. Onde o SLI ainda não é medido hoje, está marcado `NÃO MEDIDO`. Fonte dos dados: `GET /api/health`, `/api/health/live`, `/api/health/ready`, `/api/admin/engine-status` (operador) e o log do ciclo do Engine (`py -m pulso_engine.pipeline`).
+> Metas **iniciais, para começar a medir**, não promessas. Nenhuma foi calibrada com série longa: a primeira tarefa operacional é registrar o SLI e só depois apertar a meta. Onde o SLI ainda não é medido hoje, está marcado `NÃO MEDIDO`. Fonte dos dados: `GET /api/health`, `/api/health/live`, `/api/health/ready`, `/api/admin/engine-status` (operador) e o log do ciclo do Engine (`py -m corvo_engine.pipeline`).
 
 | # | SLI (o que se mede) | Meta inicial (SLO) | Como medir hoje | Estado |
 |---|---|---|---|---|
@@ -8,7 +8,7 @@
 | 2 | **Prontidão** — `/api/health/ready` = 200 (inclui banco) | 99,0% em 30 dias | idem | PARCIAL |
 | 3 | **Latência da API pública** — p95 de GET público | p95 < 800 ms (borda, cache 15–60 s) | não há coleta de latência | NÃO MEDIDO |
 | 4 | **Sucesso do ciclo do Engine** — ciclos terminados / ciclos disparados | 95% em 7 dias | workflow `Coleta` (conclusão por execução) | PARCIAL (derivável do histórico do Actions; sem painel) |
-| 5 | **Atraso do ciclo** — idade do último Pulso (BR) | p95 ≤ 10 min; nunca > 15 min (`collection.stale`) | `/api/health` → `collection.age_seconds` | MEDIDO (instantâneo; sem histórico agregado) |
+| 5 | **Atraso do ciclo** — idade do último Corvo (BR) | p95 ≤ 10 min; nunca > 15 min (`collection.stale`) | `/api/health` → `collection.age_seconds` | MEDIDO (instantâneo; sem histórico agregado) |
 | 6 | **Frescor dos coletores** — idade do item mais novo por fonte (p50/p95/máx) e fração de fontes FRESH | ≥ 70% das fontes ativas FRESH; p95 ≤ limite da classe (`source_freshness.DEFAULT_STALE_AFTER_MIN`) | log do ciclo (`frescor: ...`), `batch["source_freshness"]`; **ainda não persistido no Worker** | MEDIDO NO ENGINE (não exposto na API) |
 | 7 | **Sucesso do ingest** — lotes aceitos / enviados | ≥ 99% em 7 dias (sem contar 5xx do storage fora) | resposta do `/api/ingest` no log do Engine | PARCIAL |
 | 8 | **Sucesso do storage** — escritas sem erro | ≥ 99,5% | `engine-status.budget`/`rows_today`; erros 5xx do ingest | PARCIAL (sem taxa de erro agregada) |

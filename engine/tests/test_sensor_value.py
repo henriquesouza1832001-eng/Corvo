@@ -1,4 +1,4 @@
-from pulso_engine.intelligence.sensor_value import family_report, marginal_information_gain, verdict_hint
+from corvo_engine.intelligence.sensor_value import family_report, marginal_information_gain, verdict_hint
 
 
 def day(family, d, **kw):

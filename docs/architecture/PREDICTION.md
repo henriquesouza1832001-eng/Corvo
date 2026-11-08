@@ -1,14 +1,14 @@
-# Previsão no PULSO (o "Pizza Index do Brasil")
+# Previsão no CORVO (o "Pizza Index do Brasil")
 
 ## Decisão
-O PULSO **prevê**. Qualquer pergunta sobre o futuro cuja resposta seja verificável com informação pública pode virar uma previsão: política, eleições, economia, segurança, clima, trânsito, infraestrutura, relações internacionais, saúde, eventos. Esta decisão substitui a regra anterior que proibia previsões políticas (ver ADR 0002).
+O CORVO **prevê**. Qualquer pergunta sobre o futuro cuja resposta seja verificável com informação pública pode virar uma previsão: política, eleições, economia, segurança, clima, trânsito, infraestrutura, relações internacionais, saúde, eventos. Esta decisão substitui a regra anterior que proibia previsões políticas (ver ADR 0002).
 
 O que a torna confiável **não é limitar o assunto, e sim a forma**: toda previsão é uma **probabilidade calibrada, rastreável e auditável**, nunca uma afirmação.
 
 ## O que é uma previsão
 ```
 Forecast {
-  forecast_id, question            "O Pulso BR passará de 70 nas próximas 24 h?"
+  forecast_id, question            "O Corvo BR passará de 70 nas próximas 24 h?"
   kind                             NOWCAST | EVENT | QUANTITY | OPEN
   horizon / resolves_at            quando a pergunta tem resposta
   probability (0–1) + intervalo    "62% (faixa 48–74%)"
@@ -25,7 +25,7 @@ Forecast {
 |---|---|---|
 | **NOWCAST** (minutos–horas) | "Esta anomalia em BH vira evento nível 3+ em 2 h?" | baseline + anomalia (z-score/EWMA), aceleração de menções, convergência de tipos de fonte |
 | **EVENT** (horas–dias) | "Haverá manifestação com bloqueio em Brasília até sexta?" | séries históricas por escopo×categoria, sazonalidade, sinais antecipatórios, taxas-base |
-| **QUANTITY** | "Pulso Brasil amanhã às 18 h?", "Selic na próxima reunião?" | séries temporais (EWMA/ARIMA/regressão), intervalo de previsão |
+| **QUANTITY** | "Corvo Brasil amanhã às 18 h?", "Selic na próxima reunião?" | séries temporais (EWMA/ARIMA/regressão), intervalo de previsão |
 | **OPEN** (qualquer tema) | "Quem lidera no 2º turno?", "A medida passa no Senado?" | combina taxas-base históricas + dados públicos (pesquisas registradas, calendário, votos, cobertura) em ensemble; LLM só ajuda a estruturar a pergunta e levantar evidências, **nunca produz o número sozinho** |
 
 A cobertura jornalística e a atividade social são **sinais**, não a verdade: servem de entrada ao modelo e ficam listadas como evidência.
@@ -35,7 +35,7 @@ A cobertura jornalística e a atividade social são **sinais**, não a verdade: 
 2. **Probabilidade + incerteza**, nunca "vai acontecer". Sem dados suficientes → "dados insuficientes" em vez de chute.
 3. **Histórico de acertos público**: cada previsão é registrada antes do resultado e pontuada depois (Brier score, curva de calibração). A página de uma previsão mostra o desempenho do método naquele tipo de pergunta. Previsões sem calibração suficiente saem marcadas como **EXPERIMENTAL**.
 4. **Rastreabilidade**: evidências e versão do método guardadas; o "POR QUE?" mostra o que moveu a probabilidade (mesma lógica do score explicável).
-5. **Previsão não eleva alerta**: o nível PULSO 4–5 continua exigindo confirmação por fontes (SCORING.md). Previsão alta de emergência gera "atenção antecipada", não alerta de emergência.
+5. **Previsão não eleva alerta**: o nível CORVO 4–5 continua exigindo confirmação por fontes (SCORING.md). Previsão alta de emergência gera "atenção antecipada", não alerta de emergência.
 6. **Sem dados pessoais**: previsões sobre eventos, séries e instituições; nada de prever comportamento de indivíduos privados, nem perfilamento.
 7. **Eleições**: previsões que usem pesquisas devem se apoiar em pesquisas **registradas na Justiça Eleitoral** e citar a fonte, e a publicação deve respeitar a legislação eleitoral vigente. Revisar isso com assessoria jurídica antes de publicar previsões eleitorais ao público.
 8. **Reversibilidade**: o sistema precisa conseguir retirar/corrigir uma previsão e registrar a correção publicamente.
@@ -53,10 +53,10 @@ A cobertura jornalística e a atividade social são **sinais**, não a verdade: 
 **Pronto (v1, tudo EXPERIMENTAL):**
 - Tabela `forecasts` (migration 0003) e contrato `Forecast`. A previsão é **imutável**: o Worker só aceita preencher a resolução de uma previsão ainda aberta, e recusa probabilidade 0 ou 1, resolvida sem resultado e probabilidade fora do próprio intervalo.
 - API pública: `GET /api/forecasts`, `/api/forecasts/:id`, `/api/forecasts/track-record` (Brier por método, taxa observada, curva de calibração em faixas de 20% e *skill* contra a referência ingênua). Toda resposta traz o aviso "PREVISÃO (probabilidade), não fato". Um método é EXPERIMENTAL até resolver 100 previsões.
-- Previsor `pulse_empirical_delta` v1 (NOWCAST): "o Pulso do Brasil será ≥ T daqui a 60 min?", com T = atual+10 e atual+20 (arredondado a 5). Probabilidade pela distribuição empírica das variações de 60 min do próprio histórico do Pulso, com suavização de Laplace e intervalo de Wilson. **Só prevê com ≥ 36 pares de histórico (~3,5 h contínuas); sem isso não prevê.**
+- Previsor `pulse_empirical_delta` v1 (NOWCAST): "o Corvo do Brasil será ≥ T daqui a 60 min?", com T = atual+10 e atual+20 (arredondado a 5). Probabilidade pela distribuição empírica das variações de 60 min do próprio histórico do Corvo, com suavização de Laplace e intervalo de Wilson. **Só prevê com ≥ 36 pares de histórico (~3,5 h contínuas); sem isso não prevê.**
 - Resolução automática com o valor **real** observado; sem observação em até 30 min do vencimento a previsão é **anulada** (`void`), nunca estimada.
-- Previsor `signal_volume_empirical_delta` v1 (NOWCAST de **volume por categoria**, `forecast_surge.py`): "haverá N ou mais sinais de <tema> no <Brasil/UF> na próxima hora?" para qualquer categoria (clima, trânsito, saúde, política, economia, internacional, tecnologia...). Mesmo método do Pulso (variações hora a hora observadas no próprio histórico + Laplace + Wilson). Até 12 séries por rodada, as de maior atividade; dois limiares (≥1,5× o volume atual e baseline+2σ). **Só prevê com baseline válido (≥ 12 h) e ≥ 24 pares de horas consecutivas; sem isso não prevê.** Resolve contando os sinais **reais** da janela, e só se a coleta tiver rodado (≥ 6 pontos do Pulso na janela); com lacuna, a previsão é **anulada**: lacuna nunca vira "calmaria". Métrica `signals_<categoria>`; o contrato não mudou.
+- Previsor `signal_volume_empirical_delta` v1 (NOWCAST de **volume por categoria**, `forecast_surge.py`): "haverá N ou mais sinais de <tema> no <Brasil/UF> na próxima hora?" para qualquer categoria (clima, trânsito, saúde, política, economia, internacional, tecnologia...). Mesmo método do Corvo (variações hora a hora observadas no próprio histórico + Laplace + Wilson). Até 12 séries por rodada, as de maior atividade; dois limiares (≥1,5× o volume atual e baseline+2σ). **Só prevê com baseline válido (≥ 12 h) e ≥ 24 pares de horas consecutivas; sem isso não prevê.** Resolve contando os sinais **reais** da janela, e só se a coleta tiver rodado (≥ 6 pontos do Corvo na janela); com lacuna, a previsão é **anulada**: lacuna nunca vira "calmaria". Métrica `signals_<categoria>`; o contrato não mudou.
 - **Backtest em janela deslizante** (`backtest.py`, `tests/test_backtest.py`): para cada hora usa só o passado e mede o Brier contra dois ingênuos (sempre 0,5 e sempre a frequência histórica). Em série **sintética** com rajadas: Brier 0,114 contra 0,123 de uma referência ingênua JUSTA (a taxa de acerto observada só até aquele ponto, sem espiar o futuro) e 0,25 da moeda (ganho de ~7%), e calibração boa (previsto 0,11, observado 0,12). **Isso prova a mecânica, não a acurácia no mundo real**: só dados reais, depois de semanas de coleta, dizem quanto o método acerta.
 
 - **Simulação do laço completo** (`tests/test_forecast_loop_simulation.py`): ~29 h de coleta simulada contra um "Worker de mentira" (séries, pulsos e previsões abertas) exercita criação, resolução pela contagem real, imutabilidade e as regras de validação do Worker antes de haver histórico em produção. Resultado numa série **sintética**: 174 previsões (92 de volume), 78 resolvidas, Brier médio 0,154, 330 escritas de previsão para 174 previsões (a previsão com id já aberto não é reenviada). Prova a **mecânica**; a acurácia real só virá com dados reais.
-**Falta (honesto):** com os dados de hoje a camada preditiva é **persistência + ruído histórico** de cada série: ela quantifica incerteza, mas ainda não "antecipa" causas. Próximos passos: indicadores antecedentes entre categorias (ex.: aviso de chuva do INMET antes de alagamento e trânsito), medidos com defasagem a partir do histórico e só adotados se melhorarem o Brier no backtest; sazonalidade por hora e dia da semana; previsores de EVENT (um evento chega ao nível 3+?), QUANTITY por estado e OPEN; modelos que usem mais do que a persistência do Pulso; sazonalidade; a avaliação de quando um método deixa de ser experimental com base no *skill*, não só na contagem.
+**Falta (honesto):** com os dados de hoje a camada preditiva é **persistência + ruído histórico** de cada série: ela quantifica incerteza, mas ainda não "antecipa" causas. Próximos passos: indicadores antecedentes entre categorias (ex.: aviso de chuva do INMET antes de alagamento e trânsito), medidos com defasagem a partir do histórico e só adotados se melhorarem o Brier no backtest; sazonalidade por hora e dia da semana; previsores de EVENT (um evento chega ao nível 3+?), QUANTITY por estado e OPEN; modelos que usem mais do que a persistência do Corvo; sazonalidade; a avaliação de quando um método deixa de ser experimental com base no *skill*, não só na contagem.

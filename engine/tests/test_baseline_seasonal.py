@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.anomaly import anomaly_score
-from pulso_engine.baseline import BR_TZ, INSUFFICIENT, seasonal_baseline
+from corvo_engine.anomaly import anomaly_score
+from corvo_engine.baseline import BR_TZ, INSUFFICIENT, seasonal_baseline
 
 AT = datetime(2026, 10, 4, 6, 20, tzinfo=timezone.utc)  # domingo 03:20 em Brasília
 

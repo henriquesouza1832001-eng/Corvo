@@ -46,9 +46,9 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.push }}" != "true" ]; then
-            python -m pulso_engine.pipeline
+            python -m corvo_engine.pipeline
           else
-            python -m pulso_engine.pipeline --push
+            python -m corvo_engine.pipeline --push
           fi
       # Piloto de 48 h (COLLECTION_PROTOCOL.md §3): fontes sociais desativadas rodam aqui só se
       # o secret existir, NUNCA enviam ao Worker e o log mostra só contagens (repo público).
@@ -64,4 +64,4 @@ jobs:
           if [ -n "$X_BEARER_TOKEN" ]; then ids="$ids --source x-politics --source x-clima"; fi
           if [ -n "$BLUESKY_HANDLE" ] && [ -n "$BLUESKY_APP_PASSWORD" ]; then ids="$ids --source bluesky-politics --source bluesky-clima"; fi
           if [ -z "$ids" ]; then echo "sem secrets sociais: piloto não roda"; exit 0; fi
-          python -m pulso_engine.pipeline $ids --respect-interval
+          python -m corvo_engine.pipeline $ids --respect-interval

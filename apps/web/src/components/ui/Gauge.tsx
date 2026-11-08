@@ -1,4 +1,4 @@
-import type { AlertLevel } from "@pulso/shared";
+import type { AlertLevel } from "@corvo/shared";
 
 const LV_COLOR = ["", "#34e07c", "#ffb340", "#ff8a3d", "#ff4545", "#ff1744"];
 const R = 92;

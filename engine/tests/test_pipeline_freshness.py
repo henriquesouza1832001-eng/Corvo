@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import run_once
+from corvo_engine.pipeline import run_once
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)
 

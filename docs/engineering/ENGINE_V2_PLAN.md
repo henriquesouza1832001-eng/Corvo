@@ -6,7 +6,7 @@
 ```text
 V1 em produção ──────────────────────────────► continua igual
 V2 em paralelo (arquivo novo, por composição) ► atrás de feature flag (OFF)
-        ↓ SHADOW: calcula e GRAVA, não muda evento/Pulso/alerta
+        ↓ SHADOW: calcula e GRAVA, não muda evento/Corvo/alerta
         ↓ BACKTEST V1 × V2 (eventos reais quando houver histórico)
         ↓ PORTÃO DE PROMOÇÃO (§5)
         ↓ CANARY (parte dos escopos) → ACTIVE
@@ -17,35 +17,35 @@ V2 em paralelo (arquivo novo, por composição) ► atrás de feature flag (OFF)
 ### CRIAR (novos, por composição)
 | Arquivo | Fase | Observação |
 |---|---|---|
-| `engine/pulso_engine/flags.py` | A | **já criado** (14 flags, padrão seguro, `PULSO_FLAG_<NOME>`) |
-| `engine/pulso_engine/validation/shadow_compare.py` | A | grava `V1 × V2 × desfecho` por evento/previsão |
-| `engine/pulso_engine/validation/metrics.py` | A | Brier, log loss, erro de calibração, precision/recall/F1, FPR, lead time, cobertura |
-| `engine/pulso_engine/validation/backtest_v2.py` | A/C | evolui o `backtest.py` (sintético) para eventos reais e V1 × V2; o antigo fica |
-| `engine/pulso_engine/validation/forecast_registry.py` | A | snapshot de features, `model_version`, `feature_version`, `baseline_version` por previsão |
-| `engine/pulso_engine/processing/geo_v2.py` + `engine/data/br_municipalities.*` | A | gazetteer dos 5.570 municípios (IBGE), com origem e versão registradas; `geo.py` fica |
-| `engine/pulso_engine/quality.py` | A | completeness, freshness, geo_quality, duplication_probability por sinal |
-| `engine/pulso_engine/intelligence/anomaly_v2.py` | B | `anomaly_score` e `anomaly_confidence` separados, `robust_z` (mediana/MAD), percentil; reaproveita `anomaly.window_anomaly` |
-| `engine/pulso_engine/intelligence/seasonal_robust.py` | B | mediana/MAD/percentis sobre `signal_observations`; **estende** `baseline.seasonal_baseline`, não duplica |
-| `engine/pulso_engine/intelligence/event_fingerprint.py` | B | identidade estável da história além do título |
-| `engine/pulso_engine/scoring/confidence_v2.py` | B | `publisher ≠ origin`, diversidade de sensores, contradição (usa `research/validator.py`) |
-| `engine/pulso_engine/scoring/severity_v2.py` | B | vetor de impacto (dano físico, mobilidade, infraestrutura, alcance, extensão, duração, serviços, severidade oficial) |
-| `engine/pulso_engine/scoring/national_pulse.py` | B | dispersão, nº de estados, diversidade, persistência |
-| `engine/pulso_engine/intelligence/driver_validator.py` | C | Brier com × sem driver; registro de drivers com estados `CANDIDATE/TESTING/ACTIVE/DEGRADED/DISABLED` |
-| `engine/pulso_engine/intelligence/event_escalation.py` | C | P(evento atingir nível superior no horizonte); **começa em shadow** |
-| `engine/pulso_engine/intelligence/sensor_reliability.py` | C | desempenho histórico por fonte × tipo de evento × geografia (desempenho operacional, não "verdade") |
-| `engine/pulso_engine/intelligence/context_engine.py` | C | feriados (BrasilAPI já validado), jogos, eleições: ajusta baseline/anomalia, **nunca** confirma |
-| `engine/pulso_engine/intelligence/information_gain.py` | D | qual sensor consultar para reduzir mais a incerteza |
-| `engine/pulso_engine/intelligence/signatures.py` | D | `EVENT_SIGNATURE` (leading/concurrent/confirming/contextual) aprendida de lead times medidos |
-| `engine/pulso_engine/collectors/breaker.py` | D | circuit breaker por coletor (OPEN/HALF_OPEN) |
+| `engine/corvo_engine/flags.py` | A | **já criado** (14 flags, padrão seguro, `PULSO_FLAG_<NOME>`) |
+| `engine/corvo_engine/validation/shadow_compare.py` | A | grava `V1 × V2 × desfecho` por evento/previsão |
+| `engine/corvo_engine/validation/metrics.py` | A | Brier, log loss, erro de calibração, precision/recall/F1, FPR, lead time, cobertura |
+| `engine/corvo_engine/validation/backtest_v2.py` | A/C | evolui o `backtest.py` (sintético) para eventos reais e V1 × V2; o antigo fica |
+| `engine/corvo_engine/validation/forecast_registry.py` | A | snapshot de features, `model_version`, `feature_version`, `baseline_version` por previsão |
+| `engine/corvo_engine/processing/geo_v2.py` + `engine/data/br_municipalities.*` | A | gazetteer dos 5.570 municípios (IBGE), com origem e versão registradas; `geo.py` fica |
+| `engine/corvo_engine/quality.py` | A | completeness, freshness, geo_quality, duplication_probability por sinal |
+| `engine/corvo_engine/intelligence/anomaly_v2.py` | B | `anomaly_score` e `anomaly_confidence` separados, `robust_z` (mediana/MAD), percentil; reaproveita `anomaly.window_anomaly` |
+| `engine/corvo_engine/intelligence/seasonal_robust.py` | B | mediana/MAD/percentis sobre `signal_observations`; **estende** `baseline.seasonal_baseline`, não duplica |
+| `engine/corvo_engine/intelligence/event_fingerprint.py` | B | identidade estável da história além do título |
+| `engine/corvo_engine/scoring/confidence_v2.py` | B | `publisher ≠ origin`, diversidade de sensores, contradição (usa `research/validator.py`) |
+| `engine/corvo_engine/scoring/severity_v2.py` | B | vetor de impacto (dano físico, mobilidade, infraestrutura, alcance, extensão, duração, serviços, severidade oficial) |
+| `engine/corvo_engine/scoring/national_pulse.py` | B | dispersão, nº de estados, diversidade, persistência |
+| `engine/corvo_engine/intelligence/driver_validator.py` | C | Brier com × sem driver; registro de drivers com estados `CANDIDATE/TESTING/ACTIVE/DEGRADED/DISABLED` |
+| `engine/corvo_engine/intelligence/event_escalation.py` | C | P(evento atingir nível superior no horizonte); **começa em shadow** |
+| `engine/corvo_engine/intelligence/sensor_reliability.py` | C | desempenho histórico por fonte × tipo de evento × geografia (desempenho operacional, não "verdade") |
+| `engine/corvo_engine/intelligence/context_engine.py` | C | feriados (BrasilAPI já validado), jogos, eleições: ajusta baseline/anomalia, **nunca** confirma |
+| `engine/corvo_engine/intelligence/information_gain.py` | D | qual sensor consultar para reduzir mais a incerteza |
+| `engine/corvo_engine/intelligence/signatures.py` | D | `EVENT_SIGNATURE` (leading/concurrent/confirming/contextual) aprendida de lead times medidos |
+| `engine/corvo_engine/collectors/breaker.py` | D | circuit breaker por coletor (OPEN/HALF_OPEN) |
 | `engine/tests/test_*` por módulo + cenários integrados | todas | ver §6 |
 
 ### MODIFICAR (só quando não houver composição; sempre aditivo e atrás de flag)
 | Arquivo | Mudança | Por quê / risco |
 |---|---|---|
-| `engine/pulso_engine/pipeline.py` | chamadas novas em `run_once`, cada uma com `flag(...)` e `try/except` (já feito para histórico e Sentinela) | único ponto de integração; risco médio, coberto por `test_pipeline`, `test_cycle_simulation` |
+| `engine/corvo_engine/pipeline.py` | chamadas novas em `run_once`, cada uma com `flag(...)` e `try/except` (já feito para histórico e Sentinela) | único ponto de integração; risco médio, coberto por `test_pipeline`, `test_cycle_simulation` |
 | `apps/worker/src/routes/ingest.ts`, `admin.ts`, `lib/budget.ts` | campos opcionais novos (`shadow`, `forecast_registry`...) com escrita condicional e governador | produção de dados; cada campo novo passa pelo `write_budget` |
 | `packages/shared/src/contracts.ts`, `models.py`, `docs/api/API.md` | só campos opcionais, label `contract` | contrato (regra do `AGENTS.md`) |
-| `engine/pulso_engine/baseline.py`, `anomaly.py` | **congelados**: já receberam funções aditivas; novas versões vão em arquivos novos | prompt §3 |
+| `engine/corvo_engine/baseline.py`, `anomaly.py` | **congelados**: já receberam funções aditivas; novas versões vão em arquivos novos | prompt §3 |
 
 ### NÃO TOCAR
 `processing/clustering.py`, `processing/geo.py`, `processing/importance.py`, `scoring/pulse.py`, `scoring/confidence.py`, `events.py`, `forecast.py`, `forecast_surge.py`, `drivers.py`, `apps/web/**`, as migrations `0001`-`0005`, as rotas públicas existentes. Mudar o comportamento deles só por V2 paralelo + portão. Frontend não é prioridade (prompt §69).
@@ -63,7 +63,7 @@ V2 em paralelo (arquivo novo, por composição) ► atrás de feature flag (OFF)
 Regras: sem índice secundário por padrão (cada índice dobra a escrita), escrita só do que mudou, retenção definida na própria migration, e entrada no governador de orçamento. Nada altera tabela existente; reverter = desligar a flag (as tabelas novas ficam, sem efeito).
 
 ## 4. Feature flags
-Definidas em `engine/pulso_engine/flags.py`; ligar/desligar por variável `PULSO_FLAG_<NOME>`. Padrão: **tudo V2 desligado**, exceto o que já roda como **shadow** (só grava dados): `HISTORY_OBSERVATIONS`, `SENTINEL`. Lista: `SEASONAL_BASELINE_V2, ANOMALY_V2, CLUSTER_REFINE, SEMANTIC_CLUSTERING, GEO_V2, CONFIDENCE_V2, SEVERITY_V2, PULSE_V2, NATIONAL_PULSE_V2, DRIVER_VALIDATOR, EVENT_ESCALATION, CONTEXT_ENGINE, NOISE_GATE` (`NOISE_GATE`: portão de ruído do QA adversarial, ver `docs/SCORING.md`). O estado efetivo das flags vai no snapshot da previsão e no log do ciclo.
+Definidas em `engine/corvo_engine/flags.py`; ligar/desligar por variável `PULSO_FLAG_<NOME>`. Padrão: **tudo V2 desligado**, exceto o que já roda como **shadow** (só grava dados): `HISTORY_OBSERVATIONS`, `SENTINEL`. Lista: `SEASONAL_BASELINE_V2, ANOMALY_V2, CLUSTER_REFINE, SEMANTIC_CLUSTERING, GEO_V2, CONFIDENCE_V2, SEVERITY_V2, PULSE_V2, NATIONAL_PULSE_V2, DRIVER_VALIDATOR, EVENT_ESCALATION, CONTEXT_ENGINE, NOISE_GATE` (`NOISE_GATE`: portão de ruído do QA adversarial, ver `docs/SCORING.md`). O estado efetivo das flags vai no snapshot da previsão e no log do ciclo.
 
 ## 5. Portão de promoção (valores iniciais; revisar com dados reais)
 Nenhum V2 sai de shadow sem **todas** as condições:
@@ -102,7 +102,7 @@ Cada módulo: testes unitários. Cenários integrados do prompt (§78-§85), com
 
 ## 8. Ordem (fase → passo do roteiro em `docs/CURRENT_ENGINE_STATE.md`)
 **A. Fundação:** flags ✔ → histórico ✔ (1) → baseline sazonal ✔ código (2), ligar atrás de flag → **geo_v2 + gazetteer** → qualidade de dado → shadow_compare + forecast_registry + metrics.
-**B. Correlação:** tendência ✔ e anomalia v2 ✔ código (3-4) → fingerprint → refino/semântico (8) → procedência/origem ✔ código (7) → confiança v2 → severidade v2 → Pulso nacional v2.
+**B. Correlação:** tendência ✔ e anomalia v2 ✔ código (3-4) → fingerprint → refino/semântico (8) → procedência/origem ✔ código (7) → confiança v2 → severidade v2 → Corvo nacional v2.
 **C. Predição:** driver_validator → event_escalation (shadow) → calibração → sensor_reliability → contexto.
 **D. Sentinela:** Sentinela ✔ (5) → information gain → deep search adaptativo ✔ código (6) → assinaturas aprendidas → circuit breaker.
 Depois de cada fase: backtest V1 × V2, comparação, portão.
@@ -112,4 +112,4 @@ Depois de cada fase: backtest V1 × V2, comparação, portão.
 2. **Gazetteer dos municípios:** autorizar baixar a base pública do IBGE (nomes, UF, centroide, população) para `engine/data/`?
 3. **Limiares do portão** (§5): 200 amostras e 5% de Brier estão bons para começar?
 4. **Backtest com eventos reais** depende de histórico acumulado (semanas): aceitar que as primeiras comparações V1 × V2 sejam só em shadow?
-5. **Nowcast "BH Pulso 3+"** exige escopo por cidade (hoje só BR e UF): priorizar depois do gazetteer?
+5. **Nowcast "BH Corvo 3+"** exige escopo por cidade (hoje só BR e UF): priorizar depois do gazetteer?

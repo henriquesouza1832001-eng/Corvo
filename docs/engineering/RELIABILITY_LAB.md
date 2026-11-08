@@ -25,7 +25,7 @@ melhora a previsão sem piorar falsos positivos, recall ou calibração?
 `ReplayItem.event_time` diz quando algo aconteceu; não é autorização para o
 motor conhecer o dado. O item só aparece quando todos os timestamps de
 disponibilidade que ele possui já ocorreram. Isso é conservador: um dado
-publicado às 17:00, mas obtido pelo PULSO às 17:45, só aparece às 17:45.
+publicado às 17:00, mas obtido pelo CORVO às 17:45, só aparece às 17:45.
 
 O replay nunca usa `datetime.now()`, aleatoriedade ou ordem de `set`. A linha
 do tempo é ordenada por timestamp e `item_id`; duas execuções do mesmo dataset

@@ -18,12 +18,12 @@ import time
 import tracemalloc
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.processing.clustering import cluster_signals
-from pulso_engine.research.history import build_observations
-from pulso_engine.research.provenance import provenance
-from pulso_engine.research.sentinel import detect_candidates
-from pulso_engine.source_freshness import SourceReading, assess
+from corvo_engine.models import Signal
+from corvo_engine.processing.clustering import cluster_signals
+from corvo_engine.research.history import build_observations
+from corvo_engine.research.provenance import provenance
+from corvo_engine.research.sentinel import detect_candidates
+from corvo_engine.source_freshness import SourceReading, assess
 
 NOW = datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc)
 WORDS = ("rua avenida ponte viaduto praça bairro escola mercado posto terminal rodovia túnel obra galeria represa córrego favela condomínio hospital "

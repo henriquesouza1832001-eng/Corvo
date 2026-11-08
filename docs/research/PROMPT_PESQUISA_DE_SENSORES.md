@@ -1,6 +1,6 @@
-# Prompt de pesquisa de sensores do PULSO (versão para agentes de IA e desenvolvedores)
+# Prompt de pesquisa de sensores do CORVO (versão para agentes de IA e desenvolvedores)
 
-> Uso: colar o **corpo** (a partir de "Você está trabalhando no projeto PULSO") em cada agente, trocando a linha "SUA FRENTE" pela
+> Uso: colar o **corpo** (a partir de "Você está trabalhando no projeto CORVO") em cada agente, trocando a linha "SUA FRENTE" pela
 > frente atribuída (A, B, C ou D, seção 4). Este arquivo é a versão ajustada do prompt original do dono, com o contexto real do
 > repositório em 2026-10-03, as regras de trabalho em paralelo e a divisão em frentes. Nada do espírito original foi removido.
 
@@ -8,7 +8,7 @@
 
 ## CORPO DO PROMPT
 
-Você está trabalhando no projeto **PULSO**. Repositório: `https://github.com/henriquesouza1832001-eng/Pulso`.
+Você está trabalhando no projeto **CORVO**. Repositório: `https://github.com/henriquesouza1832001-eng/Corvo`.
 
 **SUA FRENTE:** `<A | B | C | D>` (seção 4). Trabalhe só nela; as outras estão com outros agentes.
 
@@ -16,22 +16,22 @@ Você está trabalhando no projeto **PULSO**. Repositório: `https://github.com/
 Leia, nesta ordem: `AGENTS.md`, `docs/OVERVIEW_PARA_AGENTES.md`, `README.md`, `docs/BACKEND_STATUS.md` (estado e registro de mudanças),
 `docs/architecture/ARCHITECTURE.md`, `docs/architecture/PREDICTION.md`, `docs/SCORING.md`, `docs/COLLECTION_PROTOCOL.md`,
 `docs/sources/SOURCES.md` + `CATALOGO_FONTES.md` + `CAMERAS.md`, `docs/decisions/` (ADRs 0005 a 0008), `packages/shared/src/contracts.ts`,
-`engine/config/sources.json`, `engine/pulso_engine/` (collectors, processing, pipeline, forecast*), `apps/worker/`, `database/migrations/`
+`engine/config/sources.json`, `engine/corvo_engine/` (collectors, processing, pipeline, forecast*), `apps/worker/`, `database/migrations/`
 e os testes. NÃO recrie o projeto, NÃO substitua arquitetura funcional, NÃO apague trabalho de outras pessoas. O projeto é colaborativo.
 
 ### 1. Regras do repositório que valem para você (do `AGENTS.md`)
 - **Branch:** trabalhe só na branch que o dono atribuiu a você. **Nunca crie branches, nunca use a `main`.** Só existem `main`, `hen`, `thig`, `art` e `isar`. Abra PR para a `main`; **o merge é decisão humana**.
 - **Nunca** commite segredos (`.env`, tokens, cookies, chaves). Nunca contorne autenticação, limites, captcha ou termos de uso; nunca use proxy rotativo, conta falsa, cookie alheio ou chave que não tenha sido emitida para o projeto.
-- Mudança de contrato = mesmo PR atualiza `packages/shared/src/contracts.ts`, `engine/pulso_engine/models.py` e `docs/api/API.md`, com label `contract`.
+- Mudança de contrato = mesmo PR atualiza `packages/shared/src/contracts.ts`, `engine/corvo_engine/models.py` e `docs/api/API.md`, com label `contract`.
 - Antes de integrar uma fonte: ficha em `docs/sources/SOURCES.md` (API oficial, termos, limites, custo, autenticação, licença, retenção, exibição pública). Toda fonte nova entra **com `reviewed_by: "PENDENTE"`** até o dono revisar.
 - Atualize `docs/BACKEND_STATUS.md` (registro de mudanças) em todo PR relevante. Decisões arquiteturais viram `docs/decisions/NNNN-titulo.md`.
 - Rode `cd engine && py -m pytest`, `npm test`, `npm run typecheck && npm run build`. **Verifique o comportamento real** (chame a fonte de verdade, não só "compilou").
 - Previsão sempre com probabilidade, incerteza, evidências e método; **nunca** apresentada como fato; **nunca** probabilidade vinda só de LLM.
 
-### 2. Estado do PULSO (2026-10-03). NÃO refaça o que já existe
+### 2. Estado do CORVO (2026-10-03). NÃO refaça o que já existe
 - **Coleta:** 282 fontes ativas (RSS nacional/regional/local de todos os estados, INMET, INPE queimadas, Defesa Civil/IDAP, USGS, BCB/PTAX, InfoDengue, ONS energia armazenada, Google Trends BR, GDELT). Ciclo a cada 5 min (Cloudflare Cron → GitHub Actions `collect.yml`, limite 8 min; hoje ~40 s).
 - **Processamento:** importância do texto, geolocalização (cidade/UF/gentílico), agrupamento em eventos com ids estáveis, frescor por categoria, rotina de campanha com peso baixo, tipos de evento e precursores (`engine/config/event_types.json`, só como evidência).
-- **Previsão:** previsor de Pulso e de volume por categoria, Brier, backtest sintético (prova a mecânica, não a acurácia), indicadores antecedentes por correlação defasada. Rótulo EXPERIMENTAL até 100 previsões resolvidas.
+- **Previsão:** previsor de Corvo e de volume por categoria, Brier, backtest sintético (prova a mecânica, não a acurácia), indicadores antecedentes por correlação defasada. Rótulo EXPERIMENTAL até 100 previsões resolvidas.
 - **Banco:** hoje o **Turso** (SQLite hospedado, plano grátis) é o banco ativo (`DB_BACKEND=turso`); o D1 estourou o limite diário de escrita em 2026-10-03 (ADR 0008). Há governador de orçamento de escrita no ingest.
 - **Redes sociais:** adaptadores Reddit, X e Bluesky **prontos e desligados** à espera de chaves (roteiro `docs/ATIVAR_REDES_SOCIAIS.md`).
 - **Câmeras:** catálogo `engine/config/cameras.json` (RealData, Motiva com prévia autorizada; Skyline e painéis oficiais só link).
@@ -68,9 +68,9 @@ Para cada fonte registrada como utilizável, grave na ficha: URL exata consultad
 
 # OBJETIVO DESTA TAREFA
 
-Sua missão é descobrir, pesquisar, classificar e, quando apropriado, integrar **novas fontes públicas de informação capazes de aumentar a capacidade de detecção antecipada do PULSO**.
+Sua missão é descobrir, pesquisar, classificar e, quando apropriado, integrar **novas fontes públicas de informação capazes de aumentar a capacidade de detecção antecipada do CORVO**.
 
-Pense no PULSO como um **Pizza Index extremamente expandido para o Brasil**. Não estamos construindo um portal de notícias; estamos construindo um **sistema de detecção de sinais e anomalias**. Queremos detectar "algo fora do normal está começando a acontecer aqui" e depois procurar evidências adicionais para: confirmar, refutar, contextualizar, localizar, medir intensidade, estimar evolução, atualizar confiança e alimentar modelos de nowcast/previsão.
+Pense no CORVO como um **Pizza Index extremamente expandido para o Brasil**. Não estamos construindo um portal de notícias; estamos construindo um **sistema de detecção de sinais e anomalias**. Queremos detectar "algo fora do normal está começando a acontecer aqui" e depois procurar evidências adicionais para: confirmar, refutar, contextualizar, localizar, medir intensidade, estimar evolução, atualizar confiança e alimentar modelos de nowcast/previsão.
 
 ## PRINCÍPIO CENTRAL
 Não procure apenas NOTÍCIAS. Procure **SENSORES**. Uma notícia é apenas um sensor. Queremos o máximo de fontes públicas independentes.
@@ -105,7 +105,7 @@ GTFS, GTFS-Realtime, metrô, CPTM, ônibus, BRT, VLT, trens, aeroportos, portos.
 ANAC, DECEA, INFRAERO, aeroportos, NOTAM, METAR, TAF, atrasos, cancelamentos, fechamentos, restrições. *(Já validado: `aviationweather.gov/api/data/metar` responde METAR de aeroportos brasileiros, ex.: SBGR; falta TAF, NOTAM, atrasos e a análise de termos.)* Investigue o que pode legalmente ser usado; não use fonte que proíba reutilização.
 
 ## 7. Clima
-INMET, INPE, CEMADEN, Defesa Civil, CPTEC, radares estaduais, institutos estaduais, dados pluviométricos, nível de rios, alertas, tempestades, raios, vento, temperatura, deslizamentos. **Clima deve ser um sensor extremamente importante.** *(Já validado: Open-Meteo responde chuva a cada 15 min, vazão de rios e qualidade do ar; termos: uso não comercial, < 10 mil chamadas/dia, CC-BY 4.0, sem anúncio nem assinatura; confirme se o PULSO se enquadra.)*
+INMET, INPE, CEMADEN, Defesa Civil, CPTEC, radares estaduais, institutos estaduais, dados pluviométricos, nível de rios, alertas, tempestades, raios, vento, temperatura, deslizamentos. **Clima deve ser um sensor extremamente importante.** *(Já validado: Open-Meteo responde chuva a cada 15 min, vazão de rios e qualidade do ar; termos: uso não comercial, < 10 mil chamadas/dia, CC-BY 4.0, sem anúncio nem assinatura; confirme se o CORVO se enquadra.)*
 
 ## 8. Hidrologia
 Nível de rios, reservatórios, barragens, chuvas, enchentes; ANA, CEMADEN, Defesa Civil, companhias estaduais. Identifique atualizações rápidas.
@@ -221,10 +221,10 @@ FLOOD:
 Crie signatures para: FLOOD, FIRE, BLACKOUT, TRAFFIC_COLLAPSE, LANDSLIDE, STORM, EARTHQUAKE, PROTEST, LARGE_EVENT, PUBLIC_TRANSPORT_FAILURE, INTERNET_OUTAGE, AIRPORT_DISRUPTION, ROAD_BLOCK, HEALTH_ALERT, INFRASTRUCTURE_FAILURE. *(Parta de `engine/config/event_types.json`, que já tem 12 tipos e relações `raises` como hipóteses a validar.)*
 
 # PARTE 6: LEADING INDICATORS
-Banco de **indicadores antecedentes**: sensores que historicamente antecedem determinado evento. Não afirme causalidade sem evidência. Exemplo: chuva extrema T-90 min; nível de rio T-50; trânsito anormal T-25; Defesa Civil T-15; notícias T+0. Com histórico suficiente, meça `lead_time`, `precision`, `recall`, `false_positive_rate`. *(Já existe `engine/pulso_engine/drivers.py`, correlação defasada entre categorias; estenda, não duplique.)*
+Banco de **indicadores antecedentes**: sensores que historicamente antecedem determinado evento. Não afirme causalidade sem evidência. Exemplo: chuva extrema T-90 min; nível de rio T-50; trânsito anormal T-25; Defesa Civil T-15; notícias T+0. Com histórico suficiente, meça `lead_time`, `precision`, `recall`, `false_positive_rate`. *(Já existe `engine/corvo_engine/drivers.py`, correlação defasada entre categorias; estenda, não duplique.)*
 
 # PARTE 7: VALIDAÇÃO POR NOTÍCIAS
-Quando o PULSO detectar uma anomalia: não espere passivamente. Crie o **VALIDATION ENGINE**: `ANOMALIA → LOCATION → CATEGORY → KEYWORDS → QUERY EXPANSION → NEWS SEARCH → OFFICIAL SEARCH → SOCIAL SEARCH → CORRELATION`. Exemplo (BH, FLOOD, termos "alagamento", "Venda Nova", "Vilarinho"): `"alagamento" "Venda Nova"`, `"chuva" "Venda Nova"`, `"interdição" "Vilarinho"`, `site:mg.gov.br "Vilarinho"`. **Use somente mecanismos e APIs que permitam esse uso** (buscar nos **nossos próprios sinais armazenados** é sempre permitido e é o primeiro passo; busca externa só em API que autorize).
+Quando o CORVO detectar uma anomalia: não espere passivamente. Crie o **VALIDATION ENGINE**: `ANOMALIA → LOCATION → CATEGORY → KEYWORDS → QUERY EXPANSION → NEWS SEARCH → OFFICIAL SEARCH → SOCIAL SEARCH → CORRELATION`. Exemplo (BH, FLOOD, termos "alagamento", "Venda Nova", "Vilarinho"): `"alagamento" "Venda Nova"`, `"chuva" "Venda Nova"`, `"interdição" "Vilarinho"`, `site:mg.gov.br "Vilarinho"`. **Use somente mecanismos e APIs que permitam esse uso** (buscar nos **nossos próprios sinais armazenados** é sempre permitido e é o primeiro passo; busca externa só em API que autorize).
 
 # PARTE 8: QUERY EXPANSION
 O Python expande consultas automaticamente (ACIDENTE → colisão, batida, capotamento, engavetamento, interdição, bloqueio, trânsito parado), considerando contexto para evitar falso positivo ("apagão" energia vs. figurado; "explosão" literal vs. expressão). Use NLP/contexto.
@@ -242,17 +242,17 @@ Considere país, UF, cidade, bairro, logradouro, ponto de interesse. **Não inve
 O objetivo é aumentar: **LEAD TIME** (quanto antes percebe), **PRECISION**, **RECALL**, **CALIBRATION** (70% acontece ~70%?) e reduzir **FALSE POSITIVE RATE**.
 
 # PARTE 13: PREVISÃO
-O PULSO produz **nowcasts** de eventos e condições verificáveis. Exemplo: "BH atingir PULSO 3+ nas próximas 2 h? 68%, intervalo 52–79%, EXPERIMENTAL". Toda previsão tem `forecast_id, question, horizon, probability, uncertainty, method, model_version, evidence, created_at, resolves_at, outcome, score` (já é o contrato `Forecast`). **Nunca use LLM sozinho para gerar probabilidade.** LLM pode interpretar, classificar, expandir query e resumir evidências; a probabilidade vem de modelo estatístico auditável.
+O CORVO produz **nowcasts** de eventos e condições verificáveis. Exemplo: "BH atingir CORVO 3+ nas próximas 2 h? 68%, intervalo 52–79%, EXPERIMENTAL". Toda previsão tem `forecast_id, question, horizon, probability, uncertainty, method, model_version, evidence, created_at, resolves_at, outcome, score` (já é o contrato `Forecast`). **Nunca use LLM sozinho para gerar probabilidade.** LLM pode interpretar, classificar, expandir query e resumir evidências; a probabilidade vem de modelo estatístico auditável.
 
 # PARTE 14: POLÍTICA E ELEIÇÕES
 Monitore política como **categoria de eventos e cobertura**, com neutralidade. Separe fato, declaração, alegação, fonte oficial e análise. Sem recomendação eleitoral; sem "melhor/pior/mais perigoso" para candidato ou partido. Para pesquisas eleitorais, só dados verificáveis, registrando instituto, contratante, período de campo, população, amostra, margem de erro, registro, data e URL original. **Não produza previsão própria de vencedor.** *(Ajuste: o dono quer cenários pós-eleição por cidade. Isso é permitido e desejado quando for sobre **consequências verificáveis**: trânsito, segurança, mobilização, mercado, serviços. Nunca sobre quem ganha. Eleição 2026: 1º turno em 2026-10-04; o TSE publica resultados em `resultados.tse.jus.br`.)*
 
 # PARTE 15: TESTE RETROSPECTIVO (muito importante)
-Escolha acontecimentos históricos públicos (enchentes, apagões, grandes tempestades, manifestações, interdições, incêndios, colapsos de transporte). Reconstrua T-6h, T-3h, T-1h, T-30m, T-10m, T0, T+30m. Pergunte: quais sensores já mudavam? Quando saiu a primeira notícia? Quando a fonte oficial? Quanto antes o PULSO poderia ter detectado? Relatório por evento:
+Escolha acontecimentos históricos públicos (enchentes, apagões, grandes tempestades, manifestações, interdições, incêndios, colapsos de transporte). Reconstrua T-6h, T-3h, T-1h, T-30m, T-10m, T0, T+30m. Pergunte: quais sensores já mudavam? Quando saiu a primeira notícia? Quando a fonte oficial? Quanto antes o CORVO poderia ter detectado? Relatório por evento:
 
 ```text
 EVENTO X | Primeiro sensor: T-47m | Primeira correlação: T-31m | Primeira fonte oficial: T-18m
-Primeira grande notícia: T0 | Lead potencial PULSO: 31 minutos
+Primeira grande notícia: T0 | Lead potencial CORVO: 31 minutos
 ```
 *(Ressalva do projeto: o backtest atual é sintético e só prova a mecânica. Backtest com eventos reais exige histórico dos sensores; verifique se a fonte oferece dado histórico antes de prometer o resultado.)*
 
@@ -260,9 +260,9 @@ Primeira grande notícia: T0 | Lead potencial PULSO: 31 minutos
 Um sensor aparecer antes de um evento uma vez não prova que o prevê. Registre verdadeiros e falsos positivos e negativos e calcule desempenho.
 
 # PARTE 17: DATASET DE TREINAMENTO
-Construa o dataset histórico do próprio PULSO: `timestamp, location, sensor, signal, category, value, baseline, anomaly, event_id, event_outcome, lead_time`. É um dos ativos técnicos mais importantes. *(Respeite o orçamento de escrita da seção 3: proponha agregação e retenção antes de gravar.)*
+Construa o dataset histórico do próprio CORVO: `timestamp, location, sensor, signal, category, value, baseline, anomaly, event_id, event_outcome, lead_time`. É um dos ativos técnicos mais importantes. *(Respeite o orçamento de escrita da seção 3: proponha agregação e retenção antes de gravar.)*
 
-# PARTE 18: PULSO SENSOR GRAPH
+# PARTE 18: CORVO SENSOR GRAPH
 Proponha um grafo de relações temporais entre sensores (CHUVA → TRÂNSITO e RIOS → ALAGAMENTO → DEFESA CIVIL → NOTÍCIA). **Não trate o grafo como causalidade.**
 
 # PARTE 19: PRIORIDADE DE IMPLEMENTAÇÃO
@@ -288,10 +288,10 @@ Não invente dados; cada afirmação precisa de fonte (URL + data).
 Mantenha a seção **ASTEROIDES DESCOBERTOS**. Para cada ideia: nome; o que mede; quem fornece; frequência; cobertura; por que pode antecipar; como correlacionar; existe histórico; risco de falso positivo; como validar; se é legal e tecnicamente utilizável. Procure sinais estranhos, indiretos e pouco óbvios.
 
 # PARTE 25: PERGUNTA GUIA
-Para cada fonte: **"Isso ajuda o PULSO a saber que algo está acontecendo ANTES de simplesmente ler a notícia?"** Se sim: sensor primário. Se só confirma: sensor de validação. Se apenas replica outra fonte: baixa prioridade.
+Para cada fonte: **"Isso ajuda o CORVO a saber que algo está acontecendo ANTES de simplesmente ler a notícia?"** Se sim: sensor primário. Se só confirma: sensor de validação. Se apenas replica outra fonte: baixa prioridade.
 
 # PARTE 26: META FINAL
-De "NOTÍCIA → PULSO DESCOBRE" para: `SINAL 1 + SINAL 2 + SINAL 3 → ANOMALIA → PULSO DETECTA → DEEP SEARCH → NOTÍCIAS + OFICIAIS + SOCIAL + OUTROS SENSORES → VALIDAÇÃO → EVENTO → NOWCAST → ACOMPANHAMENTO → RESOLUÇÃO → BACKTEST → MODELO MELHORA`. O diferencial: **DETECTAR → INVESTIGAR → CORRELACIONAR → VALIDAR → ACOMPANHAR → APRENDER**, não copiar notícias.
+De "NOTÍCIA → CORVO DESCOBRE" para: `SINAL 1 + SINAL 2 + SINAL 3 → ANOMALIA → CORVO DETECTA → DEEP SEARCH → NOTÍCIAS + OFICIAIS + SOCIAL + OUTROS SENSORES → VALIDAÇÃO → EVENTO → NOWCAST → ACOMPANHAMENTO → RESOLUÇÃO → BACKTEST → MODELO MELHORA`. O diferencial: **DETECTAR → INVESTIGAR → CORRELACIONAR → VALIDAR → ACOMPANHAR → APRENDER**, não copiar notícias.
 
 ---
 
@@ -299,6 +299,6 @@ De "NOTÍCIA → PULSO DESCOBRE" para: `SINAL 1 + SINAL 2 + SINAL 3 → ANOMALIA
 Comece **somente** pela leitura do projeto e pela pesquisa da sua frente. Não faça alterações arquiteturais grandes sem justificar (ADR). Use prioritariamente documentação oficial, órgãos públicos e provedores. Para cada integração: abra a documentação, confirme disponibilidade, autenticação, custo, frequência, termos, se podemos **exibir**, **armazenar** e **usar dados derivados em modelos**. Não confie só em resultados de busca; abra a fonte original. Registre divergências; não chute.
 
 ## PRIMEIRA RESPOSTA ESPERADA (antes de implementar qualquer coisa)
-1. **Estado atual do PULSO** (o que já existe no repo). 2. **Gaps.** 3. **Fontes já existentes.** 4. **Novos sensores descobertos** (da sua frente). 5. **Top 10 integrações P0** (tecnicamente mais úteis, sem ranking político ou editorial). 6. **Asteroides inesperados.** 7. **Arquitetura proposta** (encaixar sem destruir o que existe). 8. **Plano de backtest.** 9. **Custos e limitações** (APIs pagas, quotas, contratos, bloqueios). 10. **Próxima etapa** (só depois da análise, proponha quais P0 implementar).
+1. **Estado atual do CORVO** (o que já existe no repo). 2. **Gaps.** 3. **Fontes já existentes.** 4. **Novos sensores descobertos** (da sua frente). 5. **Top 10 integrações P0** (tecnicamente mais úteis, sem ranking político ou editorial). 6. **Asteroides inesperados.** 7. **Arquitetura proposta** (encaixar sem destruir o que existe). 8. **Plano de backtest.** 9. **Custos e limitações** (APIs pagas, quotas, contratos, bloqueios). 10. **Próxima etapa** (só depois da análise, proponha quais P0 implementar).
 
-A pesquisa deve ser ampla. O objetivo é descobrir o máximo de **sensores públicos, legais, úteis e independentes** capazes de transformar o PULSO no radar de anomalias do Brasil.
+A pesquisa deve ser ampla. O objetivo é descobrir o máximo de **sensores públicos, legais, úteis e independentes** capazes de transformar o CORVO no radar de anomalias do Brasil.

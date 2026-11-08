@@ -1,6 +1,6 @@
 # Protocolo de coleta de informação
 
-Vale para **toda** fonte, humana ou agente. Quem integra uma fonte segue este protocolo; o Engine recusa carregar uma fonte que não traga os campos exigidos (`engine/pulso_engine/config.py`).
+Vale para **toda** fonte, humana ou agente. Quem integra uma fonte segue este protocolo; o Engine recusa carregar uma fonte que não traga os campos exigidos (`engine/corvo_engine/config.py`).
 
 ## 1. Princípios
 1. **Só vias autorizadas.** Nunca contornar login, captcha, paywall, limite de taxa ou termos. Sem contas falsas, sem raspagem de plataformas que a proíbem, sem câmeras privadas.
@@ -48,13 +48,13 @@ Vale para **toda** fonte, humana ou agente. Quem integra uma fonte segue este pr
 - Descartar itens sem título ou com timestamp inválido; contar descartes na saúde da fonte.
 
 ## 7. Retenção e privacidade
-Sinais: `retention_days` por fonte (padrão 90). Séries agregadas (Pulso, contagens, baseline) são mantidas por mais tempo, pois alimentam a previsão e não contêm conteúdo de terceiros. Pedido de remoção de uma fonte ou matéria é atendido removendo o sinal e recalculando os eventos afetados. Nenhuma coleta de dados pessoais de indivíduos privados; sem reconhecimento facial.
+Sinais: `retention_days` por fonte (padrão 90). Séries agregadas (Corvo, contagens, baseline) são mantidas por mais tempo, pois alimentam a previsão e não contêm conteúdo de terceiros. Pedido de remoção de uma fonte ou matéria é atendido removendo o sinal e recalculando os eventos afetados. Nenhuma coleta de dados pessoais de indivíduos privados; sem reconhecimento facial.
 
 ## 8. Saúde das fontes
 `ONLINE → DEGRADED → OFFLINE`, com `RATE_LIMITED` e `AUTH_ERROR` à parte. Estado e motivo vão para `source_health` e para `/api/health`, e alimentam o painel administrativo. Mudança de estado repetida (flapping) gera alerta.
 
 ## 9. Histórico para a previsão
-Toda rodada grava, além dos eventos, **séries agregadas** por (escopo, categoria, janela): contagem de sinais, de fontes distintas, velocidade e Pulso. Sem esse histórico não existe baseline nem previsão calibrada (ver `PREDICTION.md`). Por isso a coleta precisa rodar de forma contínua e sem lacunas; lacunas são registradas, não preenchidas.
+Toda rodada grava, além dos eventos, **séries agregadas** por (escopo, categoria, janela): contagem de sinais, de fontes distintas, velocidade e Corvo. Sem esse histórico não existe baseline nem previsão calibrada (ver `PREDICTION.md`). Por isso a coleta precisa rodar de forma contínua e sem lacunas; lacunas são registradas, não preenchidas.
 
 ## 10. Execução e agendamento
 - Coleta periódica por agendador (GitHub Actions `schedule`, intervalo mínimo 5 min, ou container/VM para tempo real), com `concurrency` para impedir duas rodadas simultâneas.
@@ -72,7 +72,7 @@ Chaves de API só em secrets (GitHub Actions / `wrangler secret`), nomeados por 
 | Reddit | API oficial; exige registro do app e respeito aos termos (uso comercial pode exigir acordo) | ⏳ revisar termos antes |
 | X (Twitter) | API oficial paga, por plano | ⏳ decisão de custo; perfis pequenos com peso baixo; nunca confirma sozinho |
 | Waze | Programa *Waze for Cities* (parceiros públicos) | ⏳ depende de parceria formal |
-| Google (Maps/Trends/Notícias) | Os termos do Maps Platform proíbem extrair e reutilizar seus dados; o mapa de calor do PULSO é gerado a partir dos **nossos** eventos (MapLibre). Google News RSS: termos a revisar. | ❌ sem extração do Maps |
+| Google (Maps/Trends/Notícias) | Os termos do Maps Platform proíbem extrair e reutilizar seus dados; o mapa de calor do CORVO é gerado a partir dos **nossos** eventos (MapLibre). Google News RSS: termos a revisar. | ❌ sem extração do Maps |
 | Instagram | Graph API cobre só contas próprias/de negócio autorizadas | ⏳ uso restrito |
 | Câmeras de trânsito | Somente feeds que o órgão dono libera oficialmente | ⏳ Fase 3, por autorização |
 

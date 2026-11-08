@@ -5,8 +5,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.models import Signal
-from pulso_engine.research.provenance import origin_groups, provenance
+from corvo_engine.models import Signal
+from corvo_engine.research.provenance import origin_groups, provenance
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)
 TITLE = "Chuva forte causa alagamento e interdita a Avenida Cristiano Machado em Belo Horizonte"

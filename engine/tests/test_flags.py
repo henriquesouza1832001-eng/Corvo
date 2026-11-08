@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.flags import FLAGS, enabled, snapshot
-from pulso_engine.pipeline import run_once
+from corvo_engine.flags import FLAGS, enabled, snapshot
+from corvo_engine.pipeline import run_once
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)
 

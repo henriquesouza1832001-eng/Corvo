@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.validation.temporal import final_holdout, walk_forward_splits
+from corvo_engine.validation.temporal import final_holdout, walk_forward_splits
 
 
 def times(n: int):

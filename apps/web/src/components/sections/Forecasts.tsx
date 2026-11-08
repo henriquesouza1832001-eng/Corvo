@@ -1,4 +1,4 @@
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { brTime } from "../../lib/format";
 
 export interface Forecast {
@@ -42,7 +42,7 @@ export function Sparkline({ seed, trend }: { seed: number; trend: number }) {
 }
 
 /** Histórico: momentos de nível alto registrados + eventos resolvidos recentes. */
-export function History({ entries, events }: { entries: HistEntry[]; events: PulsoEvent[] }) {
+export function History({ entries, events }: { entries: HistEntry[]; events: CorvoEvent[] }) {
 	const resolved = events
 		.filter((e) => e.status === "RESOLVED" || e.status === "RESOLVING")
 		.slice(0, 3);

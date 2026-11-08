@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.events import is_publishable
-from pulso_engine.models import Signal
-from pulso_engine.processing.clustering import Cluster
-from pulso_engine.processing.importance import (
+from corvo_engine.events import is_publishable
+from corvo_engine.models import Signal
+from corvo_engine.processing.clustering import Cluster
+from corvo_engine.processing.importance import (
     EDITORIAL_ONLY, OPERATIONAL_SIGNAL, POTENTIAL_INCIDENT, SCHEDULED_CONTEXT, assess,
 )
 

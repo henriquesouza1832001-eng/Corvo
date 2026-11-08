@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { MIN_RESOLVED, calibrationError, classificationMetrics, methodKey, toForecast } from "../src/routes/forecasts";
 
 const row = (method_version: string) => ({
-	id: "fc-x", kind: "NOWCAST", question: "O Pulso será >= 50?", scope: "BR", metric: "pulse", comparator: "gte",
+	id: "fc-x", kind: "NOWCAST", question: "O Corvo será >= 50?", scope: "BR", metric: "pulse", comparator: "gte",
 	threshold: 50, method: "pulse_empirical_delta", method_version, probability: 0.3, interval_low: 0.2, interval_high: 0.4,
 	horizon_minutes: 60, created_at: "2026-10-03T00:00:00Z", resolves_at: "2026-10-03T01:00:00Z", evidence: "{}",
 	status: "open", outcome: null, observed_value: null, resolved_at: null, brier: null,

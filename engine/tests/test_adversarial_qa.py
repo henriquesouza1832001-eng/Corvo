@@ -12,8 +12,8 @@ from xml.sax.saxutils import escape
 
 import pytest
 
-from pulso_engine.flags import FLAGS
-from pulso_engine.pipeline import run_once
+from corvo_engine.flags import FLAGS
+from corvo_engine.pipeline import run_once
 
 NOW = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)
 

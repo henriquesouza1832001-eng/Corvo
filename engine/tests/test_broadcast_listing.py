@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.news.rss import RssAdapter
-from pulso_engine.processing.normalizer import is_broadcast_listing
+from corvo_engine.collectors.news.rss import RssAdapter
+from corvo_engine.processing.normalizer import is_broadcast_listing
 
 NOW = datetime(2026, 10, 3, 3, 0, tzinfo=timezone.utc)
 

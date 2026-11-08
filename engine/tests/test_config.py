@@ -3,7 +3,7 @@ import warnings
 
 import pytest
 
-from pulso_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
+from corvo_engine.config import DEFAULT_SOURCES_PATH, SourceConfigError, load_sources, validate_source
 
 OK = {
     "id": "x", "name": "X", "adapter": "rss", "source_class": "NEWS_HIGH", "url": "https://x.com/rss",

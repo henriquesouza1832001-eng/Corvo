@@ -1,9 +1,9 @@
-# PULSO — visão geral para agentes de IA (Codex, Claude e outros)
+# CORVO — visão geral para agentes de IA (Codex, Claude e outros)
 
 > Leia **`AGENTS.md`** (raiz) primeiro; ele é a lista de regras. Este arquivo dá o contexto, o que já foi feito, quem faz o quê e como entregar. Estado em tempo real: `docs/BACKEND_STATUS.md` (documento vivo; confira a data de atualização antes de confiar em qualquer informação).
 
 ## 1. Missão do produto
-Plataforma brasileira de inteligência situacional: transforma **sinais públicos** em **eventos** geolocalizados com **severidade**, **confiança** e **Pulso Score** explicáveis, e **antecipa** acontecimentos como **previsões probabilísticas calibradas** (no espírito do "Pizza Index"). Frase-guia: *observar, correlacionar, localizar, confirmar, explicar, visualizar.*
+Plataforma brasileira de inteligência situacional: transforma **sinais públicos** em **eventos** geolocalizados com **severidade**, **confiança** e **Corvo Score** explicáveis, e **antecipa** acontecimentos como **previsões probabilísticas calibradas** (no espírito do "Pizza Index"). Frase-guia: *observar, correlacionar, localizar, confirmar, explicar, visualizar.*
 
 ### Princípios inegociáveis
 1. **Sinal fraco não é fato.** Rede social detecta, não confirma sozinha (teto de confiança 40 só com social).
@@ -23,18 +23,18 @@ Cron da Cloudflare (*/5 min) → workflow_dispatch → GitHub Actions executa o 
 ```
 | Pasta | Conteúdo |
 |---|---|
-| `engine/pulso_engine/` | `collectors/` (`registry.py`, `news/rss.py`), `processing/` (normalizer, geo, clustering, keyword_engine, keywords.json), `scoring/` (confidence, pulse), `series.py`, `baseline.py`, `anomaly.py`, `events.py`, `pipeline.py`, `client.py`, `config.py`, `models.py` |
+| `engine/corvo_engine/` | `collectors/` (`registry.py`, `news/rss.py`), `processing/` (normalizer, geo, clustering, keyword_engine, keywords.json), `scoring/` (confidence, pulse), `series.py`, `baseline.py`, `anomaly.py`, `events.py`, `pipeline.py`, `client.py`, `config.py`, `models.py` |
 | `engine/config/sources.json` | fontes (validadas por `config.py` contra o protocolo) |
 | `apps/worker/src/` | `routes/` (health, pulse, events, map públicas; ingest, admin com token), `lib/` (auth, cache, dispatch), `index.ts` (fetch + `scheduled`) |
 | `database/migrations/` | `0001_init.sql`, `0002_series.sql` |
-| `packages/shared/src/contracts.ts` | contratos (espelho: `engine/pulso_engine/models.py`) |
+| `packages/shared/src/contracts.ts` | contratos (espelho: `engine/corvo_engine/models.py`) |
 | `apps/web/` | front React (não mexer sem combinar) |
 | `docs/` | arquitetura, previsão, protocolo de coleta, scoring, API, fontes, decisões (ADR) |
 
 Em produção: API `https://pulso-api.henriquesouza.workers.dev`, Web `https://pulso-web.henriquesouza.workers.dev`, D1 `pulso`. Deploy automático pelo GitHub Actions a cada merge na `main`.
 
 ## 3. O que já está feito (resumo)
-Monorepo e CI; Cloudflare (Worker, D1, front) com deploy automático; coleta de ~112 fontes (RSS de imprensa nacional, regional e internacional, e órgãos oficiais; avisos do INMET, focos de calor do INPE e dólar PTAX do Banco Central) em paralelo, com dedup, geo (cidade/estado), clusterização e eventos; confiança, Pulso Score explicável e níveis 1–5; API pública e rotas internas (`/api/ingest`, `/api/admin/series`, `/api/admin/overview`); histórico em séries, baseline (EWMA) e anomalia; protocolo de coleta validado em código; `/api/health` com atraso da coleta; Cron Trigger registrado; registro de coletores; frescor por categoria, eventos com agrupamento e publicação criteriosos, previsões de pulso e de volume por categoria (EXPERIMENTAIS), healthcheck e auditoria de fontes; ~172 testes Python e 7 do Worker. Ver `docs/BACKEND_STATUS.md` (estado vivo) e `docs/RUNBOOK.md` (operação).
+Monorepo e CI; Cloudflare (Worker, D1, front) com deploy automático; coleta de ~112 fontes (RSS de imprensa nacional, regional e internacional, e órgãos oficiais; avisos do INMET, focos de calor do INPE e dólar PTAX do Banco Central) em paralelo, com dedup, geo (cidade/estado), clusterização e eventos; confiança, Corvo Score explicável e níveis 1–5; API pública e rotas internas (`/api/ingest`, `/api/admin/series`, `/api/admin/overview`); histórico em séries, baseline (EWMA) e anomalia; protocolo de coleta validado em código; `/api/health` com atraso da coleta; Cron Trigger registrado; registro de coletores; frescor por categoria, eventos com agrupamento e publicação criteriosos, previsões de pulso e de volume por categoria (EXPERIMENTAIS), healthcheck e auditoria de fontes; ~172 testes Python e 7 do Worker. Ver `docs/BACKEND_STATUS.md` (estado vivo) e `docs/RUNBOOK.md` (operação).
 
 ## 4. Pendências e riscos (não os esconda ao priorizar)
 1. **Coleta contínua ainda não verificada de ponta a ponta.** O `schedule` do GitHub não dispara com confiança; o Cron da Cloudflare foi implementado e o segredo `GH_DISPATCH_TOKEN` foi criado, mas **o disparo automático ainda não foi confirmado**. Sem coleta contínua não há histórico, e sem histórico não há baseline nem previsão.

@@ -1,22 +1,22 @@
-# PULSO 🇧🇷
+# CORVO 🇧🇷
 
-**O PULSO é um instrumento que mede o Brasil em tempo real.** Ele junta centenas de fontes públicas (imprensa nacional e local, alertas oficiais, clima, energia, câmbio, saúde, buscas) e responde, o tempo todo, a quatro perguntas:
+**O CORVO é um instrumento que mede o Brasil em tempo real.** Ele junta centenas de fontes públicas (imprensa nacional e local, alertas oficiais, clima, energia, câmbio, saúde, buscas) e responde, o tempo todo, a quatro perguntas:
 
 1. **O que está acontecendo?** (eventos, agrupados e localizados por estado e cidade)
 2. **Quão fora do normal está?** (anomalia contra o comportamento esperado)
 3. **Quão bem sustentado está?** (confiança: quantas fontes independentes, se há confirmação oficial)
 4. **Para onde está indo?** (previsões de curto prazo, sempre com probabilidade, incerteza e histórico de acertos)
 
-> A ideia é o espírito do *Pizza Index*: um sinal indireto que muda **antes** da manchete. O PULSO não é um portal de notícias. Uma notícia é só mais um sensor.
+> A ideia é o espírito do *Pizza Index*: um sinal indireto que muda **antes** da manchete. O CORVO não é um portal de notícias. Uma notícia é só mais um sensor.
 
-O PULSO mede **atividade e sinais públicos detectados**. Ele não mede a probabilidade de dano a ninguém, não afirma que algo é verdade e não rastreia pessoas.
+O CORVO mede **atividade e sinais públicos detectados**. Ele não mede a probabilidade de dano a ninguém, não afirma que algo é verdade e não rastreia pessoas.
 
 ## Como funciona
 
 ```text
  FONTES (≈280)                     MOTOR PYTHON                              PRODUTO
  imprensa nacional/local     coletar → normalizar → deduplicar        ┌──────────────────────┐
- alertas oficiais (INMET,    localizar (cidade/UF) → agrupar em       │  Pulso 0-100 do país │
+ alertas oficiais (INMET,    localizar (cidade/UF) → agrupar em       │  Corvo 0-100 do país │
  Defesa Civil, INPE...)      eventos com estado                       │  e de cada estado    │
  energia, câmbio, saúde,     → severidade + confiança + frescor       │  eventos e "por quê" │
  buscas, redes sociais       → anomalia e tendência (baseline)        │  previsões com       │
@@ -28,12 +28,12 @@ O PULSO mede **atividade e sinais públicos detectados**. Ele não mede a probab
 - **Eventos:** notícias sobre o mesmo fato viram **um evento** com identidade estável; cópias da mesma matéria contam como **uma** fonte.
 - **O que é de agora vale mais:** cada categoria tem uma meia-vida (trânsito esfria em horas; política em dias). Uma notícia de 12 h atrás pesa menos que uma de agora.
 - **Rotina de campanha pesa pouco:** comício, carreata e agenda de candidato são eventos esperados e entram com severidade baixa, a menos que venha com violência ou vítimas.
-- **Pulso (0-100):** soma explicável de severidade, confiança, velocidade, diversidade de fontes, anomalia, recência, persistência e alcance. Todo número responde "por que 87?" ([docs/SCORING.md](docs/SCORING.md)).
+- **Corvo (0-100):** soma explicável de severidade, confiança, velocidade, diversidade de fontes, anomalia, recência, persistência e alcance. Todo número responde "por que 87?" ([docs/SCORING.md](docs/SCORING.md)).
 - **Severidade ≠ confiança:** um incêndio possivelmente grande com um só relato tem severidade alta e confiança baixa. Rede social **detecta, nunca confirma**.
 - **Sentinela:** quando algo foge do normal (volume, velocidade, vários tipos de fonte ao mesmo tempo, sinal oficial), abre uma **investigação** com estado, procura evidências nos sinais já coletados e vai esfriando até encerrar.
-- **Previsão honesta:** sem histórico suficiente o PULSO responde `INSUFFICIENT_DATA`; até 100 previsões resolvidas, tudo é `EXPERIMENTAL`; toda previsão registra método, versão, evidências e é pontuada depois (Brier). Probabilidade nunca vem de um modelo de linguagem ([docs/architecture/PREDICTION.md](docs/architecture/PREDICTION.md)).
+- **Previsão honesta:** sem histórico suficiente o CORVO responde `INSUFFICIENT_DATA`; até 100 previsões resolvidas, tudo é `EXPERIMENTAL`; toda previsão registra método, versão, evidências e é pontuada depois (Brier). Probabilidade nunca vem de um modelo de linguagem ([docs/architecture/PREDICTION.md](docs/architecture/PREDICTION.md)).
 
-## O que o PULSO nunca faz
+## O que o CORVO nunca faz
 
 - Reconhecimento facial, rastreamento de pessoas ou perfil individual.
 - Tratar alegação política como fato, recomendar voto, ranquear candidatos ou prever vencedor de eleição.
@@ -46,8 +46,8 @@ O PULSO mede **atividade e sinais públicos detectados**. Ele não mede a probab
 |---|---|---|
 | Interface | [apps/web](apps/web) | React + TypeScript + Vite |
 | API / gateway | [apps/worker](apps/worker) | Cloudflare Worker + Hono + zod |
-| **Motor (a alma do PULSO)** | [engine](engine) | Python, sem dependências obrigatórias |
-| Contratos | [packages/shared](packages/shared) | TypeScript (espelho em `engine/pulso_engine/models.py`) |
+| **Motor (a alma do CORVO)** | [engine](engine) | Python, sem dependências obrigatórias |
+| Contratos | [packages/shared](packages/shared) | TypeScript (espelho em `engine/corvo_engine/models.py`) |
 | Banco | [database](database) | migrations SQL (hoje em Turso/SQLite; ver ADR 0008) |
 
 O motor roda no GitHub Actions a cada 5 minutos (disparado pelo Cron da Cloudflare), grava no banco pelo Worker e a interface lê a API. Tudo em planos gratuitos; o custo de escrita no banco é um orçamento controlado pelo próprio motor.
@@ -55,7 +55,7 @@ O motor roda no GitHub Actions a cada 5 minutos (disparado pelo Cron da Cloudfla
 ## Estado hoje (outubro de 2026)
 
 - ≈280 fontes ativas em todos os estados, mais de 170 veículos locais; coleta completa em menos de 1 minuto.
-- Pulso nacional e por estado, eventos com "por quê", previsões de Pulso e de volume com Brier e backtest.
+- Corvo nacional e por estado, eventos com "por quê", previsões de Corvo e de volume com Brier e backtest.
 - Sentinela e histórico agregado por hora em construção; baseline sazonal precisa de semanas de coleta para ficar útil.
 - Reddit, X e Bluesky: adaptadores prontos e desligados à espera de chaves ([como ativar](docs/ATIVAR_REDES_SOCIAIS.md)).
 - Câmeras: catálogo de links e de algumas prévias autorizadas ([docs/sources/CAMERAS.md](docs/sources/CAMERAS.md)).
@@ -70,8 +70,8 @@ npm run dev:worker          # API em http://127.0.0.1:8787 (D1 local)
 npm run dev:web             # interface em http://localhost:5173
 cd engine
 py -m pytest                # testes do motor
-py -m pulso_engine.pipeline # uma rodada completa, sem enviar nada
-py -m pulso_engine.audit    # o que cada fonte entrega agora
+py -m corvo_engine.pipeline # uma rodada completa, sem enviar nada
+py -m corvo_engine.audit    # o que cada fonte entrega agora
 ```
 
 Antes de abrir um PR: `npm run typecheck && npm test && npm run build` e `cd engine && py -m pytest`. Verifique o comportamento real (rode a fonte, chame o endpoint), não só "compilou".

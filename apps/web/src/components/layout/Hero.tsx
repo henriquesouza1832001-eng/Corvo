@@ -1,12 +1,12 @@
 /**
- * Hero editorial no molde do pizzint: título markdown ("# PULSO"),
+ * Hero editorial no molde do pizzint: título markdown ("# CORVO"),
  * tagline, linha de contexto e ações. Sem glow, sem fonte display.
  */
 export function Hero() {
 	return (
 		<header className="hero">
 			<h1>
-				<span className="hash">#</span> PULSO
+				<span className="hash">#</span> CORVO
 			</h1>
 			<p className="tagline">O Brasil em tempo real</p>
 			<p className="hero-sub">
@@ -17,7 +17,7 @@ export function Hero() {
 					className="hbtn"
 					onClick={() => {
 						const url = window.location.href;
-						if (navigator.share) void navigator.share({ title: "PULSO — Brasil em tempo real", url });
+						if (navigator.share) void navigator.share({ title: "CORVO — Brasil em tempo real", url });
 						else void navigator.clipboard.writeText(url);
 					}}
 				>

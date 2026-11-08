@@ -1,10 +1,10 @@
 # Coordenação entre agentes (Claude, Codex e humanos)
 
-O PULSO é desenvolvido por várias pessoas e agentes de IA **ao mesmo tempo, no mesmo diretório e na mesma branch** (`hen`). Não criamos uma branch por agente (decisão do dono). Em vez disso, combinamos **quem edita o quê** e **quem commita**, por um barramento de arquivos simples.
+O CORVO é desenvolvido por várias pessoas e agentes de IA **ao mesmo tempo, no mesmo diretório e na mesma branch** (`hen`). Não criamos uma branch por agente (decisão do dono). Em vez disso, combinamos **quem edita o quê** e **quem commita**, por um barramento de arquivos simples.
 
 ## Organização: três frentes e um portão
 ```text
-                         PULSO
+                         CORVO
         ┌─────────────────┼─────────────────┐
       CODEX            CLAUDE A          CLAUDE B
    (red team)          (engine)          (platform)
@@ -18,8 +18,8 @@ O PULSO é desenvolvido por várias pessoas e agentes de IA **ao mesmo tempo, no
 ```
 | Frente | Nome no quadro | Papel | Donos de pasta (reservas padrão) |
 |---|---|---|---|
-| **Codex: RED TEAM** | `codex` | confiabilidade, replay, backtest, caos, métricas; tenta quebrar o que os outros fazem e prova o que funciona | `engine/pulso_engine/validation/`, `engine/tests/reliability/`, `docs/engineering/RELIABILITY_LAB.md`, `SYSTEM_RELIABILITY_AUDIT.md` |
-| **Claude A: ENGINE** | `claude-motor` | Sentinela, sensores, evidência, contexto, qualidade de dado, modelos V2 | `engine/pulso_engine/research/`, `intelligence/`, `scoring/*_v2.py`, `processing/cluster_refine.py`, `quality.py`, `simulation.py`, `docs/research/`, `docs/CURRENT_ENGINE_STATE.md` |
+| **Codex: RED TEAM** | `codex` | confiabilidade, replay, backtest, caos, métricas; tenta quebrar o que os outros fazem e prova o que funciona | `engine/corvo_engine/validation/`, `engine/tests/reliability/`, `docs/engineering/RELIABILITY_LAB.md`, `SYSTEM_RELIABILITY_AUDIT.md` |
+| **Claude A: ENGINE** | `claude-motor` | Sentinela, sensores, evidência, contexto, qualidade de dado, modelos V2 | `engine/corvo_engine/research/`, `intelligence/`, `scoring/*_v2.py`, `processing/cluster_refine.py`, `quality.py`, `simulation.py`, `docs/research/`, `docs/CURRENT_ENGINE_STATE.md` |
 | **Claude B: PLATFORM** | `claude-hen` | Worker/API, armazenamento (Turso/D1), segurança, observabilidade, integração no pipeline, fontes; front só com autorização | `apps/worker/`, `database/`, `packages/shared/`, `.github/workflows/`, `scripts/`, `pipeline.py`, `client.py`, `models.py`, `flags.py`, `docs/engineering/ENGINE_*`, `docs/api/`, README, AGENTS |
 
 **Como as três se encaixam**

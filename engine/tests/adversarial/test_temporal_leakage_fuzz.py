@@ -1,8 +1,8 @@
 """Vazamento temporal: PROPRIEDADE central = nenhuma informação posterior ao cutoff altera o que o motor calcula no cutoff.
 
 Fuzz com semente fixa: gera sinais com timestamps embaralhados em torno do cutoff (publicado/coletado antes e depois) e linhas de
-observação/pontos do Pulso futuros, e confere que a saída no cutoff é IDÊNTICA com e sem os dados do futuro. Campos cobertos aqui:
-`timestamp` (publicação), `collected_at` (fetch), hora de observação (`signal_observations.hour`) e pontos do Pulso. Os demais
+observação/pontos do Corvo futuros, e confere que a saída no cutoff é IDÊNTICA com e sem os dados do futuro. Campos cobertos aqui:
+`timestamp` (publicação), `collected_at` (fetch), hora de observação (`signal_observations.hour`) e pontos do Corvo. Os demais
 (`event_time`, `confirmed_at`, `resolved_at`...) são do replay do Codex (`tests/reliability/test_data_leakage.py`).
 """
 import random
@@ -10,12 +10,12 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.baseline import seasonal_baseline
-from pulso_engine.forecast_v2 import hour_deltas
-from pulso_engine.forecast_v2_features import build_snapshot
-from pulso_engine.intelligence.baseline_hierarchy import resolve_baseline
-from pulso_engine.models import Signal
-from pulso_engine.research.sentinel import detect_candidates
+from corvo_engine.baseline import seasonal_baseline
+from corvo_engine.forecast_v2 import hour_deltas
+from corvo_engine.forecast_v2_features import build_snapshot
+from corvo_engine.intelligence.baseline_hierarchy import resolve_baseline
+from corvo_engine.models import Signal
+from corvo_engine.research.sentinel import detect_candidates
 
 CUTOFF = datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc)
 SEEDS = list(range(12))

@@ -68,4 +68,4 @@ A camada de cobertura é linear no número de assessments/famílias e os testes 
 - **BLOCKED_EXTERNAL:** `npm ci` local por lock de `node_modules`; CI remoto verde no PR.
 - **UNVERIFIED:** contratos Worker/DB para novos campos de observabilidade não foram alterados nesta rodada.
 
-Conclusão: o PULSO já diferencia “nenhuma evidência com sensores saudáveis” de “visão insuficiente” no harness e nos contratos V2. Isso ainda não é uma garantia de cobertura real nacional nem evidência de skill preditiva.
+Conclusão: o CORVO já diferencia “nenhuma evidência com sensores saudáveis” de “visão insuficiente” no harness e nos contratos V2. Isso ainda não é uma garantia de cobertura real nacional nem evidência de skill preditiva.

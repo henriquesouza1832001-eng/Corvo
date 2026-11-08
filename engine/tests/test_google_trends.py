@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.social.google_trends import GoogleTrendsAdapter, _traffic
+from corvo_engine.collectors.social.google_trends import GoogleTrendsAdapter, _traffic
 
 SRC = {"id": "google-trends-br", "adapter": "google_trends", "source_class": "SOCIAL", "url": "https://trends/rss", "min_importance": 45}
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)

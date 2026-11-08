@@ -1,12 +1,12 @@
-# Validação preditiva do PULSO
+# Validação preditiva do CORVO
 
 Data de corte: 2026-10-03. Responsável pela medição: Codex/red team. Este relatório não promove V1 ou V2 e não trata dados sintéticos como evidência operacional.
 
 ## Pergunta e target
 
-Target científico proposto para o Forecast V2: `P(event reaches PULSO ALERT >= 3 within horizon)`. Cada horizonte (15, 30, 60, 120 e 360 minutos) é uma tarefa diferente e nunca pode dividir a mesma métrica. A resolução é determinística: `Y=1` se o alvo ocorrer na janela; `Y=0` se a janela se encerrar sem ocorrer; `UNKNOWN` se cobertura, retenção ou timestamps impedirem a resolução. `UNKNOWN` não é negativo.
+Target científico proposto para o Forecast V2: `P(event reaches CORVO ALERT >= 3 within horizon)`. Cada horizonte (15, 30, 60, 120 e 360 minutos) é uma tarefa diferente e nunca pode dividir a mesma métrica. A resolução é determinística: `Y=1` se o alvo ocorrer na janela; `Y=0` se a janela se encerrar sem ocorrer; `UNKNOWN` se cobertura, retenção ou timestamps impedirem a resolução. `UNKNOWN` não é negativo.
 
-O V1 hoje prevê variação de Pulso em 60 minutos, não implementa ainda este target de evento. Portanto, qualquer comparação V1/V2 precisa registrar target, `prediction_time`, horizonte, geo, categoria, `data_cutoff`, versões de modelo/features e status.
+O V1 hoje prevê variação de Corvo em 60 minutos, não implementa ainda este target de evento. Portanto, qualquer comparação V1/V2 precisa registrar target, `prediction_time`, horizonte, geo, categoria, `data_cutoff`, versões de modelo/features e status.
 
 ## Dataset e estado atual
 
@@ -24,7 +24,7 @@ A fotografia pública de `/api/forecasts/track-record` em 2026-10-03 tem 0 posit
 
 `validation.temporal.walk_forward_splits` fornece janelas consecutivas `train → calibration → test`; `final_holdout` reserva o trecho final intocado. Feature selection, limiar, calibrador e pesos usam somente treino/calibração. O holdout final é usado uma vez como exame. A unidade de reamostragem e intervalo de confiança deve ser `event_id`, nunca forecast individual quando houver múltiplos forecasts por evento.
 
-Comparar cada challenger contra: taxa-base, taxa-base sazonal, persistência, anomalia-only, velocidade-only, Pulso atual e V1. Reportar Brier, Brier Skill, log loss, ECE acompanhado de bins/N, precisão, recall, FPR/FNR, cobertura, abstenção e lead time por horizonte. Accuracy não é métrica principal em evento raro.
+Comparar cada challenger contra: taxa-base, taxa-base sazonal, persistência, anomalia-only, velocidade-only, Corvo atual e V1. Reportar Brier, Brier Skill, log loss, ECE acompanhado de bins/N, precisão, recall, FPR/FNR, cobertura, abstenção e lead time por horizonte. Accuracy não é métrica principal em evento raro.
 
 ## Calibração e abstenção
 

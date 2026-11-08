@@ -1,4 +1,4 @@
-# Contribuindo com o Pulso
+# Contribuindo com o Corvo
 
 Leia também o [AGENTS.md](AGENTS.md) (vale para humanos e agentes de IA).
 
@@ -27,11 +27,11 @@ npm run db:migrate && npm run db:seed     # D1 local com dados fictícios
 npm run dev:worker                         # API em :8787 (copie apps/worker/.dev.vars.example para .dev.vars)
 npm run dev:web                            # React em :5173 (proxy para a API)
 cd engine && py -m pip install -e ".[dev]" && py -m pytest
-# verificação operacional (ver docs/RUNBOOK.md): py -m pulso_engine.audit (roda cada fonte) e py -m pulso_engine.healthcheck (saúde da produção)
+# verificação operacional (ver docs/RUNBOOK.md): py -m corvo_engine.audit (roda cada fonte) e py -m corvo_engine.healthcheck (saúde da produção)
 ```
 
 ## Segurança
 Nunca versionar `.env`, `.dev.vars`, tokens ou chaves. Produção usa `wrangler secret put`. Nenhum secret no frontend.
 
 ## Princípio editorial
-O Pulso observa, correlaciona, localiza, confirma, explica e visualiza. Sinal fraco não é fato; alegação política não vira fato; IA não é fonte.
+O Corvo observa, correlaciona, localiza, confirma, explica e visualiza. Sinal fraco não é fato; alegação política não vira fato; IA não é fonte.

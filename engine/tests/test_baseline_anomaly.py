@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.anomaly import anomaly_score, zscore
-from pulso_engine.baseline import MIN_HOURS, Baseline, ewma_baseline, hourly_counts
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import chunks, run_once
-from pulso_engine.series import build_series, bucket_start
+from corvo_engine.anomaly import anomaly_score, zscore
+from corvo_engine.baseline import MIN_HOURS, Baseline, ewma_baseline, hourly_counts
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import chunks, run_once
+from corvo_engine.series import build_series, bucket_start
 
 NOW = datetime(2026, 10, 3, 12, 30, tzinfo=timezone.utc)
 
@@ -63,7 +63,7 @@ def test_current_hour_is_excluded_from_baseline():
 
 
 def test_run_once_uses_history_and_emits_series():
-    import pulso_engine.pipeline as pl  # noqa: F401
+    import corvo_engine.pipeline as pl  # noqa: F401
     from tests.test_pipeline import rss, src  # reutiliza utilitários
 
     titles = [f"Temporal causa alagamento em Belo Horizonte relato {k} bairro" for k in range(6)]
@@ -76,7 +76,7 @@ def test_run_once_uses_history_and_emits_series():
     with_hist = run_once(sources, lambda u: feeds[u], now, history=calm)
     without = run_once(sources, lambda u: feeds[u], now, history=[])
     ev_h, ev_n = with_hist["events"][0], without["events"][0]
-    assert ev_h["pulse"] > ev_n["pulse"]  # a anomalia vs. baseline aumentou o Pulso
+    assert ev_h["pulse"] > ev_n["pulse"]  # a anomalia vs. baseline aumentou o Corvo
     assert any(b["key"] == "anomaly" for b in ev_h["score_breakdown"])
     assert not any(b["key"] == "anomaly" for b in ev_n["score_breakdown"])
     assert with_hist["series"] and chunks(with_hist)[-1]["series"]

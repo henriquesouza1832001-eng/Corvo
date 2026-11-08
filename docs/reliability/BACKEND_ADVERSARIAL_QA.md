@@ -64,7 +64,7 @@ A `NOISE_GATE` foi mantida (nomes `GATE_*` para não colidir com o `_SCHEDULED` 
 ### QA-001 — volume de veículos sozinho leva ruído a N2 (P1, motor)
 
 - **Ataque:** a mesma manchete de futebol, "onde assistir", show ou feriado publicada por 6 veículos.
-- **Resultado:** evento `CONFIRMED`, **N2**, Pulso 30. No painel ao vivo de 2026-10-03 apareceu "Brasil x Índia: onde assistir…" como N2.
+- **Resultado:** evento `CONFIRMED`, **N2**, Corvo 30. No painel ao vivo de 2026-10-03 apareceu "Brasil x Índia: onde assistir…" como N2.
 - **Reprodução:** `test_noise_does_not_reach_n2_by_outlet_volume`.
 - **Causa raiz:**
   - `events.is_publishable` publica todo grupo com 2+ fontes, inclusive categoria `OTHER` sem nenhum termo de impacto.
@@ -87,7 +87,7 @@ A `NOISE_GATE` foi mantida (nomes `GATE_*` para não colidir com o `_SCHEDULED` 
   - O classificador e o `importance` casam substantivos ("bloqueio", "interdicao"), não verbos e particípios ("bloqueiam", "interrompida", "paralisada").
   - Não existe vocabulário de telecom ("sem internet", "sem sinal", "fora do ar").
   - "Feridos" + "evacuado" num show cai em `OTHER`, com base de severidade baixa.
-- **Risco:** perda de recall justamente nos incidentes urbanos que o PULSO quer pegar. O filtro de ruído do QA-001 **não** pode ser corrigido sem este, senão o recall cai mais.
+- **Risco:** perda de recall justamente nos incidentes urbanos que o CORVO quer pegar. O filtro de ruído do QA-001 **não** pode ser corrigido sem este, senão o recall cai mais.
 
 ### QA-003 — repost social idêntico vira fonte independente e confirma o evento (P1, motor)
 
@@ -100,12 +100,12 @@ A `NOISE_GATE` foi mantida (nomes `GATE_*` para não colidir com o `_SCHEDULED` 
   - O texto idêntico só reduz a confiança via `duplicate_ratio`; não reduz a independência.
 - **Invariante violada:** `duplicate volume != independent evidence`.
 
-### QA-004 — cópias da mesma fonte inflam o Pulso (P2, motor)
+### QA-004 — cópias da mesma fonte inflam o Corvo (P2, motor)
 
 - **Ataque:** 1000 itens da mesma fonte, mesmo título, URLs diferentes.
 - **Resultado:**
   - A independência continua 1 e a confiança cai para 5 (correto).
-  - Mas a velocidade conta cópias, e o Pulso sobe de 30 para 45.
+  - Mas a velocidade conta cópias, e o Corvo sobe de 30 para 45.
 - **Reprodução:** `test_duplicate_volume_from_one_outlet_does_not_inflate_pulse`.
 - **Causa raiz:** `velocity_per_hour` conta sinais, não títulos distintos nem fontes.
 
@@ -133,7 +133,7 @@ A `NOISE_GATE` foi mantida (nomes `GATE_*` para não colidir com o `_SCHEDULED` 
 ### QA-008 — N2 quase não separa nada nos dados ao vivo (observação, INSUFFICIENT_DATA)
 
 - **Ataque:** distribuição de níveis dos eventos ao vivo em 2026-10-03.
-- **Resultado:** 98 eventos em N2 e 2 em N3, de 100. Pulso mínimo 35, mediana 40. O filtro "nível 2+" dos briefings mostra tudo.
+- **Resultado:** 98 eventos em N2 e 2 em N3, de 100. Corvo mínimo 35, mediana 40. O filtro "nível 2+" dos briefings mostra tudo.
 - **Ressalva:** a API devolve os 100 eventos **mais quentes**, então a amostra é enviesada. Sem a lista completa não dá para afirmar inflação de nível. Precisa de uma consulta ao banco (dono: `claude-hen`).
 - **Replay do `NOISE_GATE` nesses 100 eventos (título + resumo):** 9 seriam rebaixados a N1. Todos são agenda/serviço: "onde assistir" (2×), Mega-Sena, "saiba como baixar o e-Título", "veja como funciona", "zerézima", local de votação. "AGU pede que STF declare lei das bets inconstitucional" deixou de ser rebaixado depois de tirar "bets/apostas" da lista (é tema, não agenda).
 
@@ -150,7 +150,7 @@ Pedida pelo dono do projeto depois do relatório. Regra completa em `docs/SCORIN
 | Apagão, evacuação, enchente, "show termina em tumulto", "feriado tem acidente com mortos" | N2 | N2 (recall mantido) |
 | 1 notícia + 9 reposts sociais idênticos | 10 fontes, CONFIRMED | **1 fonte, DETECTED** |
 | Relato social com palavras próprias | conta | conta |
-| 1000 cópias da mesma fonte | Pulso 45 | **Pulso 30** (igual a 1 cópia) |
+| 1000 cópias da mesma fonte | Corvo 45 | **Corvo 30** (igual a 1 cópia) |
 | Menos cobertura | — | confiança nunca sobe (4 → 3 → 2 fontes) |
 
 **Não corrigidos:**
@@ -170,7 +170,7 @@ Pedida pelo dono do projeto depois do relatório. Regra completa em `docs/SCORIN
 - A mesma URL repetida (inclusive com `utm_*`) é deduplicada.
 - Sindicação (título idêntico) tem confiança menor que cobertura independente.
 - O mesmo assunto em SP e MG não é fundido.
-- A ordem das fontes não muda nada: mesmo `event_id`, nível, Pulso e contagem.
+- A ordem das fontes não muda nada: mesmo `event_id`, nível, Corvo e contagem.
 - Timestamp futuro (inclusive ano 9999) é limitado a "agora".
 - Notícia de 2019 republicada não entra no estado.
 - Título vazio ou só com espaços é descartado; título de 200 mil caracteres é limitado a 300.

@@ -1,8 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
 
-from pulso_engine.anomaly import window_anomaly
-from pulso_engine.baseline import BR_TZ
-from pulso_engine.intelligence.baseline_hierarchy import ladder_gaps, resolve_baseline
+from corvo_engine.anomaly import window_anomaly
+from corvo_engine.baseline import BR_TZ
+from corvo_engine.intelligence.baseline_hierarchy import ladder_gaps, resolve_baseline
 
 AT = datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc)  # quarta 18:00 em Brasília
 

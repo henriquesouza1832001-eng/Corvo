@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
+from corvo_engine.models import Signal
 
 T = datetime(2026, 10, 7, 20, 0, tzinfo=timezone.utc)
 

@@ -4,7 +4,7 @@ import urllib.error
 
 import pytest
 
-from pulso_engine import client
+from corvo_engine import client
 
 
 class _Resp(io.BytesIO):

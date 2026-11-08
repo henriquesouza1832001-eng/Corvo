@@ -1,4 +1,4 @@
-import type { AlertLevel, Category, EventStatus, SourceClass } from "@pulso/shared";
+import type { AlertLevel, Category, EventStatus, SourceClass } from "@corvo/shared";
 
 export const LEVEL_PT: Record<AlertLevel, string> = {
 	1: "NORMAL",

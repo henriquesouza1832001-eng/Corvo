@@ -1,10 +1,10 @@
 """Geo torture: V1 e V2 sobre o MESMO corpus de 164 casos. Mede, não promove: o Geo V2 continua OFF até o gate separado aprovar."""
 import pytest
 
-from pulso_engine import flags
-from pulso_engine.processing import geo_v2
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.geo_gate import promotion_gate
+from corvo_engine import flags
+from corvo_engine.processing import geo_v2
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.geo_gate import promotion_gate
 from tests.adversarial.geo_torture import CITY, NONE, STATE, cases, metrics
 
 

@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine import client, pipeline
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import chunks, geo_source_ids, regeolocate, select_sources
+from corvo_engine import client, pipeline
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import chunks, geo_source_ids, regeolocate, select_sources
 
 NOW = datetime(2026, 10, 3, 12, 17, tzinfo=timezone.utc)  # minuto 17: ciclo comum (fora do horário de revisão)
 

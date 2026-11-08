@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine import pipeline
-from pulso_engine.pipeline import chunks, run_once
+from corvo_engine import pipeline
+from corvo_engine.pipeline import chunks, run_once
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)
 ROW = {"item_id": "fc-x", "method": "pulse_empirical_delta", "scope": "BR", "p_v1": 0.4, "p_v2": 0.6, "outcome": 1}

@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.news import rss
-from pulso_engine.collectors.news.rss import RssAdapter
+from corvo_engine.collectors.news import rss
+from corvo_engine.collectors.news.rss import RssAdapter
 
 NOW = datetime(2026, 10, 2, 18, 0, tzinfo=timezone.utc)
 

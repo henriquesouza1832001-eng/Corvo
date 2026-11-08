@@ -1,5 +1,5 @@
 """Validação do NOISE_GATE OFF x ON (docs/reliability/NOISE_GATE_VALIDATION.md), em cima do corpus de
-`pulso_engine.validation.noise_gate_corpus`. A varredura completa (todos os volumes, tabela) é o `__main__` do módulo;
+`corvo_engine.validation.noise_gate_corpus`. A varredura completa (todos os volumes, tabela) é o `__main__` do módulo;
 aqui ficam as invariantes que não podem regredir, a 10 e 1000 itens.
 
 - O gate NÃO pode resolver falso positivo criando falso negativo: todo positivo que passa desligado passa ligado.
@@ -8,7 +8,7 @@ aqui ficam as invariantes que não podem regredir, a 10 e 1000 itens.
 """
 import pytest
 
-from pulso_engine.validation import noise_gate_corpus as C
+from corvo_engine.validation import noise_gate_corpus as C
 
 BY_NAME = {s.name: s for s in C.scenarios()}
 HARD = [f"{n}@{v}" for n in C.HARD_NEGATIVES for v in (10, 1000)]

@@ -8,7 +8,7 @@
 | `/api/health/live` 200 | o Worker respondeu (não toca o banco) | público |
 | `/api/health/ready` 200 / 503 | o sistema consegue SERVIR dados; 503 = banco fora (**LIVE ≠ READY**) | público |
 | `engine-status.verdict`: ok / degraded / not_ready | veredito agregado do operador | `/api/admin/engine-status` |
-| `collection.stale` | sem Pulso novo há > 15 min | `/api/health` |
+| `collection.stale` | sem Corvo novo há > 15 min | `/api/health` |
 | fonte `FRESH / STALE / EMPTY / QUIET / UNKNOWN` | frescor do CONTEÚDO, separado do transporte (HTTP 200 ≠ dado novo) | log do ciclo `frescor:`; `source_freshness` |
 | transporte `ONLINE / DEGRADED / RATE_LIMITED / OFFLINE / AUTH_ERROR` | só a conexão e a leitura | `source_health` |
 
@@ -20,7 +20,7 @@
 
 ## 2. Coletor ou fonte fora (uma fonte)
 - **Sintoma:** fonte `OFFLINE`/`RATE_LIMITED`/`AUTH_ERROR`; freshness `UNKNOWN`.
-- **Confirmar:** `py -m pulso_engine.audit` (roda cada fonte) e o detalhe em `source_health`.
+- **Confirmar:** `py -m corvo_engine.audit` (roda cada fonte) e o detalhe em `source_health`.
 - **Fazer:** uma fonte caída não derruba o ciclo (testado: `tests/chaos`). 403/429 a partir do GitHub Actions = bloqueio de IP de nuvem ou limite: **desligar a fonte** (`enabled: false`), nunca contornar, nunca insistir. 429 com `Retry-After`: respeitar (o circuit breaker abre pelo menos esse tempo).
 - **Não fazer:** CAPTCHA, proxy, rotação de IP/UA, burlar paywall/robots.
 
@@ -56,4 +56,4 @@
 - **Limitação conhecida (A1b):** o `write_budget` pode subestimar se uma resposta se perde.
 
 ## 9. Conformidade (fonte com termos que proíbem a coleta)
-- **Fazer:** `enabled: false`, registrar o motivo em `compliance_notes` e rodar `py -m pulso_engine.compliance --write`. Nada de APPROVED sem decisão humana.
+- **Fazer:** `enabled: false`, registrar o motivo em `compliance_notes` e rodar `py -m corvo_engine.compliance --write`. Nada de APPROVED sem decisão humana.

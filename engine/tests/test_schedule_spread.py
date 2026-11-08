@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import is_due
+from corvo_engine.pipeline import is_due
 
 T0 = datetime(2026, 10, 3, 0, 0, tzinfo=timezone.utc)
 

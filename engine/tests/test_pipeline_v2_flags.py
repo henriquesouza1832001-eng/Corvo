@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.baseline import BR_TZ
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import cluster_anomaly
-from pulso_engine.processing.clustering import Cluster, cluster_signals, tokens
+from corvo_engine.baseline import BR_TZ
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import cluster_anomaly
+from corvo_engine.processing.clustering import Cluster, cluster_signals, tokens
 
 NOW = datetime(2026, 10, 4, 6, 20, tzinfo=timezone.utc)  # domingo 03:20 em Brasília
 
@@ -52,7 +52,7 @@ def test_cluster_refine_flag_is_wired(monkeypatch):
     a = sig(1, "Acidente fecha BR-381 em Betim", 30)
     b = sig(2, "Colisão interdita a BR-381 perto de Betim e provoca fila", 20, source="b")
     assert len(cluster_signals([a, b])) == 2
-    from pulso_engine.pipeline import run_once
+    from corvo_engine.pipeline import run_once
 
     src = {"id": "x", "name": "x", "domain": "x", "adapter": "rss", "source_class": "NEWS_HIGH", "url": "u", "state": None, "enabled": True}
     feed = lambda url: b"<rss><channel></channel></rss>"  # noqa: E731

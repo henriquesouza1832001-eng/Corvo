@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import { fold } from "./lib/text";
 import { api } from "./lib/api";
 import { useClock } from "./hooks/useClock";
@@ -33,7 +33,7 @@ const DEMO = import.meta.env.VITE_DEMO === "1";
 const PREVIEW: string | undefined = import.meta.env.VITE_PREVIEW_BRANCH || undefined;
 
 /**
- * PULSO — watch page vertical no molde do pizzint:
+ * CORVO — watch page vertical no molde do pizzint:
  * topo → identidade → indicador nacional → cidades → mapa → feed → módulos → arquivo.
  */
 export function App() {
@@ -61,7 +61,7 @@ export function App() {
 		return () => clearInterval(id);
 	}, []);
 
-	const allEvents: PulsoEvent[] = useMemo(() => {
+	const allEvents: CorvoEvent[] = useMemo(() => {
 		const real = eventsPoll.data?.events ?? [];
 		return DEMO ? [...real, ...DEMO_EVENTS] : real;
 	}, [eventsPoll.data]);
@@ -117,7 +117,7 @@ export function App() {
 		document.getElementById("feed")?.scrollIntoView({ behavior: "smooth", block: "start" });
 	}, []);
 	const apiOnline = !pulse.error || !!pulse.data;
-	// "AO VIVO" = API respondendo e último Pulso com menos de 15 min (3 ciclos de coleta).
+	// "AO VIVO" = API respondendo e último Corvo com menos de 15 min (3 ciclos de coleta).
 	const lastPulse = stats.data?.last_pulse_at ? Date.parse(stats.data.last_pulse_at) : null;
 	const live = apiOnline && (lastPulse === null || Date.now() - lastPulse < 15 * 60_000);
 	const onlineSources = health.data?.sources.filter((s) => s.status === "ONLINE").length ?? 0;

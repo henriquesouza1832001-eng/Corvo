@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pulso_engine.pipeline import changed_events, changed_series, select_health
+from corvo_engine.pipeline import changed_events, changed_series, select_health
 
 
 def ev(i, pulse=40, level=2, status="DETECTED", signals=3, sources=2):
@@ -49,7 +49,7 @@ def test_health_sends_only_problems_between_full_slots():
 
 
 def _batch():
-    from pulso_engine.pipeline import chunks
+    from corvo_engine.pipeline import chunks
     sources = [{"id": f"s{i}", "name": "n", "domain": "d", "adapter": "rss", "source_class": "NEWS_HIGH", "url": "https://x", "state": None}
                for i in range(5)]
     events = [{"event_id": f"ev-{i}", "title": "t"} for i in range(4)]
@@ -67,7 +67,7 @@ def test_sources_go_only_in_the_first_part_of_a_split_batch():
 
 
 def test_full_catalog_only_in_the_review_slot():
-    from pulso_engine.pipeline import select_sources
+    from corvo_engine.pipeline import select_sources
     batch, _ = _batch()
     select_sources(batch, datetime(2026, 10, 3, 12, 31, tzinfo=timezone.utc))  # slot de revisão
     assert len(batch["sources"]) == 5 and batch["catalog_complete"] is True
@@ -77,7 +77,7 @@ def test_full_catalog_only_in_the_review_slot():
 
 
 def test_stale_feed_items_are_not_collected_again_as_new_data():
-    from pulso_engine.pipeline import run_once
+    from corvo_engine.pipeline import run_once
 
     def feed(url):
         return ("<rss><channel>"

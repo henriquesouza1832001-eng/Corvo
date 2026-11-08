@@ -2,8 +2,8 @@
 import json
 from pathlib import Path
 
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.geo_v2 import resolve
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.geo_v2 import resolve
 
 
 CASES = json.loads((Path(__file__).parents[1] / "golden" / "geo_cases.json").read_text(encoding="utf-8"))["cases"]

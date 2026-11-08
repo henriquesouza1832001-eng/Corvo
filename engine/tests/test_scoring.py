@@ -1,6 +1,6 @@
-from pulso_engine.models import EventStats
-from pulso_engine.scoring.confidence import SOCIAL_ONLY_CAP, confidence
-from pulso_engine.scoring.pulse import alert_level, decay, pulse_score
+from corvo_engine.models import EventStats
+from corvo_engine.scoring.confidence import SOCIAL_ONLY_CAP, confidence
+from corvo_engine.scoring.pulse import alert_level, decay, pulse_score
 
 
 def stats(**kw) -> EventStats:
@@ -65,7 +65,7 @@ def test_social_only_never_exceeds_level3():
 
 
 def test_impactful_now_beats_equally_impactful_12h_ago():
-    from pulso_engine.scoring.pulse import freshness
+    from corvo_engine.scoring.pulse import freshness
     kw = dict(severity=90, independent_sources=4, source_classes=frozenset({"OFFICIAL", "NEWS_HIGH"}),
               official_confirmation=True, velocity_per_hour=20, persistence_min=120)
     now_score, _ = pulse_score(stats(newest_age_min=5, **kw))
@@ -75,7 +75,7 @@ def test_impactful_now_beats_equally_impactful_12h_ago():
 
 
 def test_traffic_goes_stale_faster_than_health():
-    from pulso_engine.scoring.pulse import HALF_LIFE_BY_CATEGORY, freshness
+    from corvo_engine.scoring.pulse import HALF_LIFE_BY_CATEGORY, freshness
     age = 6 * 60
     traffic = freshness(stats(newest_age_min=age, half_life_min=HALF_LIFE_BY_CATEGORY["TRAFFIC"]))
     health = freshness(stats(newest_age_min=age, half_life_min=HALF_LIFE_BY_CATEGORY["HEALTH"]))

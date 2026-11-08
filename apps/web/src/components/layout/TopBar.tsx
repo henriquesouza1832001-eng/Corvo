@@ -25,12 +25,12 @@ export function TopBar({
 					<span className="mark" aria-hidden>
 						▁▂▄▂▁
 					</span>
-					<b>PULSO</b>
+					<b>CORVO</b>
 					<span className="sub">BRASIL EM TEMPO REAL</span>
 				</a>
 
 				<a href="#topo" className={`pulsechip n${level}`}>
-					PULSO {score ?? "--"} · N{level}
+					CORVO {score ?? "--"} · N{level}
 				</a>
 
 				<span className="counter">

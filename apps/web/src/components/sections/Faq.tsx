@@ -4,11 +4,11 @@
  */
 const QA: Array<[string, string]> = [
 	[
-		"O QUE É O PULSO?",
+		"O QUE É O CORVO?",
 		"um índice independente que mede a intensidade de sinais públicos no brasil: notícias, boletins oficiais, trânsito, clima e relatos abertos, agregados por um motor que agrupa sinais convergentes em eventos.",
 	],
 	[
-		"PULSO ALTO SIGNIFICA PERIGO?",
+		"CORVO ALTO SIGNIFICA PERIGO?",
 		"não. o índice mede volume e velocidade de sinais, não probabilidade de dano e não veracidade. um evento pode ter pulso alto e se confirmar inofensivo, e vice-versa.",
 	],
 	[

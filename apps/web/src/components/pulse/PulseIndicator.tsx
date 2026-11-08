@@ -3,7 +3,7 @@
  * Numeral grande + estado do país + gauge discreto. É o bloco mais
  * importante da página: responde "como está o Brasil agora".
  */
-import type { PulseSnapshot, SourceHealth } from "@pulso/shared";
+import type { PulseSnapshot, SourceHealth } from "@corvo/shared";
 import type { Polling } from "../../hooks/usePolling";
 import { LEVEL_PT } from "../../lib/format";
 import { Gauge } from "../ui/Gauge";
@@ -46,7 +46,7 @@ export function PulseIndicator({
 
 				<div className="pi-main">
 					<div className="pi-numeral">
-						<span className="pi-label">PULSO</span>
+						<span className="pi-label">CORVO</span>
 						<span className="pi-number" style={{ color: pulse.loading ? "var(--tx2)" : lvVar }}>
 							{pulse.loading ? "--" : (d?.score ?? 0)}
 						</span>
@@ -89,7 +89,7 @@ export function PulseIndicator({
 				</div>
 
 				<div className="pi-curve">
-					<span className="pc-label">PULSO · ÚLTIMAS 24H</span>
+					<span className="pc-label">CORVO · ÚLTIMAS 24H</span>
 					<Sparkline seed={(d?.score ?? 50) * 13} trend={d?.score ?? 50} />
 				</div>
 

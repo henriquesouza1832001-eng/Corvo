@@ -11,9 +11,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
-from pulso_engine import safe_http
-from pulso_engine.collectors.news.rss import http_fetch
-from pulso_engine.safe_http import UnsafeURLError, is_public_ip
+from corvo_engine import safe_http
+from corvo_engine.collectors.news.rss import http_fetch
+from corvo_engine.safe_http import UnsafeURLError, is_public_ip
 
 PRIVATE = ["10.0.0.1", "10.255.255.255", "172.16.0.1", "172.31.255.255", "192.168.1.1", "127.0.0.1", "127.1.2.3", "0.0.0.0", "169.254.169.254",
            "169.254.0.1", "100.64.0.1", "192.0.2.1", "198.18.0.1", "224.0.0.1", "255.255.255.255", "::1", "::", "fe80::1", "fe80::1%eth0",
@@ -133,7 +133,7 @@ def test_explicit_test_override_allows_loopback_and_only_when_set(monkeypatch, l
 def test_a_blocked_source_degrades_to_offline_and_never_breaks_the_cycle(local):
     from datetime import datetime, timezone
 
-    from pulso_engine.pipeline import run_once
+    from corvo_engine.pipeline import run_once
 
     src = {"id": "sequestrada", "name": "s", "domain": "s.com", "adapter": "rss", "source_class": "NEWS_HIGH", "url": f"{local}/ok", "state": None, "enabled": True}
     b = run_once([src], now=datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc))

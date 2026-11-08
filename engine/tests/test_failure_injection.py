@@ -4,8 +4,8 @@ import urllib.request
 
 import pytest
 
-from pulso_engine import safe_http
-from pulso_engine.safe_http import UnsafeURLError, is_public_ip, validate_destination
+from corvo_engine import safe_http
+from corvo_engine.safe_http import UnsafeURLError, is_public_ip, validate_destination
 
 
 @pytest.mark.parametrize("ip, alvo", [

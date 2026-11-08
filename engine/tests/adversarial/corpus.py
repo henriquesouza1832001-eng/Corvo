@@ -7,11 +7,11 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
 
-from pulso_engine.baseline import BR_TZ
-from pulso_engine.intelligence.context_engine import ContextCalendar, ScheduledEvent
-from pulso_engine.models import Signal
-from pulso_engine.research.sentinel_eval import CONTRADICTION, NEGATIVE, POSITIVE, Scenario
-from pulso_engine.simulation import SCENARIOS
+from corvo_engine.baseline import BR_TZ
+from corvo_engine.intelligence.context_engine import ContextCalendar, ScheduledEvent
+from corvo_engine.models import Signal
+from corvo_engine.research.sentinel_eval import CONTRADICTION, NEGATIVE, POSITIVE, Scenario
+from corvo_engine.simulation import SCENARIOS
 
 T = datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc)  # quarta 18:00 em Brasília
 

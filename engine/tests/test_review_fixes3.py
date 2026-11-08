@@ -4,11 +4,11 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from pulso_engine.collectors.news.rss import RssAdapter, _sanitize_xml
-from pulso_engine.collectors.official.usgs import UsgsAdapter
-from pulso_engine.forecast_surge import make_surge_forecasts
-from pulso_engine.processing.geo import locate
-from pulso_engine.processing.keyword_engine import KeywordEngine
+from corvo_engine.collectors.news.rss import RssAdapter, _sanitize_xml
+from corvo_engine.collectors.official.usgs import UsgsAdapter
+from corvo_engine.forecast_surge import make_surge_forecasts
+from corvo_engine.processing.geo import locate
+from corvo_engine.processing.keyword_engine import KeywordEngine
 
 NOW = datetime(2026, 10, 3, 12, 2, tzinfo=timezone.utc)
 

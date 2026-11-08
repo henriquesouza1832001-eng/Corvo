@@ -2,10 +2,10 @@
 
 Mede (1) categoria pelo keyword engine e (2) importância (impactante x ruído). É a nossa "régua":
 ao ampliar vocabulário, rode e veja a taxa; quando errar, o caso entra aqui junto com a correção.
-Não é aprendizado de máquina: o PULSO é baseado em regras transparentes e calibração (Brier) das previsões.
+Não é aprendizado de máquina: o CORVO é baseado em regras transparentes e calibração (Brier) das previsões.
 """
-from pulso_engine.processing.importance import assess
-from pulso_engine.processing.keyword_engine import KeywordEngine
+from corvo_engine.processing.importance import assess
+from corvo_engine.processing.keyword_engine import KeywordEngine
 
 # (manchete, categoria esperada)
 CATEGORY_CASES = [
@@ -53,7 +53,7 @@ CATEGORY_CASES = [
     ("Banco divulga balanço com prejuízo de R$ 2 bilhões", "ECONOMY"),
 ]
 
-# Conteúdo sem relevância para o Pulso: deve continuar SEM categoria (o vocabulário novo não pode trazer ruído).
+# Conteúdo sem relevância para o Corvo: deve continuar SEM categoria (o vocabulário novo não pode trazer ruído).
 NO_CATEGORY_CASES = [
     "Omelete de forno: 5 receitas ricas em proteínas para o almoço",
     "Mega-Sena 3062: aposta feita em Sergipe acerta quina e ganha prêmio de R$ 59 mil",

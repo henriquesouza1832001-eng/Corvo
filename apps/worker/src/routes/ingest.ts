@@ -12,7 +12,7 @@ import {
 	INVESTIGATION_STATUSES,
 	SOURCE_CLASSES,
 	SOURCE_HEALTH,
-} from "@pulso/shared";
+} from "@corvo/shared";
 import type { AppEnv } from "../env";
 import { budgetMode, RESERVE_FIXED, RESERVE_ROWS_PER_ITEM, shedBatch, utcDay } from "../lib/budget";
 import { engineAuthorized } from "../lib/auth";
@@ -349,7 +349,7 @@ ingest.post("/", async (c) => {
 	// Idempotente: reenviar o mesmo lote não duplica nada (upsert por chave).
 	const stmts: D1PreparedStatement[] = [];
 	// LOTE OPCIONAL (pesquisa, auditoria e observabilidade: observações, investigações, registry, shadow, drivers, calibradores, estado por
-	// fonte, resumo do ciclo): À PARTE e best-effort. O lote principal é só o dado de PRODUTO (fontes, eventos, sinais, Pulso, séries,
+	// fonte, resumo do ciclo): À PARTE e best-effort. O lote principal é só o dado de PRODUTO (fontes, eventos, sinais, Corvo, séries,
 	// previsões). Se uma tabela opcional não existe (migration atrasada) ou o banco falha aqui, o dado de produto já foi gravado e NUNCA se
 	// perde nem trava por causa disto: uma migration atrasada não pode parar a coleta.
 	const obsStmts: D1PreparedStatement[] = [];

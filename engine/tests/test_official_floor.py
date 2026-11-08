@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.events import OFFICIAL_ALERT_FLOOR, build_event
-from pulso_engine.models import Signal
-from pulso_engine.pipeline import run_once
-from pulso_engine.processing.clustering import Cluster
+from corvo_engine.events import OFFICIAL_ALERT_FLOOR, build_event
+from corvo_engine.models import Signal
+from corvo_engine.pipeline import run_once
+from corvo_engine.processing.clustering import Cluster
 
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
 ALERTS = frozenset({"defesa-civil-idap", "inmet-avisos"})

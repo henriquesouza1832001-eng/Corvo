@@ -6,10 +6,10 @@ São Paulo x Campinas) ou na mesma janela de 12 h (dois acidentes na mesma rodov
 """
 from datetime import timedelta
 
-from pulso_engine.pipeline import assign_event_ids
-from pulso_engine.processing.cluster_eval import drift_and_resurrection, materialize_id, pair_metrics
-from pulso_engine.processing.cluster_refine import refine_clusters
-from pulso_engine.processing.clustering import cluster_signals
+from corvo_engine.pipeline import assign_event_ids
+from corvo_engine.processing.cluster_eval import drift_and_resurrection, materialize_id, pair_metrics
+from corvo_engine.processing.cluster_refine import refine_clusters
+from corvo_engine.processing.clustering import cluster_signals
 from tests.adversarial.cluster_corpus import corpus
 
 SIGS, TRUTH, KINDS = corpus()

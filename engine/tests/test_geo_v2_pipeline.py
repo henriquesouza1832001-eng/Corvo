@@ -1,8 +1,8 @@
 """GEO_V2 no pipeline: desligado não muda nada (só conta em sombra); ligado troca estado por município, sem oscilar."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.pipeline import refine_geo, run_once
-from pulso_engine.models import Signal
+from corvo_engine.pipeline import refine_geo, run_once
+from corvo_engine.models import Signal
 
 T = datetime(2026, 10, 3, 15, 2, tzinfo=timezone.utc)
 

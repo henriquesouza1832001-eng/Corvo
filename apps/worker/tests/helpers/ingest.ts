@@ -25,7 +25,7 @@ export function setup(fault?: (n: number, body: any) => Fault | undefined, opts:
 }
 
 export const forecast = {
-	forecast_id: "fc-chaos-1", kind: "QUANTITY", question: "Pulso BR >= 60 em 1h?", scope: "BR", metric: "pulse_score", comparator: "gte", threshold: 60,
+	forecast_id: "fc-chaos-1", kind: "QUANTITY", question: "Corvo BR >= 60 em 1h?", scope: "BR", metric: "pulse_score", comparator: "gte", threshold: 60,
 	method: "ewma_v1", method_version: "1", probability: 0.2, interval_low: 0.1, interval_high: 0.3, horizon_minutes: 60, created_at: NOW,
 	resolves_at: "2026-10-03T13:00:00Z", evidence: {}, status: "open", outcome: null, observed_value: null, resolved_at: null, brier: null,
 };

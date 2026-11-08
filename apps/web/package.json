@@ -1,5 +1,5 @@
 {
-  "name": "@pulso/web",
+  "name": "@corvo/web",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@pulso/shared": "*",
+    "@corvo/shared": "*",
     "hls.js": "^1.7.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

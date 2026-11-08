@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Category } from "@pulso/shared";
+import type { Category } from "@corvo/shared";
 import type { Clock } from "../../hooks/useClock";
 import { CATEGORY_PT } from "../../lib/format";
 import { Icon } from "../ui/Icon";
@@ -13,7 +13,7 @@ const NAV: Array<[string, string, string]> = [
 	["feed", "Eventos", "alert"],
 	["cameras", "Câmeras", "cam"],
 	["historico", "Histórico", "clock"],
-	["faq", "Sobre o Pulso", "globe"],
+	["faq", "Sobre o Corvo", "globe"],
 ];
 
 export function Sidebar() {
@@ -23,7 +23,7 @@ export function Sidebar() {
 			<a className="dsb-logo" href="#painel" onClick={() => setActive("painel")}>
 				<Icon name="activity" size={22} color="var(--red)" />
 				<span>
-					<b>PULSO</b>
+					<b>CORVO</b>
 					<small>BRASIL EM TEMPO REAL</small>
 				</span>
 			</a>

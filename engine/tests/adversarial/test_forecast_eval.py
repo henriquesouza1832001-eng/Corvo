@@ -2,7 +2,7 @@
 import random
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.forecast_eval import MIN_SAMPLES, beats_references, evaluate, order_models, with_reference_predictors
+from corvo_engine.forecast_eval import MIN_SAMPLES, beats_references, evaluate, order_models, with_reference_predictors
 
 T0 = datetime(2026, 9, 1, 0, 0, tzinfo=timezone.utc)
 BRT = timezone(timedelta(hours=-3))

@@ -49,7 +49,7 @@ The pipeline has `FORECAST_REGISTRY` enabled in shadow mode and emits one immuta
 
 ## Files and tests
 
-- Registry implementation: `engine/pulso_engine/validation/forecast_registry.py`.
+- Registry implementation: `engine/corvo_engine/validation/forecast_registry.py`.
 - Registry tests: `engine/tests/reliability/test_forecast_registry_cutoff.py`, `engine/tests/test_forecast_registry_pipeline.py`.
 - Leakage/replay tests: `engine/tests/reliability/test_data_leakage.py`, `test_replay.py`, `test_temporal_splits.py`.
 - Metrics/gate tests: `engine/tests/reliability/test_metrics.py`, `test_reliability_gate.py`.

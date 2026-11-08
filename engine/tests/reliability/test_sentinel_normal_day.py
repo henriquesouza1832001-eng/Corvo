@@ -1,8 +1,8 @@
 """Ataque de operação: volume normal e fontes diversas não devem parecer incidente."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.models import Signal
-from pulso_engine.radar import analyze
+from corvo_engine.models import Signal
+from corvo_engine.radar import analyze
 
 
 NOW = datetime(2026, 10, 3, 16, tzinfo=timezone.utc)

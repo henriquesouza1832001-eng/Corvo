@@ -3,8 +3,8 @@ import dataclasses
 
 import pytest
 
-from pulso_engine.research.sentinel import SentinelConfig
-from pulso_engine.research.sentinel_eval import replay, summarize
+from corvo_engine.research.sentinel import SentinelConfig
+from corvo_engine.research.sentinel_eval import replay, summarize
 from tests.adversarial import corpus as C
 
 _CACHE: dict = {}
@@ -36,8 +36,8 @@ def test_positive_scenarios_open_before_t0_with_an_explanation(make):
 
 @pytest.mark.parametrize("make", C.CONTRADICTIONS, ids=lambda f: f.__name__)
 def test_contradiction_scenarios_never_become_confirmed(make):
-    from pulso_engine.research.validator import validate
-    from pulso_engine.research.sentinel import Investigation
+    from corvo_engine.research.validator import validate
+    from corvo_engine.research.sentinel import Investigation
     sc = make()
     inv = Investigation("inv-x", "UF:MG", sc.signals[0].category, "NEW", sc.end, sc.end, 0.5, 0.5, 0, False)
     v = validate(inv, sc.signals)
@@ -55,7 +55,7 @@ def test_context_is_what_prevents_the_scheduled_event_false_positive():
 
 def test_single_origin_and_social_only_volume_cannot_open_alone():
     """Cascata de uma origem e enxurrada só social são abertas pela anomalia SE o gate de evidência for removido: ele é necessário."""
-    from pulso_engine.research.sentinel import detect_candidates, should_investigate
+    from corvo_engine.research.sentinel import detect_candidates, should_investigate
     for make in (C.news_burst, C.social_burst, C.viral_repost, C.duplicate_storm, C.old_news_resurface):
         sc = make()
         cands = [c for c in detect_candidates([s for s in sc.signals if s.timestamp <= sc.end], sc.obs_rows, sc.end) if c.score >= 0.65]

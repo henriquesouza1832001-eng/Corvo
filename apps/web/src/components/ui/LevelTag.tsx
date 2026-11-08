@@ -1,4 +1,4 @@
-import type { AlertLevel } from "@pulso/shared";
+import type { AlertLevel } from "@corvo/shared";
 import { LEVEL_PT } from "../../lib/format";
 
 export function LevelTag({ level, compact }: { level: AlertLevel; compact?: boolean }) {

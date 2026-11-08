@@ -9,7 +9,7 @@ export type Level = "ok" | "degraded" | "not_ready";
 export interface Facts {
 	dbOk: boolean;
 	dbLatencyMs: number | null;
-	collectionAgeSeconds: number | null; // idade do último Pulso nacional; null = nunca houve
+	collectionAgeSeconds: number | null; // idade do último Corvo nacional; null = nunca houve
 	budgetMode: "normal" | "economy" | "critical";
 	investigationsActive: number;
 	/** Opcionais: ausentes = "não medido" (ex.: tabela ainda não existe), nunca "zero". */
@@ -39,9 +39,9 @@ export function assess(f: Facts): Assessment {
 	};
 	if (!f.dbOk) raise("not_ready", "banco indisponível");
 	else if (f.dbLatencyMs !== null && f.dbLatencyMs > SLOW_DB_MS) raise("degraded", `banco lento (${f.dbLatencyMs} ms)`);
-	if (f.collectionAgeSeconds === null) raise("degraded", "nenhum Pulso registrado ainda");
+	if (f.collectionAgeSeconds === null) raise("degraded", "nenhum Corvo registrado ainda");
 	else if (f.collectionAgeSeconds > VERY_STALE_AFTER_SECONDS) raise("degraded", `coleta parada há ${Math.round(f.collectionAgeSeconds / 60)} min`);
-	else if (f.collectionAgeSeconds > STALE_AFTER_SECONDS) raise("degraded", `coleta atrasada (${Math.round(f.collectionAgeSeconds / 60)} min sem Pulso novo)`);
+	else if (f.collectionAgeSeconds > STALE_AFTER_SECONDS) raise("degraded", `coleta atrasada (${Math.round(f.collectionAgeSeconds / 60)} min sem Corvo novo)`);
 	if (f.budgetMode === "critical") raise("degraded", "orçamento de escrita crítico: só o essencial é gravado");
 	else if (f.budgetMode === "economy") raise("degraded", "orçamento de escrita em economia: shadow/diagnóstico suspensos");
 	if (f.investigationsActive >= INVESTIGATION_FLOOD) raise("degraded", `${f.investigationsActive} investigações abertas (gatilho possivelmente barulhento)`);

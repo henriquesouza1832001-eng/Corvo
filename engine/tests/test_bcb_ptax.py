@@ -1,8 +1,8 @@
 import json
 from datetime import datetime, timezone
 
-from pulso_engine.collectors.official.bcb_ptax import BcbPtaxAdapter
-from pulso_engine.pipeline import run_once
+from corvo_engine.collectors.official.bcb_ptax import BcbPtaxAdapter
+from corvo_engine.pipeline import run_once
 
 NOW = datetime(2026, 10, 2, 18, 0, tzinfo=timezone.utc)  # 15:00 em Brasília
 SRC = {"id": "bcb-ptax", "adapter": "bcb_ptax", "source_class": "OFFICIAL", "url": "https://olinda/PTAX/CotacaoDolarPeriodo"}

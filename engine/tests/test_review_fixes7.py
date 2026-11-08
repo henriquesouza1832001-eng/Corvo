@@ -3,9 +3,9 @@ import json
 import random
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.backtest import walk_forward
-from pulso_engine.drivers import leading_indicators
-from pulso_engine.forecast_surge import resolve_surge_due
+from corvo_engine.backtest import walk_forward
+from corvo_engine.drivers import leading_indicators
+from corvo_engine.forecast_surge import resolve_surge_due
 
 NOW = datetime(2026, 10, 3, 12, 2, tzinfo=timezone.utc)
 

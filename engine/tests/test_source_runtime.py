@@ -7,9 +7,9 @@ import urllib.error
 from datetime import datetime, timedelta, timezone
 from email.message import Message
 
-from pulso_engine.circuit_breaker import BreakerState
-from pulso_engine.pipeline import chunks, run_once
-from pulso_engine.source_runtime import (HEARTBEAT_MIN, breaker_from_row, cycle_summary, retry_after_seconds, runtime_row,
+from corvo_engine.circuit_breaker import BreakerState
+from corvo_engine.pipeline import chunks, run_once
+from corvo_engine.source_runtime import (HEARTBEAT_MIN, breaker_from_row, cycle_summary, retry_after_seconds, runtime_row,
                                          select_runtime)
 
 NOW = datetime(2026, 10, 4, 15, 0, tzinfo=timezone.utc)

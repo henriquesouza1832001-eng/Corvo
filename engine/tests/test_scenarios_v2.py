@@ -1,14 +1,14 @@
 """Cenários integrados do prompt do dono (§79-§85) sobre os módulos V2: o V2 se comporta como o documento exige."""
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.baseline import BR_TZ, seasonal_baseline
-from pulso_engine.intelligence.anomaly_v2 import anomaly_v2
-from pulso_engine.intelligence.driver_validator import registry_row
-from pulso_engine.models import Signal
-from pulso_engine.quality import freshness
-from pulso_engine.research.validator import find_contradictions, validate
-from pulso_engine.research.sentinel import Investigation
-from pulso_engine.scoring.confidence_v2 import confidence_v2
+from corvo_engine.baseline import BR_TZ, seasonal_baseline
+from corvo_engine.intelligence.anomaly_v2 import anomaly_v2
+from corvo_engine.intelligence.driver_validator import registry_row
+from corvo_engine.models import Signal
+from corvo_engine.quality import freshness
+from corvo_engine.research.validator import find_contradictions, validate
+from corvo_engine.research.sentinel import Investigation
+from corvo_engine.scoring.confidence_v2 import confidence_v2
 
 NOW = datetime(2026, 10, 5, 21, 20, tzinfo=timezone.utc)  # segunda 18:20 em Brasília
 

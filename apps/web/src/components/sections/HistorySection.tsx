@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { PulsoEvent } from "@pulso/shared";
+import type { CorvoEvent } from "@corvo/shared";
 import type { HistEntry } from "./Forecasts";
 import { History } from "./Forecasts";
 
@@ -24,7 +24,7 @@ function topPerDay<T>(items: T[], day: (x: T) => string, beats: (b: T, a: T) => 
 }
 
 /** Evento fechado mais importante por dia: maior nível, depois severidade, depois pulso. */
-function topEvents(events: PulsoEvent[]): PulsoEvent[] {
+function topEvents(events: CorvoEvent[]): CorvoEvent[] {
 	const closed = events
 		.filter((e) => e.status === "RESOLVED" || e.status === "RESOLVING")
 		.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
@@ -53,7 +53,7 @@ export function HistorySection({
 	events,
 }: {
 	entries: HistEntry[];
-	events: PulsoEvent[];
+	events: CorvoEvent[];
 }) {
 	const [tab, setTab] = useState<"24h" | "7d" | "30d">("24h");
 	const shown =

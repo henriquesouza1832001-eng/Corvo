@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from pulso_engine.collectors.news import rss as R
-from pulso_engine.pipeline import run_once
+from corvo_engine.collectors.news import rss as R
+from corvo_engine.pipeline import run_once
 from tests.chaos.server import start
 
 TRANSPORTS = {"ONLINE", "DEGRADED", "RATE_LIMITED", "OFFLINE", "AUTH_ERROR"}

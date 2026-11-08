@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timedelta, timezone
 
-from pulso_engine.forecast_surge import (
+from corvo_engine.forecast_surge import (
     MIN_COVERAGE_POINTS, make_surge_forecasts, merge_series, resolve_surge_due, rolling_hour,
 )
 
