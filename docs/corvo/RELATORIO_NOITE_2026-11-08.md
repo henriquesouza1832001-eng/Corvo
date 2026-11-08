@@ -405,3 +405,11 @@ O ciclo externo 5 terminou ?s 20:10 BRT: 24 feeds saud?veis, 11 itens recebidos 
 
 A mudan?a de limiar e seu teste de fronteira foram commitados em `715751a`; a bateria direcionada final teve 75 aprovados, e o freio permaneceu verde antes e depois do commit (1.278 itens, 458/562 linhas e 432/432 cr?tico).
 Pergunta ao dono: aceita manter 0,25 como limiar provis?rio enquanto se coletam mais pares fit independentes, dado recall de 0,417 e 0/30 fus?es falsas no desafio atual?
+
+### 9.17 Terceira prova P1 no fit e corte rejeitado (20:10 BRT)
+
+Mantive os mesmos 30 pares do `fit` e testei 0,235. Em rela??o a 0,25, TP subiu 5?7, FP ficou 0, FN caiu 7?5, TN ficou 18; recall 0,417?0,583 e fus?es falsas 0/30. O candidato 0,23 capturaria os mesmos 7 positivos, mas faria 1 fus?o falsa em 30 (3,3%); foi rejeitado e n?o entrou no c?digo. O corte padr?o fica 0,235, com limite inferior ainda incerto pela amostra pequena.
+
+No corpus aprovado real, 0,25?0,235 reduziu grupos de 56 para 55; cobertura multifuente ficou em 7 eventos; distribui??o final: 48 com uma fonte, 5 com duas e 2 com tr?s; confirma??o: 4 oficiais, 7 multifuente, 44 de fonte ?nica. O painel final tem 55 eventos, 100 perguntas, 0 previs?es, 100 absten??es, 18 resolu??es de pre?o local sem previs?o, 2 aguardando pre?o futuro e 80 sem instrumento; Brier, base, skill e ECE N/A. Registro local: 520 linhas em cinco snapshots idempotentes; execu??o atual com 100 linhas (`run_id=run_71e39f445d40751646a5`).
+
+Essa itera??o usa somente `fit` para ajustar a identidade de eventos; n?o abriu o lacre nem mudou o port?o Hugin. Hugin H2, Munin M3. O novo conjunto de avalia??o Hugin segue indispon?vel: eval existente tem 15 `keep`, abaixo dos 40 pedidos.

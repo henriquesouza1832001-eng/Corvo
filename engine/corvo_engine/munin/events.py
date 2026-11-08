@@ -83,7 +83,7 @@ def build_events(
     *,
     official_sources: Iterable[str] = (),
     max_gap_hours: float = 48,
-    min_similarity: float = 0.25,
+    min_similarity: float = 0.235,
 ) -> list[Event]:
     """Group articles using complete-link matching to prevent chaining.
 

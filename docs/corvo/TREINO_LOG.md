@@ -53,6 +53,8 @@
 
 | 16 | 2026-11-08 | P1 fit iteration: event title threshold 0.30 to 0.25 | same 30 fit-only labeled pairs: TP 4?5, FP 0?0, FN 8?7, TN 18; false merges 0/30; recall 0.333?0.417; directed suite 75 passed | no Hugin sealed metric; Munin event grouping only | 458/day; 562 at 5x; green | real approved corpus: events 58?56, multi-source 5?7; added positive pairs without challenge false merges; low recall remains | `715751a` |
 
+| 17 | 2026-11-08 | P1 fit iteration: event threshold 0.25 to 0.235; rejected 0.23 | same 30 fit pairs: at 0.235 TP 7, FP 0, FN 5, TN 18 (recall 0.583); 0.23 would yield FP 1/30 (3.3%) | no Hugin sealed metric; no eval titles opened | 458/day; 562 at 5x; green | real approved corpus: events 56?55, multi-source stays 7; local proof 100 questions, 0 forecasts, 100 abstentions | pending |
+
 **Resultado** = `mantido` · `revertido` · `platô` (duas rodadas seguidas sem melhorar o lacrado: **trocar de alavanca ou de tarefa e registrar o que falta**; o treino só para quando o dono pedir).
 
 ## Batimentos (uma linha por hora; é assim que o dono vê que o treino não parou)
