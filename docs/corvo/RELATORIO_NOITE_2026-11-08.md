@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:13 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. Censo T5 e auditoria T4 registrados. Ciclo externo 17 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.51.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:17 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. Censo T5 e auditoria T4 registrados. Ciclo externo 17 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.52.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:13 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:17 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -663,3 +663,8 @@ Separei os itens aprovados por hash estavel e removi os 75 URLs do eval por iden
 ### 9.51 Ciclo 17 e painel Munin local (22:10 BRT)
 
 O processo externo do dono completou o ciclo 17: 27 feeds, 3 URLs novas, zero falhas, zero itens enviados em dry-run e zero candles novos (5.230 linhas de preco). O corpus tem 1.411 URLs unicas. Reexecutei o painel local: 61 eventos, 109 perguntas, 0 previsoes e 109 abstencoes; status de resolucao segue 8 resolvidos sem forecast, 12 aguardando preco futuro, 88 aguardando instrumento e 1 historico insuficiente. Brier, skill e ECE reais continuam N/A. O freio apos o ciclo: 466 linhas/dia, 602 a 5x, fracao aceita 0,0318 e 432/432 em critico; dentro dos limites seguros.
+
+
+### 9.52 T7: auditoria computacional de todos os itens fit aprovados (22:17 BRT)
+
+No conjunto fit dinamico de 52 URLs aprovadas, excluindo os 75 URLs do eval antes da leitura dos titulos, comparei a regra antiga com a nova. Apenas uma classificacao muda: a manchete do S&P 500 passa de reportagem para opiniao. A distribuicao vai de 50 reportagens e 2 fatos para 49 reportagens, 1 opiniao e 2 fatos. Essa checagem cobre o conjunto fit atual; apenas os 40 itens da amostra anterior receberam adjudicacao manual.
