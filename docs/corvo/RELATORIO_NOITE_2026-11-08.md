@@ -1,6 +1,6 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:40 BRT:** cadeia Munin, T9, T6 e censo T5 concluídos; ciclo 14 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.42.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:40 BRT:** cadeia Munin, T9, T6 e censo T5 concluídos; ciclo 14 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.43.
 
 **Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:40 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`
 
@@ -16,7 +16,7 @@
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Reprova sintética mais recente repetiu os seis cenários; painel local tem 59 eventos, 104 perguntas, 0 previsões e 104 abstenções.
 - Nesta rodada, o corpus local está em 1.319 URLs; ciclo 14 trouxe 6 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: após o ciclo 13, a amostra dinâmica de ajuste tem 55 aprovados; a cobertura por título subiu de 39/55 (70,9%) para 47/55 (85,5%). O acerto conservador permanece 46/47 (97,9%), contando um caso ambíguo como erro. As oito manchetes sem ponto não citam lugar localizável.
-- T5 (24 h, sem URLs do eval): 1.008 itens únicos em 23 feeds; G1 tem 210 e zero aceitos; 55 itens aceitos no total. Não ajustei `reliability`/`enabled`, pois sem rótulo de falso negativo a taxa de descarte não justifica desligar a fonte.
+- T5 (24 h, sem URLs do eval): 1.014 itens únicos em 23 feeds; G1 tem 210 e zero aceitos; 55 itens aceitos no total. Não ajustei `reliability`/`enabled`, pois sem rótulo de falso negativo a taxa de descarte não justifica desligar a fonte.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -616,3 +616,8 @@ G1 gerou o maior volume (210), sem nenhum item aprovado; isso é sinal para amos
 ### 9.42 Ciclo 14 e revalidação do painel (21:40 BRT)
 
 O ciclo 14 consultou 24 feeds, sem falhas; entraram 6 URLs, nenhum preço novo (arquivo continua em 5.225 candles). O corpus chegou a 1.319 URLs. O painel local não mudou: 59 eventos, 104 perguntas, 0 previsões, 104 abstenções; 8 resoluções sem forecast, 12 aguardando preço futuro e 84 aguardando instrumento. O freio continua verde: 462 linhas/dia, 582 a 5×, 432/432 em crítico.
+
+
+### 9.43 T5 janela móvel atualizada (21:40 BRT)
+
+Recalculei o censo das últimas 24 horas até 21:40 BRT, excluindo de novo as URLs do eval pelo identificador. A janela passou a 1.014 URLs únicas e 55 HOT/BUFFER em 23 feeds; as seis URLs novas do ciclo 14 foram todas DROP. G1 segue em 210 itens e zero aceitos. A tabela da seção 9.41 é o retrato das 21:30; as mudanças de volume desde então foram +2 `allafrica`, +2 `scmp`, +1 `straits-times` e +1 `times-of-israel`, todos descartados. Nenhuma amostra de falso negativo foi criada, então não mudei parâmetros da fonte.
