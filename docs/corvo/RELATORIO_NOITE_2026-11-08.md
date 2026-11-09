@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:40 BRT:** cadeia Munin, T9, T6 e censo T5 concluídos; ciclo 14 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.43.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:40 BRT:** cadeia Munin, T9, T6, censo T5 e auditoria T4 concluídos; ciclo 14 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.44.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:40 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:40 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -621,3 +621,8 @@ O ciclo 14 consultou 24 feeds, sem falhas; entraram 6 URLs, nenhum preço novo (
 ### 9.43 T5 janela móvel atualizada (21:40 BRT)
 
 Recalculei o censo das últimas 24 horas até 21:40 BRT, excluindo de novo as URLs do eval pelo identificador. A janela passou a 1.014 URLs únicas e 55 HOT/BUFFER em 23 feeds; as seis URLs novas do ciclo 14 foram todas DROP. G1 segue em 210 itens e zero aceitos. A tabela da seção 9.41 é o retrato das 21:30; as mudanças de volume desde então foram +2 `allafrica`, +2 `scmp`, +1 `straits-times` e +1 `times-of-israel`, todos descartados. Nenhuma amostra de falso negativo foi criada, então não mudei parâmetros da fonte.
+
+
+### 9.44 T4 análise de stale, sem ajuste por falta de rótulos (21:40 BRT)
+
+Do censo, 68 registros fora do eval tinham motivo `stale`; cruzei URLs com o arquivo de rótulos fit fresco, sem ler títulos/rótulos do eval. Só 7 stale coincidem com esse arquivo: 5 marginais, 2 drops e nenhum keep; os outros 61 não têm correspondência nesse arquivo (não alego que nunca tenham sido rotulados em outro lugar). Embora haja scores de relevância altos em alguns stale, score não substitui rótulo de keep. Não aumentei `max_age_h`: não há ganho de keep medido que justifique maior retenção ou carga.
