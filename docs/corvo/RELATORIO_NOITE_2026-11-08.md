@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:35 BRT:** cadeia Munin, T9 e T6 concluídos; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.38.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:30 BRT:** cadeia Munin, T9 e T6 concluídos; ciclo 13 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.39.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:35 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:28 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -13,8 +13,8 @@
 - Hugin permanece em H2: o lacre anterior tinha 15 keeps; a amostra fresca teve 21/307 keeps no eval, recall 0,190 e precisão HOT n/d, abaixo das metas e instável. Nenhuma regra foi escolhida com exemplos do lacre.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
-- Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
-- Nesta rodada, o corpus local está em 1.310 URLs; ciclo 12 trouxe 7 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Reprova sintética mais recente repetiu os seis cenários; painel local agora tem 58 eventos, 102 perguntas, 0 previsões e 102 abstenções.
+- Nesta rodada, o corpus local está em 1.313 URLs; ciclo 13 trouxe 3 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: nos mesmos 54 aprovados do ajuste, a cobertura por título subiu de 38/54 (70,4%) para 46/54 (85,2%). A auditoria manual dos 46 pontos retornados teve 45 correspondências claras; um caso ambíguo foi contado como erro (acerto conservador 97,8%). Os oito títulos restantes não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
@@ -551,15 +551,22 @@ O teste novo cobre menção mais cedo, os quatro lugares adicionados, preservaç
 O ciclo 12 consultou 24 feeds sem falhas, trouxe 7 itens e não adicionou preços; o corpus tem 1.310 URLs e o arquivo de preços 5.225 linhas. Após o commit `1084877`, o freio foi repetido: 460 linhas/dia, 572 a 5×, aceitos 14/505 e 432/432 sob pressão crítica; todos os cenários verdes. A coleta do dono segue em `--dry-run`, PID 13596. Nenhum forecast real foi resolvido nesta atualização.
 
 
-### 9.37 T6 revisão de acerto: local da ação supera o ator (21:30 BRT)
+### 9.37 T6 revisão de acerto: local da ação supera o ator (21:25 BRT)
 
 Ao revisar os 45 títulos que o geocodificador localizava, encontrei um risco na regra “primeira menção”: notícias como “Russia strikes Ukraine” podiam apontar o ator, não o local atingido. Ajustei a seleção para priorizar um local explicitamente ligado a uma ação por construções como “damage Ukraine”, “strike on Kyiv” e “ship in the Gulf of Oman”; sem esse contexto, continua vencendo a primeira menção. Acrescentei testes de regressão Rússia/Ucrânia e EUA/Irã.
 
 No mesmo conjunto de ajuste atualizado (54 aprovados; sem URLs do eval), a versão do commit `1084877` localizava 38/54 (70,4%) e a versão do commit `34e59d7` localiza 45/54 (83,3%). Revisei os 45 resultados: 44 correspondem claramente ao local do acontecimento; um caso de deslocamento de tropas entre Síria, Iêmen e Arábia Saudita ficou ambíguo e foi contado como erro, portanto acerto conservador de 44/45 (97,8%). A seção 9.38 acrescenta uma região explicitamente citada e atualiza o placar. Nenhum item lacrado foi usado.
 
 
-### 9.38 T6: região continental explicitamente nomeada (21:35 BRT)
+### 9.38 T6: região continental explicitamente nomeada (21:28 BRT)
 
 O título “Binance users in some European countries...” nomeia uma região de mercado, mas não um país. Adicionei “Europa” com ponto regional aproximado, limitado às expressões “Europe”, “European countries/markets/Union”; não inferi a sede da Binance. Um teste assegura que “European Investment Bank” como nome de instituição não gera localização.
 
-Na mesma amostra dos 54 aprovados do ajuste: 38/54 títulos localizáveis antes das mudanças T6 (70,4%), 46/54 agora (85,2%). A amostra de acerto cobre 46 retornos: 45 lugares claros e um caso de tropas ambíguo contado como erro, 45/46 (97,8%) de acerto conservador. A cobertura e o acerto atingem os limiares T6 neste conjunto de ajuste; isso não é prova lacrada. A bateria tem 23 exemplos positivos e cinco negativos; o conjunto eval não foi aberto. Freio antes/depois do próximo commit deve permanecer verde.
+Na mesma amostra dos 54 aprovados do ajuste: 38/54 títulos localizáveis antes das mudanças T6 (70,4%), 46/54 agora (85,2%). A amostra de acerto cobre 46 retornos: 45 lugares claros e um caso de tropas ambíguo contado como erro, 45/46 (97,8%) de acerto conservador. A cobertura e o acerto atingem os limiares T6 neste conjunto de ajuste; isso não é prova lacrada. A bateria tem 23 exemplos positivos e cinco negativos; o conjunto eval não foi aberto. O commit `b28fcf3` passou o freio antes e depois: corpus 1.310, 460 linhas/dia, 572 a 5× e 432/432 na pressão crítica; tudo verde.
+
+
+### 9.39 Ciclo 13, reprova sintética Munin e painel local (21:30 BRT)
+
+`corvo_munin_eval.py --synthetic` repetiu seis cenários sem mudança: previsor calibrado skill +0,353/ECE 0,014; exagerado +0,089/0,211; taxa-base 0; conservador +0,262/0,132; n=12 continua EXPERIMENTAL/HOLD; vazamento continua bloqueado. Todos os números são sintéticos.
+
+O ciclo 13 consultou 24 feeds sem falhas, trouxe 3 itens e nenhum preço novo. O corpus está em 1.313 URLs; o painel local mostra 59 eventos e 104 perguntas, 0 previsões e 104 abstenções; 8 resoluções locais sem forecast, 12 aguardando preço futuro e 84 aguardando instrumento. Brier, taxa-base comparável, skill e ECE de previsões reais continuam N/A; nenhum resultado de previsão foi pontuado. O freio pós-ciclo está verde em 462 linhas/dia, 582 a 5× e 432/432 na pressão crítica. Coleta do dono segue ativa, PID 13596.
