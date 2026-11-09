@@ -22,6 +22,7 @@ def test_locate_prefers_action_location_then_earliest_explicit_mention():
         ("Yemen ceasefire talks resume in Riyadh", "Iêmen"),
         ("Sanaa market hit in Yemen strikes", "Iêmen"),
         ("Riga farmers protest Russia grain trade", "Letônia"),
+        ("Binance users in some European countries face new restrictions", "Europa"),
         ("Ankara announces new policy", "Turquia"),
         ("Türkiye central bank changes rates", "Turquia"),
         ("United Kingdom raises bank rate", "Reino Unido"),
@@ -44,6 +45,8 @@ def test_locate_does_not_guess_ambiguous_names_or_company_headquarters():
         "Acme Inc. expands its office footprint",
     ):
         assert locate(title) is None, title
+
+    assert locate("European Investment Bank changes its logo") is None
 
 
 def test_locate_uses_body_only_when_title_has_no_match():

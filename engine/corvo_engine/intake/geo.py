@@ -13,6 +13,8 @@ _PLACES: tuple[tuple[str, float, float, str], ...] = (
     ("Iêmen", 15.37, 44.19, r"yemen|yemeni|sanaa|sana'a|taiz|i[eê]men"),
     ("Mar Negro", 43.00, 34.00, r"black sea|mar negro"),
     ("Golfo de Omã", 23.50, 60.00, r"gulf of oman|golfo de om[aã]"),
+    # Approximate regional point; this is not a city or company headquarters.
+    ("Europa", 50.00, 15.00, r"\beurope\b|european countries|european markets|european union|uni[aã]o europeia"),
     ("Ucrânia", 50.45, 30.52, r"ukrain|kyiv|kiev|ucr[aâ]nia"),
     ("Rússia", 55.75, 37.62, r"russia|moscow|kremlin|putin|r[uú]ssia|moscou"),
     ("Israel/Gaza", 31.77, 35.21, r"israel|gaza|tel aviv|jerusalem|hamas|hezbollah"),

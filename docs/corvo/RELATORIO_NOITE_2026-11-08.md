@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:20 BRT:** cadeia Munin, T9 e auditoria parcial T6 concluídas; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.36.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:35 BRT:** cadeia Munin, T9 e T6 concluídos; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.38.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:30 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:35 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -15,7 +15,7 @@
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
 - Nesta rodada, o corpus local está em 1.310 URLs; ciclo 12 trouxe 7 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
-- T6 geolocalização: na leitura atual de 54 aprovados do ajuste, a cobertura por título subiu de 38/54 (70,4%) para 45/54 (83,3%). A auditoria manual dos 45 pontos retornados teve 44 correspondências claras; o único caso ambíguo foi contado como erro (acerto conservador 97,8%). A meta T6 de cobertura ≥85% ainda não foi alcançada; nove manchetes não citam lugar localizável.
+- T6 geolocalização: nos mesmos 54 aprovados do ajuste, a cobertura por título subiu de 38/54 (70,4%) para 46/54 (85,2%). A auditoria manual dos 46 pontos retornados teve 45 correspondências claras; um caso ambíguo foi contado como erro (acerto conservador 97,8%). Os oito títulos restantes não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -51,7 +51,7 @@ Métricas do `corvo_gate_eval.py`, ponderadas pelo estrato. A linha de base foi 
 | Drop gravado | mínimo | 0,049 | 0,125 | 0,049 | 0,125 |
 | Keep entre gravadas | ≥ 0,85 | 0,607 | 0,583 | 0,607 | 0,583 |
 | HOT entre aceitos | ≤ 0,25 | 0,770 | 0,792 | 0,082 | 0,083 |
-| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | ver T6: cobertura 70,4%→83,3%; acerto conservador 44/45 |
+| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | ver T6: cobertura 70,4%→85,2%; acerto conservador 45/46 |
 
 O lacre tem 75 itens, 15 keep e 2 HOT depois da mudança. Precisão HOT 1,000 atende o critério de T1, mas tem pouca amostra. Recall e keep entre gravadas não mudaram; ambos continuam abaixo das metas de H3. O nível de Hugin permanece **H2**.
 
@@ -555,4 +555,11 @@ O ciclo 12 consultou 24 feeds sem falhas, trouxe 7 itens e não adicionou preço
 
 Ao revisar os 45 títulos que o geocodificador localizava, encontrei um risco na regra “primeira menção”: notícias como “Russia strikes Ukraine” podiam apontar o ator, não o local atingido. Ajustei a seleção para priorizar um local explicitamente ligado a uma ação por construções como “damage Ukraine”, “strike on Kyiv” e “ship in the Gulf of Oman”; sem esse contexto, continua vencendo a primeira menção. Acrescentei testes de regressão Rússia/Ucrânia e EUA/Irã.
 
-No mesmo conjunto de ajuste atualizado (54 aprovados; sem URLs do eval), a versão do commit `1084877` localizava 38/54 (70,4%) e a versão atual localiza 45/54 (83,3%). Revisei manualmente os 45 resultados: 44 correspondem claramente ao local do acontecimento; um caso de deslocamento de tropas entre Síria, Iêmen e Arábia Saudita ficou ambíguo e foi contado como erro, portanto acerto conservador de 44/45 (97,8%). A bateria agora tem 22 exemplos positivos e quatro negativos; 108 testes CORVO/regressões passaram. Ainda não alcança cobertura ≥85%; não vou inventar localização para as nove manchetes sem lugar citado. Nenhum item lacrado foi usado.
+No mesmo conjunto de ajuste atualizado (54 aprovados; sem URLs do eval), a versão do commit `1084877` localizava 38/54 (70,4%) e a versão do commit `34e59d7` localiza 45/54 (83,3%). Revisei os 45 resultados: 44 correspondem claramente ao local do acontecimento; um caso de deslocamento de tropas entre Síria, Iêmen e Arábia Saudita ficou ambíguo e foi contado como erro, portanto acerto conservador de 44/45 (97,8%). A seção 9.38 acrescenta uma região explicitamente citada e atualiza o placar. Nenhum item lacrado foi usado.
+
+
+### 9.38 T6: região continental explicitamente nomeada (21:35 BRT)
+
+O título “Binance users in some European countries...” nomeia uma região de mercado, mas não um país. Adicionei “Europa” com ponto regional aproximado, limitado às expressões “Europe”, “European countries/markets/Union”; não inferi a sede da Binance. Um teste assegura que “European Investment Bank” como nome de instituição não gera localização.
+
+Na mesma amostra dos 54 aprovados do ajuste: 38/54 títulos localizáveis antes das mudanças T6 (70,4%), 46/54 agora (85,2%). A amostra de acerto cobre 46 retornos: 45 lugares claros e um caso de tropas ambíguo contado como erro, 45/46 (97,8%) de acerto conservador. A cobertura e o acerto atingem os limiares T6 neste conjunto de ajuste; isso não é prova lacrada. A bateria tem 23 exemplos positivos e cinco negativos; o conjunto eval não foi aberto. Freio antes/depois do próximo commit deve permanecer verde.
