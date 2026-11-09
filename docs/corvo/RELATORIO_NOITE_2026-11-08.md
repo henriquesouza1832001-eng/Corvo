@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:20 BRT:** cadeia Munin, T9 e auditoria parcial T6 concluídas; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.35.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:20 BRT:** cadeia Munin, T9 e auditoria parcial T6 concluídas; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.36.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:10 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:20 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -14,7 +14,7 @@
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
-- Nesta rodada, o corpus local está em 1.300 URLs; ciclo 10 trouxe 7 itens e 5 preços novos, com um 404 isolado em `fed-press`. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- Nesta rodada, o corpus local está em 1.310 URLs; ciclo 12 trouxe 7 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: em 53 aprovados do ajuste, a cobertura por título subiu de 37/53 (69,8%) para 44/53 (83,0%). Auditoria positiva curada: 20/20; testes de “Turkey” ambíguo, Georgia/Jordan e empresa sem sede inferida não produziram falso ponto. A meta T6 de cobertura ≥85% ainda não foi alcançada; nove manchetes não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
@@ -543,4 +543,9 @@ Hipótese definida no ajuste: selecionar a menção geográfica mais cedo no tí
 
 Na mesma amostra de 53 aprovados fora do eval lacrado, a versão anterior localizava 37/53 títulos (69,8%); a nova localiza 44/53 (83,0%), ganho de 7 títulos. Nove títulos ainda não nomeiam uma localidade; não atribuí sede presumida a empresa ou ativo. Uma auditoria positiva curada e pré-especificada de 20 títulos de ajuste acertou 20/20 (100%); quatro testes negativos cobrem “Turkey” como alimento, Georgia/Jordan ambíguos e empresa sem sede. Isso não é uma estimativa independente de precisão: não há rótulo geográfico independente de toda a amostra. O critério de cobertura T6 (≥85%) permanece pendente.
 
-O teste novo cobre menção mais cedo, os quatro lugares adicionados, preservação da prioridade do título sobre o corpo e ausência de inferência para nomes ambíguos/empresa. Os 108 testes CORVO e regressões selecionadas passaram. Nenhum item do eval lacrado foi aberto ou usado. Hugin segue H2; freio verde repetido antes e depois do commit será registrado no log.
+O teste novo cobre menção mais cedo, os quatro lugares adicionados, preservação da prioridade do título sobre o corpo e ausência de inferência para nomes ambíguos/empresa. Os 108 testes CORVO e regressões selecionadas passaram. Nenhum item do eval lacrado foi aberto ou usado. Hugin segue H2. Freio antes do commit T6: corpus 1.310, 460 linhas/dia, 572 a 5×, 432/432 crítico; freio depois: mesmos valores, verde em normal, economia e crítico.
+
+
+### 9.36 Ciclo 12 e conferência posterior ao commit T6 (21:20 BRT)
+
+O ciclo 12 consultou 24 feeds sem falhas, trouxe 7 itens e não adicionou preços; o corpus tem 1.310 URLs e o arquivo de preços 5.225 linhas. Após o commit `1084877`, o freio foi repetido: 460 linhas/dia, 572 a 5×, aceitos 14/505 e 432/432 sob pressão crítica; todos os cenários verdes. A coleta do dono segue em `--dry-run`, PID 13596. Nenhum forecast real foi resolvido nesta atualização.
