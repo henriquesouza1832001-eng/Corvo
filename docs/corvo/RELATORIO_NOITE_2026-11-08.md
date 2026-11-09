@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:40 BRT:** cadeia Munin, T9, T6, censo T5 e auditoria T4 concluídos; ciclo 14 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.44.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:50 BRT:** cadeia Munin, T9, T6, censo T5 e auditoria T4 concluídos; ciclo 15 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.45.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:40 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:50 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -14,7 +14,7 @@
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Reprova sintética mais recente repetiu os seis cenários; painel local tem 59 eventos, 104 perguntas, 0 previsões e 104 abstenções.
-- Nesta rodada, o corpus local está em 1.319 URLs; ciclo 14 trouxe 6 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
+- Nesta rodada, o corpus local está em 1.325 URLs; ciclo 15 trouxe 6 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: após o ciclo 13, a amostra dinâmica de ajuste tem 55 aprovados; a cobertura por título subiu de 39/55 (70,9%) para 47/55 (85,5%). O acerto conservador permanece 46/47 (97,9%), contando um caso ambíguo como erro. As oito manchetes sem ponto não citam lugar localizável.
 - T5 (24 h, sem URLs do eval): 1.014 itens únicos em 23 feeds; G1 tem 210 e zero aceitos; 55 itens aceitos no total. Não ajustei `reliability`/`enabled`, pois sem rótulo de falso negativo a taxa de descarte não justifica desligar a fonte.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
@@ -626,3 +626,8 @@ Recalculei o censo das últimas 24 horas até 21:40 BRT, excluindo de novo as UR
 ### 9.44 T4 análise de stale, sem ajuste por falta de rótulos (21:40 BRT)
 
 Do censo, 68 registros fora do eval tinham motivo `stale`; cruzei URLs com o arquivo de rótulos fit fresco, sem ler títulos/rótulos do eval. Só 7 stale coincidem com esse arquivo: 5 marginais, 2 drops e nenhum keep; os outros 61 não têm correspondência nesse arquivo (não alego que nunca tenham sido rotulados em outro lugar). Embora haja scores de relevância altos em alguns stale, score não substitui rótulo de keep. Não aumentei `max_age_h`: não há ganho de keep medido que justifique maior retenção ou carga.
+
+
+### 9.45 Ciclo 15 e bancada Munin (21:50 BRT)
+
+O ciclo 15 consultou os 24 feeds sem falhas, incluiu 6 URLs e não adicionou candles. O corpus chegou a 1.325 URLs; freio verde em 462 linhas/dia, 582 a 5× e 432/432 crítico. O painel repetido após o ciclo manteve 59 eventos, 104 perguntas, 0 previsões, 104 abstenções; 8 resoluções sem forecast, 12 aguardando preço futuro, 84 aguardando instrumento. Nenhum Brier, skill ou ECE real foi calculado.
