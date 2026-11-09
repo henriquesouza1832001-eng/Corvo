@@ -24,6 +24,9 @@
     { "id": "coindesk", "name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "region": "Cripto", "kind": "cripto", "reliability": 0.65, "official": false, "max_age_h": 24, "enabled": true },
     { "id": "cointelegraph", "name": "Cointelegraph", "url": "https://cointelegraph.com/rss", "region": "Cripto", "kind": "cripto", "reliability": 0.55, "official": false, "max_age_h": 24, "enabled": true },
     { "id": "decrypt", "name": "Decrypt", "url": "https://decrypt.co/feed", "region": "Cripto", "kind": "cripto", "reliability": 0.6, "official": false, "max_age_h": 24, "enabled": true },
-    { "id": "theblock", "name": "The Block", "url": "https://www.theblock.co/rss.xml", "region": "Cripto", "kind": "cripto", "reliability": 0.65, "official": false, "max_age_h": 24, "enabled": true }
+    { "id": "theblock", "name": "The Block", "url": "https://www.theblock.co/rss.xml", "region": "Cripto", "kind": "cripto", "reliability": 0.65, "official": false, "max_age_h": 24, "enabled": true },
+    { "id": "bea-releases", "name": "BEA (dados oficiais dos EUA: PIB, comércio, renda)", "url": "https://apps.bea.gov/rss/rss.xml", "region": "Américas", "kind": "oficial", "reliability": 0.92, "official": true, "max_age_h": 168, "enabled": true },
+    { "id": "bloomberg-markets", "name": "Bloomberg Markets", "url": "https://feeds.bloomberg.com/markets/news.rss", "region": "Mercados", "kind": "mercado", "reliability": 0.8, "official": false, "max_age_h": 24, "enabled": true },
+    { "id": "ft-home", "name": "Financial Times", "url": "https://www.ft.com/rss/home", "region": "Mercados", "kind": "mercado", "reliability": 0.8, "official": false, "max_age_h": 24, "enabled": true }
   ]
 }
