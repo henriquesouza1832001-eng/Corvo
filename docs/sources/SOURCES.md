@@ -315,3 +315,26 @@ Verificadas ao vivo em 2026-11-08 (HTTP 200, RSS válido). Só **título, link e
 | `bea-releases` | BEA, Departamento de Comércio dos EUA (`apps.bea.gov/rss/rss.xml`) | oficial | 0,92 | dados que mexem em mercado (PIB, comércio exterior, renda e gastos); poucos itens por semana, por isso `max_age_h` 168 |
 | `bloomberg-markets` | Bloomberg Markets (`feeds.bloomberg.com/markets/news.rss`) | mercado | 0,80 | RSS público de consumo; **rever os termos antes de qualquer uso comercial ou de exibir o conteúdo** |
 | `ft-home` | Financial Times (`ft.com/rss/home`) | mercado | 0,80 | idem; muitas matérias ficam atrás de assinatura, então só o título e o link entram |
+
+### Camadas de fontes da caixa (2026-11-09): 19 feeds extras, ligados aos poucos pelo governador térmico
+Verificadas ao vivo em 2026-11-09 (HTTP 200, RSS ou Atom válido, com itens). Só **título, link e resumo curto**, com atribuição; o corpo da matéria não é guardado nem exibido. O núcleo (camada 0, 27 feeds) é o padrão; a caixa liga a camada 1 e depois a 2 enquanto a temperatura deixa (`CORVO_TIER`). **Todas valem para uso não comercial; rever os termos antes de qualquer uso comercial.**
+| Camada | `id` | Fonte | Tipo | Conf. | Notas |
+|---|---|---|---|---|---|
+| 1 | `sec-press` | SEC (comunicados) | oficial | 0,92 | ações e cripto: processos, aprovações |
+| 1 | `boj-news` | Banco do Japão | oficial | 0,92 | juros e iene |
+| 1 | `boc-press` | Banco do Canadá | oficial | 0,92 | decisões de juros |
+| 1 | `fed-speeches` | Federal Reserve, discursos | oficial | 0,90 | o portão trata fala de dirigente com peso menor |
+| 1 | `bis-press` | BIS, publicações | oficial | 0,85 | estabilidade financeira |
+| 1 | `eia-today` | EIA, Today in Energy | oficial | 0,90 | petróleo e gás (EUA) |
+| 1 | `nhc-atlantic` | NOAA, furacões do Atlântico | oficial | 0,90 | risco físico; poucos itens |
+| 1 | `usgs-m45` | USGS, terremotos M4,5+ (24 h) | oficial | 0,90 | risco físico |
+| 2 | `nikkei-asia` | Nikkei Asia | mercado | 0,80 | |
+| 2 | `wsj-markets` | WSJ Markets | mercado | 0,80 | |
+| 2 | `nyt-business` | NYT Business | mercado | 0,75 | |
+| 2 | `cnn-business` | CNN Business | mercado | 0,70 | |
+| 2 | `economist-finance` | The Economist, finanças | mercado | 0,80 | |
+| 2 | `bitcoin-magazine`, `cryptoslate`, `dailyhodl` | imprensa cripto | cripto | 0,50 a 0,55 | |
+| 2 | `al-monitor` | Al-Monitor | agência | 0,65 | Oriente Médio |
+| 2 | `yonhap` | Yonhap | agência | 0,70 | Coreia do Sul |
+| 2 | `business-standard` | Business Standard (Índia, mercados) | mercado | 0,65 | |
+Testadas e **não incluídas** (404, 403 ou erro de certificado): CFTC, Tesouro dos EUA, OFAC, BCE (discursos), RBA, SNB, FMI, Banco Mundial, Yahoo Finance e Arab News. GDACS funciona mas traz 795 KB por ciclo de alertas de baixo valor para mercado, então ficou de fora.
