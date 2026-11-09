@@ -64,7 +64,7 @@ _PLACES: tuple[tuple[str, float, float, str], ...] = (
     ("Tailândia", 13.76, 100.50, r"thailand|bangkok|tail[aâ]ndia"),
     ("Vietnã", 21.03, 105.85, r"vietnam|hanoi|vietn[aã]"),
     ("Noruega", 59.91, 10.75, r"norway|oslo|noruega"),
-    ("Estados Unidos", 38.90, -77.04, r"u\.s\.|united states|washington|wall street|federal reserve|\bfed\b|pentagon|white house|nasdaq|s&p ?500|\bfomc\b|estados unidos|casa branca"),
+    ("Estados Unidos", 38.90, -77.04, r"(?-i:\bUS\b)|u\.s\.|united states|washington|wall street|federal reserve|\bfed\b|pentagon|white house|nasdaq|s&p ?500|\bfomc\b|estados unidos|casa branca"),
 )
 _COMPILED = tuple((label, lat, lon, re.compile(pat, re.I)) for label, lat, lon, pat in _PLACES)
 _EVENT_LOCATION_CUE = re.compile(
