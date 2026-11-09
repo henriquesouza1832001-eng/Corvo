@@ -49,3 +49,18 @@ Foram acrescentadas ao catálogo `bea-releases` (dados oficiais dos EUA), `bloom
 - **Lacuna de léxico para o Codex avaliar (T2, com lacre, uma hipótese por rodada):** "Personal Income and Outlays" (traz o PCE, a inflação que o Fed acompanha) e "International Trade in Goods and Services" ficam em **0,44**, abaixo do corte BUFFER de 0,50. São dados macro oficiais que mexem em mercado. Testar se termos como `personal income and outlays` e `international trade in goods` em `dados_macro` melhoram o recall sem subir o volume (freio verde).
 - **FT:** 9 itens, todos `irrelevant` (política e opinião). Custo baixo, nada a fazer.
 - **Bloomberg Markets:** 20 itens, 2 aprovados (1 HOT, 1 BUFFER).
+
+## 7. Achados da auditoria da caixa (2026-11-09, 852 decisões da caixa em 3 h)
+Mecânica correta: nenhuma URL duplicada no corpus nem no banco, todo item decidido em modo envio chegou ao banco (5 de 5), estatísticas por hora coerentes, 0 falhas de fonte em 25 ciclos. **Qualidade do portão (Hugin H2): lacunas de recall**, com exemplos reais para o T2 (uma hipótese por rodada, provada no lacre, freio verde):
+| Descartado como | Título (fonte) | Provável causa |
+|---|---|---|
+| `irrelevant` | "Global stocks fall amid big worries over AI after Democrats' midterms triumph" (guardian-world) | queda de bolsas sem o verbo/termo do tema `mercado` |
+| `irrelevant` | "Gnosis Pay breach exposes card numbers... linked crypto wallets" (coindesk) | `breach` não casa com cripto (só `hack` e `exploit`) |
+| `irrelevant` | "Greece approves 10% tax on crypto gains and 15% levy on DeFi income" (coindesk) | tributação e regulação de cripto fora do léxico |
+| `irrelevant` | "ECB wage tracker...", "ECB Survey of Professional Forecasters" (ecb-press) | dados macro oficiais do BCE (salários, expectativas) fora de `dados_macro` |
+| `below_threshold` 0,45 | "Production suspended at Iraq's Khor Mor gas field after drone attack" (straits-times) | interrupção de produção de gás: `energia` não casa com "gas field" |
+| `below_threshold` 0,48 a 0,49 | "Houthi attack damages Aramco building in Riyadh's financial district" (scmp, straits-times) | quase no corte; o evento acabou coberto por outra fonte |
+Estimativa: 45 dos 718 `irrelevant` (6%) têm palavra de mercado no título; a maioria é ruído legítimo (esporte, cultura, "gold" de medalha), então o ganho é cirúrgico, não em massa.
+
+Sem defeito do portão, mas a conhecer: 5 manchetes do mesmo acontecimento (Irã) entram como itens separados, porque o agrupamento em eventos (P1) ainda não está no banco; e 10 itens aprovados no primeiro ciclo em modo seco da caixa nunca foram enviados (efeito único da fase de testes).
+
