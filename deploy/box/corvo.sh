@@ -7,12 +7,18 @@
 #   logs [n]  últimas n linhas do log (padrão 20)
 #   painel    painel ao vivo no terminal (feed da API: pressão do orçamento e últimas notícias); Ctrl+C sai
 #   enviar    pede o token (digitação oculta), grava em deploy/box/.env e passa a ENVIAR à API
-#   seco      volta ao modo --dry-run (decide e guarda só local; não envia nada)
+#   seco      modo --dry-run (decide e guarda só local; não envia nada; o token continua guardado)
+#   envio     volta a ENVIAR à API (precisa do token, gravado uma vez por `enviar`)
+#   intervalo N  segundos entre ciclos (300 a 3600)
 #   agente    liga o agente que recebe os comandos do app no celular
 #   instalar  cria o comando curto `corvo` (depois: corvo on, corvo off, corvo status, corvo painel)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
 cd "$(dirname "$0")/../.." || exit 1
 ROOT=$(pwd); ENVF="$ROOT/deploy/box/.env"; DATA="$ROOT/engine/data/corvo_corpus"; LOG="$DATA/caixa.log"
+setvar() { # setvar CHAVE VALOR: troca ou acrescenta uma linha no .env, preservando o resto
+  umask 077; touch "$ENVF"; grep -v "^$1=" "$ENVF" > "$ENVF.tmp" 2>/dev/null; printf '%s=%s
+' "$1" "$2" >> "$ENVF.tmp"; mv "$ENVF.tmp" "$ENVF"
+}
 rodando() { ps -ef 2>/dev/null | grep '[d]eploy/box/run.sh' >/dev/null; }
 agente_ligado() { ps -ef 2>/dev/null | grep '[d]eploy/box/agente.sh' >/dev/null; }
 
@@ -20,7 +26,8 @@ case "$1" in
   status)
     if rodando; then echo "coletor: LIGADO"; else echo "coletor: DESLIGADO"; fi
     if agente_ligado; then echo "agente (comandos do app): LIGADO"; else echo "agente (comandos do app): DESLIGADO"; fi
-    if [ -f "$ENVF" ] && grep -q '^CORVO_INGEST_TOKEN=.\{8,\}' "$ENVF"; then echo "modo: ENVIA à API"; else echo "modo: SECO (não envia)"; fi
+    if [ -f "$ENVF" ] && grep -q '^CORVO_INGEST_TOKEN=.\{8,\}' "$ENVF" && ! grep -q '^CORVO_MODO=seco' "$ENVF"; then echo "modo: ENVIA à API"; else echo "modo: SECO (não envia)"; fi
+    echo "intervalo: $(grep '^CORVO_INTERVALO=' "$ENVF" 2>/dev/null | cut -d= -f2 | grep . || echo 900)s"
     echo "último ciclo:"; grep '"feeds"' "$LOG" 2>/dev/null | tail -1 | cut -c1-200
     [ -f "$DATA/corpus.jsonl" ] && echo "itens no corpus local: $(wc -l < "$DATA/corpus.jsonl")"
     [ -f "$DATA/precos.csv" ] && echo "linhas de preço: $(( $(wc -l < "$DATA/precos.csv") - 1 ))"
@@ -40,16 +47,16 @@ case "$1" in
   enviar)
     printf "Cole o token (não aparece na tela) e tecle Enter: "; stty -echo 2>/dev/null; read -r TOK; stty echo 2>/dev/null; echo
     [ ${#TOK} -ge 8 ] || { echo "token curto demais; nada mudou"; exit 1; }
-    INT=$(grep '^CORVO_INTERVALO=' "$ENVF" 2>/dev/null | cut -d= -f2); INT=${INT:-900}
-    umask 077
-    printf 'CORVO_API_URL=https://corvo-api.henriquesouza.workers.dev\nCORVO_INGEST_TOKEN=%s\nCORVO_INTERVALO=%s\n' "$TOK" "$INT" > "$ENVF"
+    setvar CORVO_API_URL https://corvo-api.henriquesouza.workers.dev; setvar CORVO_INGEST_TOKEN "$TOK"; setvar CORVO_MODO envia
     echo "gravado em deploy/box/.env (fora do Git). Reiniciando em modo ENVIO..."; sh "$0" restart ;;
-  seco)
-    INT=$(grep '^CORVO_INTERVALO=' "$ENVF" 2>/dev/null | cut -d= -f2); echo "CORVO_INTERVALO=${INT:-900}" > "$ENVF"; echo "modo seco"; sh "$0" restart ;;
-  instalar)
-    printf '#!/bin/sh
-exec sh "%s/deploy/box/corvo.sh" "$@"
-' "$ROOT" > "$PREFIX/bin/corvo" && chmod +x "$PREFIX/bin/corvo" && echo "comando corvo instalado" ;;
+  seco) setvar CORVO_MODO seco; echo "modo seco (o token continua guardado)"; sh "$0" restart ;;
+  envio)
+    grep -q '^CORVO_INGEST_TOKEN=.\{8,\}' "$ENVF" 2>/dev/null || { echo "sem token: use 'corvo enviar' uma vez"; exit 1; }
+    setvar CORVO_MODO envia; echo "modo envio"; sh "$0" restart ;;
+  intervalo)
+    case "$2" in ''|*[!0-9]*) echo "uso: corvo intervalo 300..3600"; exit 1 ;; esac
+    [ "$2" -ge 300 ] && [ "$2" -le 3600 ] || { echo "intervalo fora de 300..3600"; exit 1; }
+    setvar CORVO_INTERVALO "$2"; echo "intervalo $2s"; sh "$0" restart ;;
   atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,14p' "$0" ;;
+  *) sed -n '2,17p' "$0" ;;
 esac

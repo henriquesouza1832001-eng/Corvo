@@ -1,92 +1,102 @@
 import { describe, expect, it } from "vitest";
 import { setup } from "./helpers/ingest";
 
-/** KV mínimo em memória (get com "json", put, delete) para provar o controle da caixa sem Cloudflare. */
-function fakeKv() {
-	const m = new Map<string, string>();
-	return {
-		get: async (k: string, type?: string) => (m.has(k) ? (type === "json" ? JSON.parse(m.get(k) as string) : m.get(k)) : null),
-		put: async (k: string, v: string) => void m.set(k, v),
-		delete: async (k: string) => void m.delete(k),
-		_m: m,
-	};
-}
-
 const ENGINE = { Authorization: "Bearer segredo-de-teste", "Content-Type": "application/json" };
 const ADMIN = { Authorization: "Bearer admin-de-teste", "Content-Type": "application/json" };
-const status = { running: true, mode: "envia", mem_kb: 470000, disk: "1.9G", last_cycle: "ok", version: "t" };
+const status = { running: true, mode: "envia", mem_kb: 470000, disk: "1.9G", last_cycle: "ok", version: "t", interval_s: 900 };
 
 function ctx(admin = true) {
 	const t = setup();
-	const kv = fakeKv();
-	const extra = { KV: kv, ...(admin ? { ADMIN_TOKEN: "admin-de-teste" } : {}) } as never;
-	const call = (path: string, init: RequestInit) => t.raw(path, init, extra);
-	return { kv, call };
+	const extra = admin ? { ADMIN_TOKEN: "admin-de-teste" } : {};
+	const call = (path: string, init: RequestInit = {}) => t.raw(path, init, extra);
+	return { t, call };
 }
 const post = (headers: Record<string, string>, body: unknown): RequestInit => ({ method: "POST", headers, body: JSON.stringify(body) });
+const get = (headers: Record<string, string>): RequestInit => ({ headers });
 
-describe("controle da caixa", () => {
+describe("centro de comando da caixa (tudo no banco)", () => {
 	it("a caixa sem token de envio e o operador sem token de operador são recusados", async () => {
 		const { call } = ctx();
 		expect((await call("/api/corvo/box/sync", post({}, { status }))).status).toBe(401);
-		expect((await call("/api/corvo/box", { headers: ENGINE })).status).toBe(401); // o token de envio NÃO abre o controle
+		expect((await call("/api/corvo/box", get(ENGINE))).status).toBe(401); // o token de envio NÃO abre o controle
 		expect((await call("/api/corvo/box/command", post(ENGINE, { action: "off" }))).status).toBe(401);
+		expect((await call("/api/corvo/diag", get(ENGINE))).status).toBe(401);
 	});
 
 	it("sem ADMIN_TOKEN configurado o controle fica fechado (503)", async () => {
 		const { call } = ctx(false);
-		expect((await call("/api/corvo/box", { headers: ADMIN })).status).toBe(503);
+		expect((await call("/api/corvo/box", get(ADMIN))).status).toBe(503);
 		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "off" }))).status).toBe(503);
+		expect((await call("/api/corvo/diag", get(ADMIN))).status).toBe(503);
 	});
 
-	it("fluxo completo: estado, comando, entrega e confirmação", async () => {
+	it("fluxo completo: estado, comando, entrega, confirmação com saída e histórico", async () => {
 		const { call } = ctx();
 		expect(await (await call("/api/corvo/box/sync", post(ENGINE, { status }))).json()).toEqual({ command: null });
-		const g1 = (await (await call("/api/corvo/box", { headers: ADMIN })).json()) as any;
+		const g1 = (await (await call("/api/corvo/box", get(ADMIN))).json()) as any;
 		expect(g1.online).toBe(true);
-		expect(g1.status).toMatchObject({ running: true, mode: "envia", mem_kb: 470000 });
+		expect(g1.status).toMatchObject({ running: true, mode: "envia", mem_kb: 470000, interval_s: 900 });
 
-		const sent = await call("/api/corvo/box/command", post(ADMIN, { action: "restart" }));
+		const sent = await call("/api/corvo/box/command", post(ADMIN, { action: "diag" }));
 		expect(sent.status).toBe(202);
 		const { id } = (await sent.json()) as { id: string };
 
 		const s2 = (await (await call("/api/corvo/box/sync", post(ENGINE, { status }))).json()) as any;
-		expect(s2.command).toEqual({ id, action: "restart" });
+		expect(s2.command).toEqual({ id, action: "diag", arg: null });
 
-		const s3 = (await (await call("/api/corvo/box/sync", post(ENGINE, { status, ack: { id, ok: true, note: "ligado" } }))).json()) as any;
+		const s3 = (await (await call("/api/corvo/box/sync", post(ENGINE, { status, ack: { id, ok: true, note: "feito", output: "disco 1.9G\nmem 470MB" } }))).json()) as any;
 		expect(s3.command).toBeNull();
-		const g2 = (await (await call("/api/corvo/box", { headers: ADMIN })).json()) as any;
-		expect(g2.command).toBeNull();
-		expect(g2.result).toMatchObject({ id, action: "restart", ok: true });
+
+		const g2 = (await (await call("/api/corvo/box", get(ADMIN))).json()) as any;
+		expect(g2.pending).toBeNull();
+		expect(g2.history[0]).toMatchObject({ id, action: "diag", state: "done", ok: 1, has_output: 1 });
+		const full = (await (await call(`/api/corvo/box/command/${id}`, get(ADMIN))).json()) as any;
+		expect(full.output).toContain("disco 1.9G");
 	});
 
-	it("só aceita ações da lista e um comando pendente de cada vez", async () => {
+	it("só aceita ações da lista, valida o argumento e um comando pendente de cada vez", async () => {
 		const { call } = ctx();
 		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "rm -rf /" }))).status).toBe(400);
-		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "off" }))).status).toBe(202);
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "intervalo" }))).status).toBe(400); // falta o argumento
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "off", arg: 600 }))).status).toBe(400); // arg fora do intervalo
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "intervalo", arg: 10 }))).status).toBe(400); // abaixo do mínimo
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "intervalo", arg: 900 }))).status).toBe(202);
 		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "on" }))).status).toBe(409);
 	});
 
-	it("confirmação de outro comando não apaga o pendente", async () => {
+	it("confirmação de outro comando não fecha o pendente", async () => {
 		const { call } = ctx();
 		const { id } = (await (await call("/api/corvo/box/command", post(ADMIN, { action: "update" }))).json()) as { id: string };
 		await call("/api/corvo/box/sync", post(ENGINE, { status, ack: { id: "outro", ok: true } }));
-		const g = (await (await call("/api/corvo/box", { headers: ADMIN })).json()) as any;
-		expect(g.command?.id).toBe(id);
+		const g = (await (await call("/api/corvo/box", get(ADMIN))).json()) as any;
+		expect(g.pending?.id).toBe(id);
 	});
 
-	it("não regrava o estado a cada chamada (limite de escritas do KV)", async () => {
-		const { call, kv } = ctx();
+	it("não regrava o estado a cada chamada (limite de escritas do banco)", async () => {
+		const { t, call } = ctx();
+		const seen = () => (t.sqlite.prepare("SELECT seen_at FROM corvo_box_state WHERE id = 1").get() as { seen_at: string }).seen_at;
 		await call("/api/corvo/box/sync", post(ENGINE, { status }));
-		const first = kv._m.get("corvo:box:status:v1");
+		const first = seen();
+		await new Promise((r) => setTimeout(r, 15));
 		await call("/api/corvo/box/sync", post(ENGINE, { status }));
-		expect(kv._m.get("corvo:box:status:v1")).toBe(first); // igual: nada foi regravado
+		expect(seen()).toBe(first); // igual: nada foi regravado
+		await new Promise((r) => setTimeout(r, 15));
 		await call("/api/corvo/box/sync", post(ENGINE, { status: { ...status, running: false } }));
-		expect(kv._m.get("corvo:box:status:v1")).not.toBe(first); // mudou: regrava
+		expect(seen()).not.toBe(first); // mudou: regrava
 	});
 
 	it("payload inválido do sync é recusado", async () => {
 		const { call } = ctx();
 		expect((await call("/api/corvo/box/sync", post(ENGINE, { status: { running: "sim" } }))).status).toBe(400);
+	});
+
+	it("diagnóstico do Worker: banco, orçamento e feed", async () => {
+		const { call } = ctx();
+		const d = (await (await call("/api/corvo/diag", get(ADMIN))).json()) as any;
+		expect(d.worker.ok).toBe(true);
+		expect(d.db.ping_ms).toBeGreaterThanOrEqual(0);
+		expect(d.budget).toMatchObject({ used: 0, pressure: "normal" });
+		expect(d.feed.news_total).toBe(0);
+		expect(d.kv_feed_cache).toBe(false);
 	});
 });
