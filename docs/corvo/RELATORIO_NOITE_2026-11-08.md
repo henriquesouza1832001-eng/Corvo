@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:21 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Ciclo externo 18 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.54.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:23 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Ciclo externo 18 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.55.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:21 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:23 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -677,3 +677,8 @@ Na amostra existente do fit, 9 dos 46 keeps rotulados recebem score 0 e decisao 
 ### 9.54 Ciclo 18 e repeticao da prova Munin (22:20 BRT)
 
 Ciclo do dono: 27 feeds, 9 URLs novas, sem falhas, zero itens aceitos enviados em dry-run e zero candles novos; corpus 1.420 URLs unicas e arquivo de precos com 5.230 registros. O painel permanece em 61 eventos, 109 perguntas, 0 previsoes e 109 abstencoes; resolucoes: 8 sem forecast, 12 aguardam preco futuro, 88 aguardam instrumento e 1 historico insuficiente. Freio verde: volume 24 h 543, 17 aceitos, 466 linhas/dia, 602 a 5x, fracao aceita 0,0313 e 432/432 em critico. Brier, skill e ECE reais seguem N/A.
+
+
+### 9.55 Idempotencia do registro local Munin (22:23 BRT)
+
+Repeti corvo_munin_backtest.py --dry-run com entradas inalteradas. O mesmo run_id run_330411c552deaefa876b foi retornado e previsoes.jsonl manteve 1.135 linhas antes/depois. O painel repetiu 61 eventos, 109 abstencoes e zero resultados de previsao; a segunda execucao nao duplicou registros. O teste automatizado de idempotencia ja existente tambem passou na bateria de 91 testes.
