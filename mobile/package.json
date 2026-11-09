@@ -1,0 +1,16 @@
+{
+  "name": "corvo-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "description": "App Android do CORVO: o painel empacotado (Capacitor). Fora dos workspaces do repositório de propósito.",
+  "scripts": {
+    "web": "npm run build -w @corvo/web --prefix ..",
+    "sync": "npx cap sync android",
+    "apk": "node scripts/build-apk.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.0",
+    "@capacitor/cli": "^7.4.0",
+    "@capacitor/core": "^7.4.0"
+  }
+}
