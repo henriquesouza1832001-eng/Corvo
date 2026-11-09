@@ -22,6 +22,7 @@ setvar() { # setvar CHAVE VALOR: troca ou acrescenta uma linha no .env, preserva
   umask 077; touch "$ENVF"; grep -v "^$1=" "$ENVF" > "$ENVF.tmp" 2>/dev/null; printf '%s=%s
 ' "$1" "$2" >> "$ENVF.tmp"; mv "$ENVF.tmp" "$ENVF"
 }
+PARADO="$ROOT/deploy/box/.parado" # marca "desligado de propósito": a autocura do agente não religa
 rodando() { ps -ef 2>/dev/null | grep '[d]eploy/box/run.sh' >/dev/null; }
 agente_ligado() { ps -ef 2>/dev/null | grep '[d]eploy/box/agente.sh' >/dev/null; }
 
@@ -38,13 +39,15 @@ case "$1" in
     df -h "$DATA" 2>/dev/null | tail -1 | awk '{print "disco livre: "$4" ("$5" usado)"}'
     ;;
   start|on)
+    rm -f "$PARADO"
     if rodando; then echo "já está ligado"; else termux-wake-lock 2>/dev/null; nohup sh deploy/box/run.sh >/dev/null 2>&1 & sleep 1; echo "ligado"; fi
     ;;
   stop|off)
+    touch "$PARADO"
     pkill -f 'deploy/box/run.sh' 2>/dev/null; pkill -f 'corvo_engine.collect --once' 2>/dev/null; echo "desligado"
     ;;
   agente) if agente_ligado; then echo "agente já está ligado"; else nohup sh deploy/box/agente.sh >/dev/null 2>&1 & sleep 1; echo "agente ligado"; fi ;;
-  restart) sh "$0" stop; sleep 2; sh "$0" start ;;
+  restart) sh "$0" stop; sleep 2; sh "$0" start ;; # (stop marca parado e start desmarca)
   painel) shift; PYTHONPATH="$ROOT/engine" python -m corvo_engine.collect.painel "$@" ;;
   logs) tail -n "${2:-20}" "$LOG" ;;
   enviar)
@@ -77,6 +80,6 @@ case "$1" in
     apt clean 2>/dev/null
     depois=$(df -k "$DATA" | tail -1 | awk '{print $4}')
     echo "livre agora: $((depois / 1024)) MB (liberou $(((depois - antes) / 1024)) MB)" ;;
-  atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
+  atualizar) git pull -q && { [ -d "$HOME/.termux/boot" ] && cp deploy/box/boot-termux.sh "$HOME/.termux/boot/corvo.sh" && chmod +x "$HOME/.termux/boot/corvo.sh"; true; } && echo "atualizado" && sh "$0" restart ;;
   *) sed -n '2,20p' "$0" ;;
 esac

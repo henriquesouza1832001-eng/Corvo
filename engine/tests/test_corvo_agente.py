@@ -151,3 +151,57 @@ def test_temperatura_aparece_no_estado_mesmo_sem_leitura(monkeypatch):
     assert agente.estado(FakeRun(), {})["temp_c"] == 47.5
     monkeypatch.setattr(agente, "_temp_c", lambda: None)
     assert agente.estado(FakeRun(), {})["temp_c"] is None
+
+
+class RunSemColetor(FakeRun):
+    """ps sem o run.sh: o coletor caiu."""
+    def __call__(self, args):
+        if args[0] == "ps":
+            self.calls.append(list(args))
+            return _ok("u0 1 sh deploy/box/agente.sh\n")
+        return super().__call__(args)
+
+
+def _sem_parado(monkeypatch, tmp_path):
+    monkeypatch.setattr(agente, "PARADO", tmp_path / ".parado")
+    monkeypatch.setattr(agente, "_ULTIMA_LIMPEZA", [0.0])
+
+
+def test_religa_o_coletor_so_depois_de_tres_quedas_seguidas(monkeypatch, tmp_path):
+    _sem_parado(monkeypatch, tmp_path)
+    run, mem = RunSemColetor(), {}
+    assert agente.guardas(run, mem, livre_mb=2000) == [] and agente.guardas(run, mem, livre_mb=2000) == []
+    assert agente.guardas(run, mem, livre_mb=2000) == ["coletor caiu: religado"]
+    assert ["sh", agente.CORVO_SH, "on"] in run.calls and mem["quedas"] == 0
+
+
+def test_nao_religa_o_que_o_dono_desligou(monkeypatch, tmp_path):
+    _sem_parado(monkeypatch, tmp_path)
+    (tmp_path / ".parado").write_text("")
+    run, mem = RunSemColetor(), {}
+    for _ in range(10):
+        assert agente.guardas(run, mem, livre_mb=2000) == []
+    assert ["sh", agente.CORVO_SH, "on"] not in run.calls
+
+
+def test_coletor_ligado_zera_a_contagem_de_quedas(monkeypatch, tmp_path):
+    _sem_parado(monkeypatch, tmp_path)
+    mem = {"quedas": 2}
+    assert agente.guardas(FakeRun(), mem, livre_mb=2000) == [] and mem["quedas"] == 0
+
+
+def test_disco_apertado_limpa_uma_vez_por_hora(monkeypatch, tmp_path):
+    _sem_parado(monkeypatch, tmp_path)
+    run = FakeRun()
+    assert "limpeza feita" in agente.guardas(run, {}, livre_mb=250, agora=10_000.0)[0]
+    assert agente.guardas(run, {}, livre_mb=250, agora=10_100.0) == []  # mesma hora: não repete
+    assert agente.guardas(run, {}, livre_mb=250, agora=14_000.0) != []  # passou 1 h
+    assert run.calls.count(["sh", agente.CORVO_SH, "limpar"]) == 2
+
+
+def test_disco_quase_cheio_desliga_o_coletor(monkeypatch, tmp_path):
+    _sem_parado(monkeypatch, tmp_path)
+    run = FakeRun()
+    feitas = agente.guardas(run, {}, livre_mb=80, agora=1.0)
+    assert any("desligado por segurança" in f for f in feitas) and ["sh", agente.CORVO_SH, "off"] in run.calls
+    assert agente.guardas(FakeRun(), {}, livre_mb=2000) == []  # disco folgado: nada a fazer
