@@ -84,7 +84,7 @@ case "$1" in
     echo "livre agora: $((depois / 1024)) MB (liberou $(((depois - antes) / 1024)) MB)" ;;
   tier)
     case "$2" in 0|1|2) ;; *) echo "uso: corvo tier 0|1|2  (camada de fontes: 0 núcleo, 1 + oficiais, 2 + imprensa e cripto)"; exit 1 ;; esac
-    setvar CORVO_TIER "$2"; echo "camada $2 (vale no próximo ciclo)" ;;
+    setvar CORVO_TIER "$2"; setvar CORVO_TIER_T "$(date +%s)"; echo "camada $2 (vale no próximo ciclo)" ;;
   governador)
     case "$2" in 0|1) ;; *) echo "uso: corvo governador 0|1  (1 liga o governador térmico, 0 desliga)"; exit 1 ;; esac
     setvar CORVO_GOVERNADOR "$2"; echo "governador térmico: $([ "$2" = 1 ] && echo ligado || echo desligado)" ;;

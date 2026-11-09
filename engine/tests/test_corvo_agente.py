@@ -239,3 +239,8 @@ def test_estado_informa_camada_governador_e_teto_termico():
     assert s["tier"] == 1 and s["governor"] == 1 and s["temp_limit_c"] == 70.0 and s["temp_ceiling_c"] == 59.5
     s = agente.estado(FakeRun(), {"CORVO_GOVERNADOR": "0", "CORVO_TIER": "9"})
     assert s["governor"] == 0 and s["tier"] == 2 and s["temp_limit_c"] == 80.0
+
+
+def test_horario_da_ultima_mudanca_de_camada_sobrevive_ao_reinicio():
+    assert agente._tier_desde({"CORVO_TIER_T": "1762650000"}) == 1762650000.0
+    assert agente._tier_desde({}) == 0.0 and agente._tier_desde({"CORVO_TIER_T": "lixo"}) == 0.0

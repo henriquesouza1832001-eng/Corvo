@@ -124,6 +124,15 @@ def _temp_c() -> float | None:
     return None
 
 
+def _tier_desde(env: dict[str, str]) -> float:
+    """Quando a camada mudou pela última vez (época, gravada por `corvo tier`). Sobrevive a reinício do agente: sem isto, cada
+    `update` zeraria o relógio dos 30 min entre mudanças e a camada subiria depressa demais."""
+    try:
+        return float(env.get("CORVO_TIER_T", "0"))
+    except ValueError:
+        return 0.0
+
+
 def _tier(env: dict[str, str]) -> int:
     try:
         return max(0, min(2, int(env.get("CORVO_TIER", "0"))))
@@ -370,7 +379,7 @@ def main() -> int:
 
     ack: dict | None = None
     memoria: dict = {}
-    medidor, acum, gest = metricas.Medidor(), metricas.Acumulador(), gov.Estado(tier=_tier(env))
+    medidor, acum, gest = metricas.Medidor(), metricas.Acumulador(), gov.Estado(tier=_tier(env), ultima_mudanca=_tier_desde(env))
     pendente_hora: dict | None = None  # resumo da hora que fechou e ainda não foi entregue à API
     while True:
         try:
@@ -385,6 +394,7 @@ def main() -> int:
                 pendente_hora = fechada
             if env.get("CORVO_GOVERNADOR") != "0":
                 gest.tier = _tier(env)  # o dono pode ter mudado a camada à mão
+                gest.ultima_mudanca = max(gest.ultima_mudanca, _tier_desde(env))
                 d = gov.decidir(gest, temp, mem, agora, _cfg_gov(env))
                 if d.parar:
                     _run(["sh", CORVO_SH, "off"])
