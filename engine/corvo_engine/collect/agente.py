@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -20,6 +21,7 @@ CORVO_SH = str(ROOT / "deploy" / "box" / "corvo.sh")
 DATA = ROOT / "engine" / "data" / "corvo_corpus"
 LOG, AGENT_LOG, PRECOS, CORPUS = DATA / "caixa.log", DATA / "agente.log", DATA / "precos.csv", DATA / "corpus.jsonl"
 ENV_FILE = ROOT / "deploy" / "box" / ".env"
+PARADO = ROOT / "deploy" / "box" / ".parado"  # existe quando o coletor foi desligado DE PROPÓSITO (`corvo off`); a autocura respeita
 USER_AGENT = "corvo-agente/1.1"
 OUT_MAX = 3800
 
@@ -258,6 +260,42 @@ def ciclo(post: Post, run: Run, env: dict[str, str], ack: dict | None) -> tuple[
     return cmd, {"id": cid, "ok": ok, "note": note, "output": out}, action in ("update", "agente")
 
 
+LIMPAR_ABAIXO_MB = 300  # disco apertando: libera espaço sozinho
+DESLIGAR_ABAIXO_MB = 120  # quase cheio: desliga o coletor para o Android não travar
+QUEDAS_PARA_RELIGAR = 3  # ciclos seguidos com o coletor parado (sem ter sido de propósito) antes de religá-lo
+_ULTIMA_LIMPEZA = [0.0]
+
+
+def guardas(run: Run, memoria: dict, livre_mb: float | None = None, agora: float | None = None) -> list[str]:
+    """Autocura para a noite: religa o coletor se ele caiu sem ter sido desligado de propósito, libera espaço quando o disco aperta e
+    desliga o coletor antes de o disco encher. Devolve o que fez (vai para o log do agente). Nunca religa o que o dono desligou."""
+    feitas: list[str] = []
+    agora = time.time() if agora is None else agora
+    rodando = "deploy/box/run.sh" in run(["ps", "-ef"]).stdout
+    if livre_mb is None:
+        try:
+            livre_mb = shutil.disk_usage(ROOT).free / 1_048_576
+        except OSError:
+            livre_mb = None
+    if rodando or PARADO.exists():
+        memoria["quedas"] = 0
+    else:
+        memoria["quedas"] = memoria.get("quedas", 0) + 1
+        if memoria["quedas"] >= QUEDAS_PARA_RELIGAR:
+            run(["sh", CORVO_SH, "on"])
+            memoria["quedas"] = 0
+            feitas.append("coletor caiu: religado")
+    if livre_mb is not None:
+        if livre_mb < LIMPAR_ABAIXO_MB and agora - _ULTIMA_LIMPEZA[0] > 3600:
+            _ULTIMA_LIMPEZA[0] = agora
+            run(["sh", CORVO_SH, "limpar"])
+            feitas.append(f"disco com {round(livre_mb)} MB livres: limpeza feita")
+        if livre_mb < DESLIGAR_ABAIXO_MB and rodando:
+            run(["sh", CORVO_SH, "off"])
+            feitas.append(f"disco com {round(livre_mb)} MB livres: coletor desligado por segurança")
+    return feitas
+
+
 def main() -> int:
     env = ler_env()
     url, token = env.get("CORVO_API_URL", ""), env.get("CORVO_INGEST_TOKEN", "")
@@ -273,10 +311,13 @@ def main() -> int:
             return json.loads(r.read(100_000))
 
     ack: dict | None = None
+    memoria: dict = {}
     while True:
         try:
             env = ler_env()  # relê: `seco`, `envio` e `intervalo` mudam o arquivo
             _, ack, sair = ciclo(post, _run, env, ack)
+            for acao in guardas(_run, memoria):
+                print(f"agente: {acao}", file=sys.stderr)
             if sair:  # envia a confirmação pendente e deixa o supervisor subir a versão nova
                 ciclo(post, _run, env, ack)
                 return 0
