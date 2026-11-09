@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:25 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Ciclo externo 18 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.56.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:30 BRT (3 h):** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Nota no marco: **8,5/10**. Ciclo externo 19 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.57.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:25 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:30 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`, `9773cb5`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -14,7 +14,7 @@
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Após o ciclo 16, o painel local tem 61 eventos, 109 perguntas, 0 previsões e 109 abstenções.
-- Nesta rodada, o corpus local está em 1.420 URLs; ciclo 16 trouxe 83 itens e 5 candles, ciclo 17 trouxe 3 URLs e ciclo 18 trouxe 9 URLs, sem candles novos; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
+- Nesta rodada, o corpus local está em 1.426 URLs; ciclos 16–19 trouxeram 83, 3, 9 e 6 URLs; só o ciclo 16 adicionou candles (5). O único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: o ajuste dinâmico atual tem 57 aprovados; a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), e o acerto conservador é 47/48 (97,9%). A cobertura cai abaixo de 85% por nove manchetes sem lugar explícito; não inventei localizações.
 - T5 (24 h, sem URLs do eval): 1.103 itens únicos em 26 IDs de fonte; 57 aceitos. G1 tem 213 e zero aceitos. O ciclo 16 ampliou o laço compartilhado para 27 feeds; não ajustei `reliability`/`enabled` sem rótulos de falsos negativos.
 - T7 fit-only: os 52 itens aprovados foram revisados manualmente, após excluir 75 URLs de eval por ID; a única opinião explícita de mercado encontrada agora sai como opinião. Auditoria 52/52 nesta amostra, sem rumor/opinião como fato; Hugin continua H2.
@@ -687,3 +687,12 @@ Repeti corvo_munin_backtest.py --dry-run com entradas inalteradas. O mesmo run_i
 ### 9.56 Fechamento manual da auditoria T7 fit-only (22:25 BRT)
 
 Revisei manualmente os 12 titulos fit aprovados que faltavam na amostra anterior. Todos sao reportagem segundo a regra de adjudicacao; somados aos 40 ja revisados, a amostra de 52/52 nao tem rumor ou opiniao marcado como fato apos a correcao. As 75 URLs do eval ficaram excluidas por identificador. Isto e uma auditoria pequena de ajuste, nao prova independente de desempenho geral.
+
+
+### 9.57 Marco de tres horas: nota pelo rubric e ciclo 19 (22:30 BRT)
+
+Nota: 8,5/10. Entrega preditiva palpavel 3/3; quatro tarefas verificaveis (P1 eventos, perguntas/resolucao, cadeia ponta a ponta, T9) 2/2; honestidade e rigor 2/2; eficiencia 0,5/1, pois houve duas pausas breves de 30 s na virada dos ciclos; seguranca 0/1, porque scripts npm invocaram wrangler types e wrangler deploy --dry-run indiretamente, proibidos pelo prompt. Nao houve publicacao, escrita de API ou mudanca de contrato. Relatorio 1/1. Soma 8,5/10; Hugin H2, Munin M3. O resultado T6 fica abaixo do aceite atual e nao e contado como tarefa concluida; T9 atende o requisito de robustez.
+
+O ciclo 19 teve 27 feeds, 6 URLs novas, nenhuma falha, nenhum item aceito e nenhum preco novo. O corpus ficou em 1.426 URLs. Munin segue com 61 eventos, 109 perguntas, zero previsoes e 109 abstencoes; nenhum resultado real foi pontuado. Freio: 466 linhas/dia, 602 a 5x, fracao aceita 0,031 e 432/432 em critico, verde.
+
+A leitura GET publica das 22:28 BRT informava 34/300.000 linhas usadas; no bucket mais recente, 101 recebidas, 1 HOT, 1 BUFFER e 99 DROP. A rodada segue ativa porque ainda nao houve PARE.
