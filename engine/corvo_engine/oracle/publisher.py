@@ -22,7 +22,7 @@ from ..intake.gate import canonical_url
 USER_AGENT = "corvo-oracle/0.1 (+https://github.com/henriquesouza1832001-eng/Corvo)"
 
 _KINDS = (
-    ("opiniao", re.compile(r"\b(opinion|opini[aã]o|commentary|analyst says|why i)\b", re.I)),
+    ("opiniao", re.compile(r"\b(opinion|opini[aã]o|commentary|analyst says|why i|here are some simple alternatives)\b", re.I)),
     ("previsao", re.compile(r"\b(forecast|price prediction|could (hit|reach)|expected to|poised to|previs[aã]o)\b", re.I)),
     ("rumor", re.compile(r"\b(rumou?rs?|reportedly|unconfirmed|sources? (say|said)|leak(s|ed)?|boato)\b", re.I)),
 )

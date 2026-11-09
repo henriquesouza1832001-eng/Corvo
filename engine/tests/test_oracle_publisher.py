@@ -64,6 +64,13 @@ def test_classify_kind_defaults_to_report_and_official_is_fact():
     assert classify_kind("Press release") == "reportagem"
 
 
+def test_explicit_market_recommendation_is_opinion_even_from_official_source():
+    title = "The S&P 500 could be dangerously exposed to AI. Here are some simple alternatives."
+
+    assert classify_kind(title) == "opiniao"
+    assert classify_kind(title, official=True) == "opiniao"
+
+
 def test_only_current_hour_bucket_is_sent_and_empty_runs_send_nothing():
     f = Fake()
     clock = [NOW]
