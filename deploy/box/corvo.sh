@@ -65,7 +65,7 @@ case "$1" in
     [ -f "$ENVF" ] && set -a && . "$ENVF" && set +a
     export PYTHONPATH="$ROOT/engine"
     MODO="--dry-run --quiet --dump $DATA/corpus.jsonl"
-    [ -n "$CORVO_API_URL" ] && [ -n "$CORVO_INGEST_TOKEN" ] && [ "$CORVO_MODO" != "seco" ] && MODO=""
+    [ -n "$CORVO_API_URL" ] && [ -n "$CORVO_INGEST_TOKEN" ] && [ "$CORVO_MODO" != "seco" ] && MODO="--dump $DATA/corpus.jsonl"
     python -m corvo_engine.collect --once $MODO --state "$DATA/seen.sqlite" 2>&1 | tail -2 ;;
   precos) PYTHONPATH="$ROOT/engine" python -m corvo_engine.collect.prices --out "$DATA/precos.csv" 2>&1 | tail -1 ;;
   limpar)

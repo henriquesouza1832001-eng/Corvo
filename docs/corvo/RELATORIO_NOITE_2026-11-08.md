@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:17 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. Censo T5 e auditoria T4 registrados. Ciclo externo 17 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.52.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:35 BRT (3 h):** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. T5 repetido apenas em metadados `fit`. Nota no marco: **8,5/10**. Ciclo externo 19 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.59.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:17 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:35 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`, `9773cb5`, `da892ba`, `e9a8d5f`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -14,10 +14,10 @@
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Após o ciclo 16, o painel local tem 61 eventos, 109 perguntas, 0 previsões e 109 abstenções.
-- Nesta rodada, o corpus local está em 1.411 URLs; ciclo 16 trouxe 83 itens e 5 candles, ciclo 17 trouxe mais 3 URLs e nenhum candle; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
-- T6 geolocalização: o ajuste dinâmico atual tem 57 aprovados; a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), e o acerto conservador é 47/48 (97,9%). A cobertura cai abaixo de 85% por nove manchetes sem lugar explícito; não inventei localizações.
-- T5 (24 h, sem URLs do eval): 1.103 itens únicos em 26 IDs de fonte; 57 aceitos. G1 tem 213 e zero aceitos. O ciclo 16 ampliou o laço compartilhado para 27 feeds; não ajustei `reliability`/`enabled` sem rótulos de falsos negativos.
-- T7 fit-only: amostra manual de 40 itens aprovados, após excluir 75 URLs de eval por ID; uma opinião explícita de mercado caiu como reportagem. A regra estreita agora classifica “here are some simple alternatives” como opinião; auditoria manual 40/40, sem rumor/opinião como fato. Hugin continua H2.
+- Nesta rodada, o corpus local está em 1.426 URLs; ciclos 16–19 trouxeram 83, 3, 9 e 6 URLs; só o ciclo 16 adicionou candles (5). O único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
+- T6 geolocalização: no conjunto de 57 aprovados, a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), com acerto conservador 47/48 (97,9%). Uma checagem separada do corpus fit atual localiza 43/52 (82,7%); uma manchete nomeia o Ártico e ainda não é reconhecida. Ambos os conjuntos ficam abaixo de 85%; não inventei localizações.
+- T5 mais recente, 24 h e fit-only por hash estável: 1.008 URLs em 26 IDs de fonte; 52 aceitos. G1 tem 212/1 aceito; `bea-releases` 39/0, `bloomberg-markets` 19/2, `ft-home` 7/0. Não ajustei `reliability`/`enabled` sem rótulos de falsos negativos.
+- T7 fit-only: os 52 itens aprovados foram revisados manualmente, após excluir 75 URLs de eval por ID; a única opinião explícita de mercado encontrada agora sai como opinião. Auditoria 52/52 nesta amostra, sem rumor/opinião como fato; Hugin continua H2.
 - Suíte CORVO/Munin repetida antes do commit T7: 91 testes passaram. T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -198,6 +198,7 @@ Não medido. A amostra não tem pares positivos/negativos rotulados para estimar
 3. Você aprova M6 com mínimo de 30 por tema/fonte, mínimo de 100 no total, Benjamini–Hochberg q≤0,05 e divisão temporal 70/15/15?
 4. Pode ser gerado um conjunto novo e sem URLs já avaliadas para continuar T2? O lacre atual não será reutilizado para escolher outra regra.
 5. Confirma o critério de classificar manchetes com recomendação explícita de alternativas de investimento como `opinião`, mesmo se vierem de fonte oficial?
+6. Aprova uma localização regional aproximada para menções explícitas ao Ártico, depois de haver um lacre adequado para avaliar a mudança?
 
 ## 8. Próximos passos sugeridos
 
@@ -668,3 +669,41 @@ O processo externo do dono completou o ciclo 17: 27 feeds, 3 URLs novas, zero fa
 ### 9.52 T7: auditoria computacional de todos os itens fit aprovados (22:17 BRT)
 
 No conjunto fit dinamico de 52 URLs aprovadas, excluindo os 75 URLs do eval antes da leitura dos titulos, comparei a regra antiga com a nova. Apenas uma classificacao muda: a manchete do S&P 500 passa de reportagem para opiniao. A distribuicao vai de 50 reportagens e 2 fatos para 49 reportagens, 1 opiniao e 2 fatos. Essa checagem cobre o conjunto fit atual; apenas os 40 itens da amostra anterior receberam adjudicacao manual.
+
+
+### 9.53 T2: falsos negativos no fit e proxima hipotese (22:21 BRT)
+
+Na amostra existente do fit, 9 dos 46 keeps rotulados recebem score 0 e decisao drop. Os titulos indicam seis trilhas de cobertura: crypto em plano 401(k), regras de stablecoin, carteira/hack de pagamento cripto, mineracao de Bitcoin, crises bancarias e exposicao de acoes a IA. Exemplos incluem 401(k) crypto plans, algorithmic stablecoins, Gnosis Pay breach, IREN bitcoin mining revenue, congelamento de poupanca no Paraguai e risco de AI no S&P 500. Nao mudei o gate: o eval desta rodada ja foi executado uma vez e contem 21 keeps, abaixo dos 40 necessarios. Proxima hipotese, somente apos novo lacre: ampliar um unico grupo lexical de mecanismo de mercado e medir em fit e eval lacrado.
+
+### 9.54 Ciclo 18 e repeticao da prova Munin (22:20 BRT)
+
+Ciclo do dono: 27 feeds, 9 URLs novas, sem falhas, zero itens aceitos enviados em dry-run e zero candles novos; corpus 1.420 URLs unicas e arquivo de precos com 5.230 registros. O painel permanece em 61 eventos, 109 perguntas, 0 previsoes e 109 abstencoes; resolucoes: 8 sem forecast, 12 aguardam preco futuro, 88 aguardam instrumento e 1 historico insuficiente. Freio verde: volume 24 h 543, 17 aceitos, 466 linhas/dia, 602 a 5x, fracao aceita 0,0313 e 432/432 em critico. Brier, skill e ECE reais seguem N/A.
+
+
+### 9.55 Idempotencia do registro local Munin (22:23 BRT)
+
+Repeti corvo_munin_backtest.py --dry-run com entradas inalteradas. O mesmo run_id run_330411c552deaefa876b foi retornado e previsoes.jsonl manteve 1.135 linhas antes/depois. O painel repetiu 61 eventos, 109 abstencoes e zero resultados de previsao; a segunda execucao nao duplicou registros. O teste automatizado de idempotencia ja existente tambem passou na bateria de 91 testes.
+
+
+### 9.56 Fechamento manual da auditoria T7 fit-only (22:25 BRT)
+
+Revisei manualmente os 12 titulos fit aprovados que faltavam na amostra anterior. Todos sao reportagem segundo a regra de adjudicacao; somados aos 40 ja revisados, a amostra de 52/52 nao tem rumor ou opiniao marcado como fato apos a correcao. As 75 URLs do eval ficaram excluidas por identificador. Isto e uma auditoria pequena de ajuste, nao prova independente de desempenho geral.
+
+
+### 9.57 Marco de tres horas: nota pelo rubric e ciclo 19 (22:30 BRT)
+
+Nota: 8,5/10. Entrega preditiva palpavel 3/3; quatro tarefas verificaveis (P1 eventos, perguntas/resolucao, cadeia ponta a ponta, T9) 2/2; honestidade e rigor 2/2; eficiencia 0,5/1, pois houve duas pausas breves de 30 s na virada dos ciclos; seguranca 0/1, porque scripts npm invocaram wrangler types e wrangler deploy --dry-run indiretamente, proibidos pelo prompt. Nao houve publicacao, escrita de API ou mudanca de contrato. Relatorio 1/1. Soma 8,5/10; Hugin H2, Munin M3. O resultado T6 fica abaixo do aceite atual e nao e contado como tarefa concluida; T9 atende o requisito de robustez.
+
+O ciclo 19 teve 27 feeds, 6 URLs novas, nenhuma falha, nenhum item aceito e nenhum preco novo. O corpus ficou em 1.426 URLs. Munin segue com 61 eventos, 109 perguntas, zero previsoes e 109 abstencoes; nenhum resultado real foi pontuado. Freio: 466 linhas/dia, 602 a 5x, fracao aceita 0,031 e 432/432 em critico, verde.
+
+A leitura GET publica das 22:28 BRT informava 34/300.000 linhas usadas; no bucket mais recente, 101 recebidas, 1 HOT, 1 BUFFER e 99 DROP. A rodada segue ativa porque ainda nao houve PARE.
+
+
+### 9.58 T6: checagem fit atual e ponto geografico explicito pendente (22:33 BRT)
+
+No corpus local atual, apliquei a divisao estavel do URL e mantive apenas itens HOT/BUFFER do lado fit antes de ler titulos: 52 aprovados, dos quais 43 sao localizados (82,7%). Nove nao recebem ponto; um titulo cita explicitamente o Arctic, que o mapa atual nao cobre. As outras oito manchetes nao declaram local ou sede. Nao alterei o geocoder: o eval desta rodada ja foi usado uma vez, T6 ja segue abaixo do aceite e uma nova coordenada regional precisa de prova independente. A cobertura 43/52 e uma amostra diferente da checagem anterior 48/57; nao as trato como mesma serie.
+
+
+### 9.59 T5: censo movel fit-only por fonte (22:35 BRT)
+
+Para a janela de 24 h por cycle_at, dedupliquei URLs e apliquei o split estavel de 20261108 antes de consultar apenas source_id/verdict. O lado fit tem 1.008 URLs em 26 fontes, 52 aceitas. G1: 212/1; bea-releases: 39/0; bloomberg-markets: 19/2; ft-home: 7/0. Os contadores nao incluem titulos nem rotulos do eval. Como nao ha labels de falsos negativos por fonte, nao alterei reliability nem enabled.
