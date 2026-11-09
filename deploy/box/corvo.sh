@@ -8,15 +8,18 @@
 #   painel    painel ao vivo no terminal (feed da API: pressão do orçamento e últimas notícias); Ctrl+C sai
 #   enviar    pede o token (digitação oculta), grava em deploy/box/.env e passa a ENVIAR à API
 #   seco      volta ao modo --dry-run (decide e guarda só local; não envia nada)
+#   agente    liga o agente que recebe os comandos do app no celular
 #   instalar  cria o comando curto `corvo` (depois: corvo on, corvo off, corvo status, corvo painel)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
 cd "$(dirname "$0")/../.." || exit 1
 ROOT=$(pwd); ENVF="$ROOT/deploy/box/.env"; DATA="$ROOT/engine/data/corvo_corpus"; LOG="$DATA/caixa.log"
 rodando() { ps -ef 2>/dev/null | grep '[d]eploy/box/run.sh' >/dev/null; }
+agente_ligado() { ps -ef 2>/dev/null | grep '[d]eploy/box/agente.sh' >/dev/null; }
 
 case "$1" in
   status)
     if rodando; then echo "coletor: LIGADO"; else echo "coletor: DESLIGADO"; fi
+    if agente_ligado; then echo "agente (comandos do app): LIGADO"; else echo "agente (comandos do app): DESLIGADO"; fi
     if [ -f "$ENVF" ] && grep -q '^CORVO_INGEST_TOKEN=.\{8,\}' "$ENVF"; then echo "modo: ENVIA à API"; else echo "modo: SECO (não envia)"; fi
     echo "último ciclo:"; grep '"feeds"' "$LOG" 2>/dev/null | tail -1 | cut -c1-200
     [ -f "$DATA/corpus.jsonl" ] && echo "itens no corpus local: $(wc -l < "$DATA/corpus.jsonl")"
@@ -28,8 +31,9 @@ case "$1" in
     if rodando; then echo "já está ligado"; else termux-wake-lock 2>/dev/null; nohup sh deploy/box/run.sh >/dev/null 2>&1 & sleep 1; echo "ligado"; fi
     ;;
   stop|off)
-    pkill -f 'deploy/box/run.sh' 2>/dev/null; pkill -f 'corvo_engine.collect' 2>/dev/null; echo "desligado"
+    pkill -f 'deploy/box/run.sh' 2>/dev/null; pkill -f 'corvo_engine.collect --once' 2>/dev/null; echo "desligado"
     ;;
+  agente) if agente_ligado; then echo "agente já está ligado"; else nohup sh deploy/box/agente.sh >/dev/null 2>&1 & sleep 1; echo "agente ligado"; fi ;;
   restart) sh "$0" stop; sleep 2; sh "$0" start ;;
   painel) shift; PYTHONPATH="$ROOT/engine" python -m corvo_engine.collect.painel "$@" ;;
   logs) tail -n "${2:-20}" "$LOG" ;;
@@ -47,5 +51,5 @@ case "$1" in
 exec sh "%s/deploy/box/corvo.sh" "$@"
 ' "$ROOT" > "$PREFIX/bin/corvo" && chmod +x "$PREFIX/bin/corvo" && echo "comando corvo instalado" ;;
   atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,13p' "$0" ;;
+  *) sed -n '2,14p' "$0" ;;
 esac
