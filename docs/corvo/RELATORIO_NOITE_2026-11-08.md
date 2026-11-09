@@ -583,31 +583,31 @@ Recalculei a cobertura no conjunto de ajuste atual, excluindo todas as URLs do e
 
 Agreguei apenas metadados (`source_id`, veredito e motivo) de registros com `cycle_at` entre 00:30:07Z de 8/11 e 00:30:07Z de 9/11. Excluí as URLs do eval lacrado por identificador, sem abrir títulos/corpos; são 1.008 URLs únicas de 23 feeds. O 24º feed (`usgs-sig`) teve zero registros no corpus neste intervalo. “Aceitos” = HOT + BUFFER; “stale” conta motivos com stale. Como a amostra não rotula falsos negativos, não alterei `reliability` ou `enabled`.
 
-| Feed | Itens | Aceitos | DROP | `stale` |
-|---|---:|---:|---:|---:|
-| g1 | 210 | 0 | 210 | 0 |
-| dw | 105 | 1 | 104 | 8 |
-| straits-times | 76 | 10 | 66 | 1 |
-| scmp | 75 | 3 | 72 | 1 |
-| guardian-world | 54 | 3 | 51 | 2 |
-| aljazeera | 49 | 10 | 39 | 0 |
-| france24 | 40 | 3 | 37 | 0 |
-| boe-news | 39 | 1 | 38 | 6 |
-| japan-times | 39 | 2 | 37 | 4 |
-| decrypt | 33 | 0 | 33 | 11 |
-| allafrica | 32 | 0 | 32 | 1 |
-| bbc-world | 29 | 5 | 24 | 1 |
-| cointelegraph | 26 | 2 | 24 | 7 |
-| times-of-israel | 26 | 2 | 24 | 0 |
-| un-news | 26 | 0 | 26 | 2 |
-| abc-au | 24 | 0 | 24 | 0 |
-| cnbc | 24 | 6 | 18 | 0 |
-| coindesk | 24 | 3 | 21 | 6 |
-| theblock | 21 | 2 | 19 | 8 |
-| fed-press | 18 | 0 | 18 | 4 |
-| marketwatch | 16 | 1 | 15 | 0 |
-| ecb-press | 11 | 1 | 10 | 5 |
-| npr-world | 11 | 0 | 11 | 0 |
-| usgs-sig | 0 | 0 | 0 | 0 |
+| Feed | Itens/24 h | Aceitos | `irrelevant` | `stale` | Duplicata URL |
+|---|---:|---:|---:|---:|---:|
+| fed-press | 18 | 0,0% | 77,8% | 22,2% | 0 |
+| ecb-press | 11 | 9,1% | 45,5% | 45,5% | 0 |
+| boe-news | 39 | 2,6% | 82,1% | 15,4% | 0 |
+| un-news | 26 | 0,0% | 88,5% | 7,7% | 0 |
+| usgs-sig | 0 | n/a | n/a | n/a | 0 |
+| bbc-world | 29 | 17,2% | 79,3% | 3,4% | 0 |
+| aljazeera | 49 | 20,4% | 77,6% | 0,0% | 0 |
+| guardian-world | 54 | 5,6% | 83,3% | 3,7% | 0 |
+| dw | 105 | 1,0% | 87,6% | 7,6% | 0 |
+| france24 | 40 | 7,5% | 87,5% | 0,0% | 0 |
+| npr-world | 11 | 0,0% | 81,8% | 0,0% | 0 |
+| abc-au | 24 | 0,0% | 100,0% | 0,0% | 0 |
+| scmp | 75 | 4,0% | 80,0% | 1,3% | 0 |
+| straits-times | 76 | 13,2% | 77,6% | 1,3% | 0 |
+| japan-times | 39 | 5,1% | 71,8% | 10,3% | 0 |
+| times-of-israel | 26 | 7,7% | 88,5% | 0,0% | 0 |
+| allafrica | 32 | 0,0% | 96,9% | 3,1% | 0 |
+| g1 | 210 | 0,0% | 99,5% | 0,0% | 0 |
+| cnbc | 24 | 25,0% | 66,7% | 0,0% | 0 |
+| marketwatch | 16 | 6,2% | 81,3% | 0,0% | 0 |
+| coindesk | 24 | 12,5% | 45,8% | 25,0% | 0 |
+| cointelegraph | 26 | 7,7% | 57,7% | 26,9% | 0 |
+| decrypt | 33 | 0,0% | 63,6% | 33,3% | 0 |
+| theblock | 21 | 9,5% | 52,4% | 38,1% | 0 |
 
 G1 gerou o maior volume (210), sem nenhum item aprovado; isso é sinal para amostrar falsos negativos e analisar o feed geral, não evidência suficiente para desligá-lo, pois o recall de Hugin ainda é baixo. `decrypt` (11/33 stale), `theblock` (8/21), `cointelegraph` (7/26), `boe-news` (6/39) e `ecb-press` (5/11) merecem uma revisão temporal de frescor. Os contadores de duplicata são zero neste censo por URL: o corpus guarda URL única, então isso não mede near-duplicates.
