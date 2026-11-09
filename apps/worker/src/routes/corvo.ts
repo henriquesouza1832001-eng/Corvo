@@ -204,11 +204,13 @@ corvo.get("/pressure", async (c) => {
 });
 
 /**
- * Limpeza manual (Bearer INGEST_TOKEN). `{"all": true}` apaga notícias e estatísticas (recomeçar do zero depois de mudar o filtro);
+ * Limpeza manual (Bearer INGEST_TOKEN ou ADMIN_TOKEN). `{"all": true}` apaga notícias e estatísticas (recomeçar do zero depois de mudar o filtro);
  * `{"older_than_days": N}` apaga só o que passou do prazo. Nunca mexe no orçamento do dia nem nas previsões.
  */
 corvo.post("/purge", async (c) => {
-	if (!engineAuthorized(c.req.header("Authorization"), c.env.INGEST_TOKEN)) return c.json({ error: "unauthorized" }, 401);
+	// vale o token de envio (coletor) OU o de operador (app de controle); cada um só se estiver configurado
+	const h = c.req.header("Authorization");
+	if (!engineAuthorized(h, c.env.INGEST_TOKEN) && !engineAuthorized(h, c.env.ADMIN_TOKEN)) return c.json({ error: "unauthorized" }, 401);
 	const body = z.object({ all: z.boolean().optional(), older_than_days: z.number().int().min(0).max(3650).optional() }).safeParse(await c.req.json().catch(() => null));
 	if (!body.success || (!body.data.all && body.data.older_than_days === undefined)) return c.json({ error: "invalid_request", detail: 'use {"all": true} ou {"older_than_days": N}' }, 400);
 	const db = c.env.DB;

@@ -24,6 +24,14 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 	const [d, setD] = useState<Diag | null>(null);
 	const [b, setB] = useState<BoxLite | null>(null);
 	const [msg, setMsg] = useState("");
+	const [days, setDays] = useState("30");
+	async function purge(body: { older_than_days: number } | { all: true }, aviso: string) {
+		if (!window.confirm(aviso)) return;
+		if ("all" in body && window.prompt('Isto apaga TODAS as notícias e estatísticas do painel. Digite APAGAR para confirmar.') !== "APAGAR") return;
+		const r = await adminFetch<{ deleted: { news: number; stats: number } }>(token, "/api/corvo/purge", { method: "POST", body });
+		setMsg(r.ok ? `Limpo: ${r.data.deleted.news} notícias e ${r.data.deleted.stats} estatísticas apagadas.` : r.message);
+		void load();
+	}
 	const load = useCallback(async () => {
 		const [rd, rb] = await Promise.all([adminFetch<Diag>(token, "/api/corvo/diag"), adminFetch<BoxLite>(token, "/api/corvo/box")]);
 		if (rd.ok) { setD(rd.data); setMsg(""); } else setMsg(rd.message);
@@ -40,7 +48,7 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 	const s = b?.status;
 	const nowIso = d?.worker.time ?? new Date().toISOString();
 	return (
-		<section className="box">
+		<section className="ctl">
 			<div className="box-head"><h2>Sistema</h2><button className="box-link" onClick={() => void load()}>Atualizar</button></div>
 			{msg && <p className="box-msg">{msg}</p>}
 			<div className="sys-grid">
@@ -52,6 +60,12 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 				<Card title="Corpus e preços" tone="ok"><b>{s?.corpus_items ?? "?"} itens</b><span className="muted sm">preço até {s?.prices_last ? s.prices_last.replace("T", " ").replace("Z", "") : "?"}</span></Card>
 			</div>
 			{s && (s.errors_recent ?? 0) > 0 && <p className="box-msg bad">A caixa registrou {s.errors_recent} erro(s) recente(s) no log. Veja em Caixa, Ver log.</p>}
+			<h3 className="box-sub">Banco</h3>
+			<div className="box-actions">
+				<input className="box-input" inputMode="numeric" value={days} onChange={(e) => setDays(e.target.value.replace(/\D/g, ""))} aria-label="dias a manter" />
+				<button className="box-btn" disabled={!days} onClick={() => void purge({ older_than_days: Number(days) }, `Apagar notícias e estatísticas com mais de ${days} dias?`)}>Limpar antigas (mais de N dias)</button>
+				<button className="box-btn danger" onClick={() => void purge({ all: true }, "Apagar TODO o feed e recomeçar do zero?")}>Apagar tudo</button>
+			</div>
 			<p className="muted sm">Cache do feed (KV): {d ? (d.kv_feed_cache ? "ligado" : "desligado") : "?"}. O controle da caixa não usa KV: tudo fica no banco.</p>
 			<button className="box-link" onClick={forget}>Trocar token</button>
 		</section>

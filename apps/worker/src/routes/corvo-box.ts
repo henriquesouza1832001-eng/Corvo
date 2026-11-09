@@ -15,7 +15,7 @@ import { utcDay } from "../lib/budget";
 export const boxRoutes = new Hono<AppEnv>();
 
 /** Lista fechada. `arg` só existe em `intervalo` (segundos entre ciclos, 300 a 3600). */
-const ACTIONS = ["on", "off", "restart", "update", "reboot", "diag", "logs", "seco", "envio", "intervalo"] as const;
+const ACTIONS = ["on", "off", "restart", "update", "reboot", "diag", "logs", "seco", "envio", "intervalo", "ciclo", "precos", "rede", "fontes", "limpar", "agente"] as const;
 const REFRESH_MS = 240_000;
 const ONLINE_MS = 600_000;
 const PENDING_TTL_MS = 600_000;
@@ -46,6 +46,7 @@ const syncBody = z.object({
 		prices_last: z.string().max(40).default(""),
 		corpus_items: z.number().int().min(0).nullable().default(null),
 		errors_recent: z.number().int().min(0).max(100_000).nullable().default(null),
+		temp_c: z.number().min(-40).max(150).nullable().default(null),
 	}),
 	ack: z.object({ id: z.string().min(1).max(64), ok: z.boolean(), note: z.string().max(200).default(""), output: z.string().max(OUTPUT_MAX).default("") }).optional(),
 });

@@ -7,7 +7,7 @@ export function TokenGate({ title, children }: { title: string; children: (token
 	const [draft, setDraft] = useState("");
 	if (token) return <>{children(token, () => { clearToken(); setToken(""); })}</>;
 	return (
-		<section className="box">
+		<section className="ctl">
 			<h2>{title}</h2>
 			<p className="muted">Cole o token de operador. Ele fica só neste aparelho e nunca é mostrado de novo.</p>
 			<input className="box-input" type="password" autoComplete="off" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="token de operador" />

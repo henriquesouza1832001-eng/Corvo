@@ -76,15 +76,16 @@ A caixa só faz requisições de saída. O operador (app no celular) manda **um 
 
 | Rota | Quem | Corpo → resposta |
 |---|---|---|
-| `POST /api/corvo/box/sync` | caixa, `Bearer INGEST_TOKEN` | `{status:{running,mode,mem_kb,disk,last_cycle,version,interval_s,prices_last,corpus_items,errors_recent}, ack?:{id,ok,note,output}}` → `{command:{id,action,arg}\|null}` |
+| `POST /api/corvo/box/sync` | caixa, `Bearer INGEST_TOKEN` | `{status:{running,mode,mem_kb,disk,last_cycle,version,interval_s,prices_last,corpus_items,errors_recent,temp_c}, ack?:{id,ok,note,output}}` → `{command:{id,action,arg}\|null}` |
 | `GET /api/corvo/box` | operador, `Bearer ADMIN_TOKEN` | → `{online, status, pending, history[15], server_time}` (`online` = contato nos últimos 10 min) |
 | `POST /api/corvo/box/command` | operador | `{action, arg?}` → `202 {ok,id,action}`; `409 command_pending` se já há um (expira em 10 min) |
 | `GET /api/corvo/box/command/:id` | operador | → o comando com a `output` completa (diagnóstico, log) |
 | `GET /api/corvo/diag` | operador | → `{worker, db:{backend,ping_ms}, budget:{used,limit,percent,pressure}, feed:{news_total,news_24h,newest_ingest,newest_age_s,stats_newest}, kv_feed_cache}` |
 
-Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `envio`, `intervalo` (`arg` de 300 a 3600 s, obrigatório só nela).
+Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `envio`, `intervalo` (`arg` de 300 a 3600 s, obrigatório só nela), `ciclo` (um ciclo de coleta agora), `precos` (atualiza os preços), `rede` (latência até a API, a internet e uma fonte), `fontes` (falhas por fonte nos últimos ciclos), `limpar` (libera espaço na caixa) e `agente` (reinicia o agente).
 
 - Sem `ADMIN_TOKEN` configurado, as rotas do operador respondem `503 admin_not_configured` (fechado). O token de envio **não** abre o controle.
 - Ação fora da lista ou `arg` inválido: `400 invalid_request`. A caixa nunca executa texto vindo da API: só mapeia a chave para um comando fixo e valida o argumento de novo.
 - `reboot` exige root na caixa; sem root, a caixa confirma com `ok:false` e a razão.
 - Histórico mantido: os últimos 200 comandos.
+- `POST /api/corvo/purge` (limpar notícias e estatísticas, `{"older_than_days":N}` ou `{"all":true}`) aceita o token de envio **ou** o de operador.
