@@ -42,3 +42,10 @@
 1. Reativar o laço de coleta do corpus (`scripts/corvo_corpus_loop.ps1`) por 3 horas, para o Codex ter dado fresco e rede.
 2. Conferir 40 rótulos do Codex (a auditoria da regra 5 pede ajuda humana se a concordância ficar baixa).
 3. Registrar os dois `gh secret set` para a coleta automática do GitHub alimentar o painel.
+
+## 6. Achados da paridade de fontes (2026-11-08)
+Foram acrescentadas ao catálogo `bea-releases` (dados oficiais dos EUA), `bloomberg-markets` e `ft-home`, para o CORVO cobrir o que o bot de mercado já lê. Em um ciclo de teste (27 feeds, 898 itens):
+- **BEA:** 48 itens, todos descartados: 34 `below_threshold`, 13 `irrelevant`, 1 `stale` (o PIB de 29/10, passou da janela de 7 dias, o que está correto).
+- **Lacuna de léxico para o Codex avaliar (T2, com lacre, uma hipótese por rodada):** "Personal Income and Outlays" (traz o PCE, a inflação que o Fed acompanha) e "International Trade in Goods and Services" ficam em **0,44**, abaixo do corte BUFFER de 0,50. São dados macro oficiais que mexem em mercado. Testar se termos como `personal income and outlays` e `international trade in goods` em `dados_macro` melhoram o recall sem subir o volume (freio verde).
+- **FT:** 9 itens, todos `irrelevant` (política e opinião). Custo baixo, nada a fazer.
+- **Bloomberg Markets:** 20 itens, 2 aprovados (1 HOT, 1 BUFFER).

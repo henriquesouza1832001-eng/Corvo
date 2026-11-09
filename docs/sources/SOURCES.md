@@ -307,3 +307,11 @@ Servem **só para o Munin conferir previsões** (resolução e calibração). N�
 | Stooq (índices, petróleo, ouro) | **não usada** | exige verificação de navegador (JavaScript) | n/a | n/a | Não contornamos a verificação. Índices e commodities ficam sem fonte por enquanto. |
 
 **Lacunas conhecidas:** sem ações, índices, petróleo e ouro. Antes de prever esses ativos é preciso registrar uma fonte pública oficial que permita acesso automático.
+
+### Fontes acrescentadas ao catálogo global (2026-11-08): BEA, Bloomberg Markets e FT
+Verificadas ao vivo em 2026-11-08 (HTTP 200, RSS válido). Só **título, link e resumo curto**, com atribuição à fonte; o corpo da matéria não é guardado nem exibido.
+| `id` | Fonte | Tipo | Confiabilidade inicial | Notas |
+|---|---|---|---|---|
+| `bea-releases` | BEA, Departamento de Comércio dos EUA (`apps.bea.gov/rss/rss.xml`) | oficial | 0,92 | dados que mexem em mercado (PIB, comércio exterior, renda e gastos); poucos itens por semana, por isso `max_age_h` 168 |
+| `bloomberg-markets` | Bloomberg Markets (`feeds.bloomberg.com/markets/news.rss`) | mercado | 0,80 | RSS público de consumo; **rever os termos antes de qualquer uso comercial ou de exibir o conteúdo** |
+| `ft-home` | Financial Times (`ft.com/rss/home`) | mercado | 0,80 | idem; muitas matérias ficam atrás de assinatura, então só o título e o link entram |
