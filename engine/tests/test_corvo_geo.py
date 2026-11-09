@@ -1,21 +1,23 @@
 from corvo_engine.intake.geo import locate
 
 
-def test_locate_uses_earliest_location_mentioned_in_title():
+def test_locate_prefers_action_location_then_earliest_explicit_mention():
     cases = [
         ("Latvian farmers protest over blood grain trade with Russia", "Letônia"),
         ("Manila weighs a South China Sea case against Beijing", "Filipinas"),
         ("Canadian firms sanctioned over Iran ties", "Canadá"),
-        ("Syrian troops may deploy to Yemen and Saudi Arabia", "Síria"),
+        ("Syrian troops may deploy to Yemen and Saudi Arabia", "Iêmen"),
         ("Yemen reports strikes near Sanaa", "Iêmen"),
         ("Yemeni forces advance as Houthis report casualties", "Iêmen"),
-        ("Russia strikes Ukraine's power network", "Rússia"),
+        ("Russia strikes Ukraine's power network", "Ucrânia"),
+        ("Russia launches a massive strike on Kyiv", "Ucrânia"),
+        ("United States carried out strikes on Iran", "Irã"),
         ("Ukraine reports damage after Russian strikes", "Ucrânia"),
         ("Japan earthquake injures people near Tokyo", "Japão"),
         ("China weighs response to Taiwan proposal", "China"),
         ("Taiwan responds to China proposal", "Taiwan"),
         ("Iran sanctions target Canadian exchange firms", "Irã"),
-        ("United States blocks a cargo ship in the Gulf of Oman", "Estados Unidos"),
+        ("United States blocks a cargo ship in the Gulf of Oman", "Golfo de Omã"),
         ("Cargo ship struck in the Black Sea near Ukraine", "Mar Negro"),
         ("Yemen ceasefire talks resume in Riyadh", "Iêmen"),
         ("Sanaa market hit in Yemen strikes", "Iêmen"),

@@ -65,17 +65,43 @@ _PLACES: tuple[tuple[str, float, float, str], ...] = (
     ("Estados Unidos", 38.90, -77.04, r"u\.s\.|united states|washington|wall street|federal reserve|\bfed\b|pentagon|white house|nasdaq|s&p ?500|\bfomc\b|estados unidos|casa branca"),
 )
 _COMPILED = tuple((label, lat, lon, re.compile(pat, re.I)) for label, lat, lon, pat in _PLACES)
+_EVENT_LOCATION_CUE = re.compile(
+    r"\b(?:strike|attack|hit|damage|bomb|shell|fire|kill|wound|injur|pound|disable|block|deploy|send|move)"
+    r"\w*\b.{0,50}\b(?:in|on|near|around|at|to)\s+(?:(?:the|a|an|de|do|da)\s+)?$",
+    re.I,
+)
+_DIRECT_EVENT_LOCATION_CUE = re.compile(
+    r"\b(?:strike|attack|hit|damage|bomb|shell|fire|kill|wound|injur|disable|block)\w*\s*$",
+    re.I,
+)
+
+
+def _first_location(blob: str) -> tuple[int, str, float, float] | None:
+    found = []
+    for label, lat, lon, rx in _COMPILED:
+        match = rx.search(blob)
+        if match:
+            found.append((match.start(), label, lat, lon, match))
+    if not found:
+        return None
+
+    # When the headline names an action and its place ("strikes on Iran"),
+    # prefer that place to an actor mentioned earlier ("US strikes on Iran").
+    cued = [
+        item
+        for item in found
+        if _EVENT_LOCATION_CUE.search(blob[: item[0]])
+        or _DIRECT_EVENT_LOCATION_CUE.search(blob[: item[0]])
+    ]
+    choices = cued or found
+    start, label, lat, lon, _ = min(choices, key=lambda item: item[0])
+    return start, label, lat, lon
 
 
 def locate(title: str, text: str = "") -> tuple[str, float, float] | None:
-    """(rótulo, lat, lon) da primeira menção geográfica; o texto só entra se o título não citar nenhuma."""
+    """(rótulo, lat, lon) do local explícito da ação, ou da primeira menção; texto é fallback."""
     for blob in (title, text[:300]):
-        matches = (
-            (match.start(), label, lat, lon)
-            for label, lat, lon, rx in _COMPILED
-            if (match := rx.search(blob)) is not None
-        )
-        first = min(matches, default=None)
+        first = _first_location(blob)
         if first is not None:
             _, label, lat, lon = first
             return label, lat, lon
