@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:23 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only encontrou e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Ciclo externo 18 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.55.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:25 BRT:** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Ciclo externo 18 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.56.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:23 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:25 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -17,7 +17,7 @@
 - Nesta rodada, o corpus local está em 1.420 URLs; ciclo 16 trouxe 83 itens e 5 candles, ciclo 17 trouxe 3 URLs e ciclo 18 trouxe 9 URLs, sem candles novos; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: o ajuste dinâmico atual tem 57 aprovados; a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), e o acerto conservador é 47/48 (97,9%). A cobertura cai abaixo de 85% por nove manchetes sem lugar explícito; não inventei localizações.
 - T5 (24 h, sem URLs do eval): 1.103 itens únicos em 26 IDs de fonte; 57 aceitos. G1 tem 213 e zero aceitos. O ciclo 16 ampliou o laço compartilhado para 27 feeds; não ajustei `reliability`/`enabled` sem rótulos de falsos negativos.
-- T7 fit-only: amostra manual de 40 itens aprovados, após excluir 75 URLs de eval por ID; uma opinião explícita de mercado caiu como reportagem. A regra estreita agora classifica “here are some simple alternatives” como opinião; auditoria manual 40/40, sem rumor/opinião como fato. Hugin continua H2.
+- T7 fit-only: os 52 itens aprovados foram revisados manualmente, após excluir 75 URLs de eval por ID; a única opinião explícita de mercado encontrada agora sai como opinião. Auditoria 52/52 nesta amostra, sem rumor/opinião como fato; Hugin continua H2.
 - Suíte CORVO/Munin repetida antes do commit T7: 91 testes passaram. T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -682,3 +682,8 @@ Ciclo do dono: 27 feeds, 9 URLs novas, sem falhas, zero itens aceitos enviados e
 ### 9.55 Idempotencia do registro local Munin (22:23 BRT)
 
 Repeti corvo_munin_backtest.py --dry-run com entradas inalteradas. O mesmo run_id run_330411c552deaefa876b foi retornado e previsoes.jsonl manteve 1.135 linhas antes/depois. O painel repetiu 61 eventos, 109 abstencoes e zero resultados de previsao; a segunda execucao nao duplicou registros. O teste automatizado de idempotencia ja existente tambem passou na bateria de 91 testes.
+
+
+### 9.56 Fechamento manual da auditoria T7 fit-only (22:25 BRT)
+
+Revisei manualmente os 12 titulos fit aprovados que faltavam na amostra anterior. Todos sao reportagem segundo a regra de adjudicacao; somados aos 40 ja revisados, a amostra de 52/52 nao tem rumor ou opiniao marcado como fato apos a correcao. As 75 URLs do eval ficaram excluidas por identificador. Isto e uma auditoria pequena de ajuste, nao prova independente de desempenho geral.
