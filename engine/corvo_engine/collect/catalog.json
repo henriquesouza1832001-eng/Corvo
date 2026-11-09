@@ -46,6 +46,6 @@
     { "id": "dailyhodl", "name": "The Daily Hodl", "url": "https://dailyhodl.com/feed/", "region": "Cripto", "kind": "cripto", "reliability": 0.5, "official": false, "max_age_h": 24, "tier": 2, "enabled": true },
     { "id": "al-monitor", "name": "Al-Monitor", "url": "https://www.al-monitor.com/rss", "region": "Oriente Médio", "kind": "agencia", "reliability": 0.65, "official": false, "max_age_h": 24, "tier": 2, "enabled": true },
     { "id": "yonhap", "name": "Yonhap (Coreia do Sul)", "url": "https://en.yna.co.kr/RSS/news.xml", "region": "Ásia", "kind": "agencia", "reliability": 0.7, "official": false, "max_age_h": 24, "tier": 2, "enabled": true },
-    { "id": "business-standard", "name": "Business Standard (Índia, mercados)", "url": "https://www.business-standard.com/rss/markets-106.rss", "region": "Ásia", "kind": "mercado", "reliability": 0.65, "official": false, "max_age_h": 24, "tier": 2, "enabled": true }
+    { "id": "business-standard", "name": "Business Standard (Índia, mercados)", "url": "https://www.business-standard.com/rss/markets-106.rss", "region": "Ásia", "kind": "mercado", "reliability": 0.65, "official": false, "max_age_h": 24, "tier": 2, "enabled": false, "note": "403 para o coletor (bloqueia robôs); desligada em 2026-11-09, sem disfarçar o robô" }
   ]
 }

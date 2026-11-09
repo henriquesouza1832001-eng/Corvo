@@ -28,7 +28,7 @@ Só **a partir de cartão microSD ou pendrive**, mantendo o Android intacto na m
 - Fontes novas (por exemplo outras redes) entram no coletor como adaptadores, cada uma com ficha em `docs/sources/SOURCES.md`, respeitando os termos de uso.
 
 ## Governador térmico, camadas e indicadores (2026-11-09)
-- **Camadas de fontes** (`CORVO_TIER`): 0 = núcleo (27 feeds), 1 = + 8 oficiais, 2 = + 11 de imprensa, cripto e regionais (46 no total). Vale no ciclo seguinte, sem reiniciar. `corvo tier 0|1|2`.
+- **Camadas de fontes** (`CORVO_TIER`): 0 = núcleo (27 feeds), 1 = + 8 oficiais, 2 = + 10 de imprensa, cripto e regionais (45 ativos no total; `business-standard` está desligada por bloquear o coletor). Vale no ciclo seguinte, sem reiniciar. `corvo tier 0|1|2`.
 - **Governador térmico** (ligado por padrão; `corvo governador 0|1`): limite de **80 °C** (`CORVO_TEMP_LIMITE`) e teto de trabalho em **85% do limite (68 °C)**. Sobe uma camada quando a mediana dos últimos minutos está pelo menos 4 °C abaixo do teto, há memória livre (300 MB ou mais) e passaram 30 min da última mudança. Desce se a mediana chega ao teto ou a memória cai abaixo de 150 MB. A 95% do limite volta à camada 0. Três leituras no limite desligam o coletor (marca "parado": só você religa).
 - **O que realmente limita a caixa:** a temperatura em repouso é de uns 51 °C e ler mais feeds quase não a aquece; o limite que aperta primeiro tende a ser a **memória** (1 GB).
 - **Indicadores** (aba Fluxo da página de controle): rede recebida e enviada, CPU, memória, temperatura, **energia estimada** pela CPU (2,5 W ocioso e 6 W no máximo; ajuste com `CORVO_POTENCIA_OCIOSA_W` e `CORVO_POTENCIA_MAXIMA_W`), fluxo pelo portão e por fonte. Sem medidor de potência, a energia é estimativa.

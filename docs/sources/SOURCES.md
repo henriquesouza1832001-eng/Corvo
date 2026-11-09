@@ -336,5 +336,5 @@ Verificadas ao vivo em 2026-11-09 (HTTP 200, RSS ou Atom válido, com itens). S�
 | 2 | `bitcoin-magazine`, `cryptoslate`, `dailyhodl` | imprensa cripto | cripto | 0,50 a 0,55 | |
 | 2 | `al-monitor` | Al-Monitor | agência | 0,65 | Oriente Médio |
 | 2 | `yonhap` | Yonhap | agência | 0,70 | Coreia do Sul |
-| 2 | `business-standard` | Business Standard (Índia, mercados) | mercado | 0,65 | |
+| 2 | `business-standard` | Business Standard (Índia, mercados) | mercado | 0,65 | **desligada** (`enabled: false`): abriu no teste, mas devolve 403 ao coletor na caixa; não se disfarça o robô para furar bloqueio |
 Testadas e **não incluídas** (404, 403 ou erro de certificado): CFTC, Tesouro dos EUA, OFAC, BCE (discursos), RBA, SNB, FMI, Banco Mundial, Yahoo Finance e Arab News. GDACS funciona mas traz 795 KB por ciclo de alertas de baixo valor para mercado, então ficou de fora.
