@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:30 BRT (3 h):** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Nota no marco: **8,5/10**. Ciclo externo 19 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.57.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:33 BRT (3 h):** cadeia Munin e T9 concluídos; T6 está abaixo do limiar atual; auditoria T7 fit-only revisou todos os 52 aprovados e corrigiu um erro de tipo. T2 mapeou nove falsos negativos fit sem mudar a regra. Nota no marco: **8,5/10**. Ciclo externo 19 encerrou e coleta segue ativa (PID 13596). Veja as seções 9.13–9.58.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:30 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`, `9773cb5`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:33 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`, `8510074`, `1c1fc63`, `04642ea`, `65dc991`, `74e43da`, `9773cb5`, `da892ba`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -15,7 +15,7 @@
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Após o ciclo 16, o painel local tem 61 eventos, 109 perguntas, 0 previsões e 109 abstenções.
 - Nesta rodada, o corpus local está em 1.426 URLs; ciclos 16–19 trouxeram 83, 3, 9 e 6 URLs; só o ciclo 16 adicionou candles (5). O único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 466 linhas/dia, 602 a 5×, 432/432 sob pressão crítica.
-- T6 geolocalização: o ajuste dinâmico atual tem 57 aprovados; a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), e o acerto conservador é 47/48 (97,9%). A cobertura cai abaixo de 85% por nove manchetes sem lugar explícito; não inventei localizações.
+- T6 geolocalização: no conjunto de 57 aprovados, a cobertura subiu de 39/57 (68,4%) para 48/57 (84,2%), com acerto conservador 47/48 (97,9%). Uma checagem separada do corpus fit atual localiza 43/52 (82,7%); uma manchete nomeia o Ártico e ainda não é reconhecida. Ambos os conjuntos ficam abaixo de 85%; não inventei localizações.
 - T5 (24 h, sem URLs do eval): 1.103 itens únicos em 26 IDs de fonte; 57 aceitos. G1 tem 213 e zero aceitos. O ciclo 16 ampliou o laço compartilhado para 27 feeds; não ajustei `reliability`/`enabled` sem rótulos de falsos negativos.
 - T7 fit-only: os 52 itens aprovados foram revisados manualmente, após excluir 75 URLs de eval por ID; a única opinião explícita de mercado encontrada agora sai como opinião. Auditoria 52/52 nesta amostra, sem rumor/opinião como fato; Hugin continua H2.
 - Suíte CORVO/Munin repetida antes do commit T7: 91 testes passaram. T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
@@ -198,6 +198,7 @@ Não medido. A amostra não tem pares positivos/negativos rotulados para estimar
 3. Você aprova M6 com mínimo de 30 por tema/fonte, mínimo de 100 no total, Benjamini–Hochberg q≤0,05 e divisão temporal 70/15/15?
 4. Pode ser gerado um conjunto novo e sem URLs já avaliadas para continuar T2? O lacre atual não será reutilizado para escolher outra regra.
 5. Confirma o critério de classificar manchetes com recomendação explícita de alternativas de investimento como `opinião`, mesmo se vierem de fonte oficial?
+6. Aprova uma localização regional aproximada para menções explícitas ao Ártico, depois de haver um lacre adequado para avaliar a mudança?
 
 ## 8. Próximos passos sugeridos
 
@@ -696,3 +697,8 @@ Nota: 8,5/10. Entrega preditiva palpavel 3/3; quatro tarefas verificaveis (P1 ev
 O ciclo 19 teve 27 feeds, 6 URLs novas, nenhuma falha, nenhum item aceito e nenhum preco novo. O corpus ficou em 1.426 URLs. Munin segue com 61 eventos, 109 perguntas, zero previsoes e 109 abstencoes; nenhum resultado real foi pontuado. Freio: 466 linhas/dia, 602 a 5x, fracao aceita 0,031 e 432/432 em critico, verde.
 
 A leitura GET publica das 22:28 BRT informava 34/300.000 linhas usadas; no bucket mais recente, 101 recebidas, 1 HOT, 1 BUFFER e 99 DROP. A rodada segue ativa porque ainda nao houve PARE.
+
+
+### 9.58 T6: checagem fit atual e ponto geografico explicito pendente (22:33 BRT)
+
+No corpus local atual, apliquei a divisao estavel do URL e mantive apenas itens HOT/BUFFER do lado fit antes de ler titulos: 52 aprovados, dos quais 43 sao localizados (82,7%). Nove nao recebem ponto; um titulo cita explicitamente o Arctic, que o mapa atual nao cobre. As outras oito manchetes nao declaram local ou sede. Nao alterei o geocoder: o eval desta rodada ja foi usado uma vez, T6 ja segue abaixo do aceite e uma nova coordenada regional precisa de prova independente. A cobertura 43/52 e uma amostra diferente da checagem anterior 48/57; nao as trato como mesma serie.
