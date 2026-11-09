@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:30 BRT:** cadeia Munin, T9 e T6 concluídos; ciclo 13 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.39.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:30 BRT:** cadeia Munin, T9, T6 e censo T5 concluídos; ciclo 13 encerrou e coleta externa ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.41.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:30 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:30 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -16,6 +16,7 @@
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Reprova sintética mais recente repetiu os seis cenários; painel local tem 59 eventos, 104 perguntas, 0 previsões e 104 abstenções.
 - Nesta rodada, o corpus local está em 1.313 URLs; ciclo 13 trouxe 3 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
 - T6 geolocalização: após o ciclo 13, a amostra dinâmica de ajuste tem 55 aprovados; a cobertura por título subiu de 39/55 (70,9%) para 47/55 (85,5%). O acerto conservador permanece 46/47 (97,9%), contando um caso ambíguo como erro. As oito manchetes sem ponto não citam lugar localizável.
+- T5 (24 h, sem URLs do eval): 1.008 itens únicos em 23 feeds; G1 tem 210 e zero aceitos; 55 itens aceitos no total. Não ajustei `reliability`/`enabled`, pois sem rótulo de falso negativo a taxa de descarte não justifica desligar a fonte.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -274,6 +275,7 @@ O único erro de feed desta retomada foi o HTTP 404 do `fed-press` no ciclo 15; 
 1. Confirma manter o corte BUFFER em 0,50 até haver um lacrado novo com pelo menos 30 casos `keep`?
 2. Confirma os rótulos marginais do snapshot T0 listados na seção 3.5?
 3. Há objeção ao protocolo M6 temporal + Benjamini–Hochberg `q=0.05`, mantido em HOLD até cumprir os critérios?
+4. Mantemos G1 habilitado até revisar falsos negativos em uma amostra rotulada por fonte?
 
 ### 9.7 Continuidade da coleta até 14:53 BRT
 
@@ -575,3 +577,37 @@ O ciclo 13 consultou 24 feeds sem falhas, trouxe 3 itens e nenhum preço novo. O
 ### 9.40 T6 rechecagem com aprovados do ciclo 13 (21:30 BRT)
 
 Recalculei a cobertura no conjunto de ajuste atual, excluindo todas as URLs do eval lacrado apenas pelo identificador. Agora são 55 aprovados: o geocodificador anterior localizava 39/55 (70,9%), o atual 47/55 (85,5%). A nova manchete “Rubio sees no Iran breakthrough...” foi localizada como Irã. A auditoria conservadora passa a 46/47 (97,9%): 46 claras e um caso de tropas ambíguo contado como erro. O resultado reforça que T6 continua acima dos dois limiares com a coleta; nenhuma linha do eval foi lida.
+
+
+### 9.41 T5 censo de feeds nas últimas 24 h (21:30 BRT)
+
+Agreguei apenas metadados (`source_id`, veredito e motivo) de registros com `cycle_at` entre 00:30:07Z de 8/11 e 00:30:07Z de 9/11. Excluí as URLs do eval lacrado por identificador, sem abrir títulos/corpos; são 1.008 URLs únicas de 23 feeds. O 24º feed (`usgs-sig`) teve zero registros no corpus neste intervalo. “Aceitos” = HOT + BUFFER; “stale” conta motivos com stale. Como a amostra não rotula falsos negativos, não alterei `reliability` ou `enabled`.
+
+| Feed | Itens | Aceitos | DROP | `stale` |
+|---|---:|---:|---:|---:|
+| g1 | 210 | 0 | 210 | 0 |
+| dw | 105 | 1 | 104 | 8 |
+| straits-times | 76 | 10 | 66 | 1 |
+| scmp | 75 | 3 | 72 | 1 |
+| guardian-world | 54 | 3 | 51 | 2 |
+| aljazeera | 49 | 10 | 39 | 0 |
+| france24 | 40 | 3 | 37 | 0 |
+| boe-news | 39 | 1 | 38 | 6 |
+| japan-times | 39 | 2 | 37 | 4 |
+| decrypt | 33 | 0 | 33 | 11 |
+| allafrica | 32 | 0 | 32 | 1 |
+| bbc-world | 29 | 5 | 24 | 1 |
+| cointelegraph | 26 | 2 | 24 | 7 |
+| times-of-israel | 26 | 2 | 24 | 0 |
+| un-news | 26 | 0 | 26 | 2 |
+| abc-au | 24 | 0 | 24 | 0 |
+| cnbc | 24 | 6 | 18 | 0 |
+| coindesk | 24 | 3 | 21 | 6 |
+| theblock | 21 | 2 | 19 | 8 |
+| fed-press | 18 | 0 | 18 | 4 |
+| marketwatch | 16 | 1 | 15 | 0 |
+| ecb-press | 11 | 1 | 10 | 5 |
+| npr-world | 11 | 0 | 11 | 0 |
+| usgs-sig | 0 | 0 | 0 | 0 |
+
+G1 gerou o maior volume (210), sem nenhum item aprovado; isso é sinal para amostrar falsos negativos e analisar o feed geral, não evidência suficiente para desligá-lo, pois o recall de Hugin ainda é baixo. `decrypt` (11/33 stale), `theblock` (8/21), `cointelegraph` (7/26), `boe-news` (6/39) e `ecb-press` (5/11) merecem uma revisão temporal de frescor. Os contadores de duplicata são zero neste censo por URL: o corpus guarda URL única, então isso não mede near-duplicates.
