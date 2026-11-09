@@ -194,7 +194,27 @@ def diagnostico(run: Run, env: dict[str, str]) -> str:
     t = run(["uptime"]).stdout.strip()
     if t:
         linhas.append(f"uptime: {t[:150]}")
+    linhas += _medidores()
     return _cap("\n".join(linhas))
+
+
+def _medidores() -> list[str]:
+    """O que os medidores de CPU, carga, rede e energia conseguem ler AGORA nesta caixa (duas amostras com 1,5 s entre elas)."""
+    out = ["medidores (duas amostras):"]
+    for nome, fn in (("cpu (/proc/stat)", metricas.ler_cpu), ("carga (/proc/loadavg)", metricas.carga), ("rede (/proc/net/dev)", metricas.ler_rede)):
+        try:
+            out.append(f"  {nome}: {fn()}")
+        except Exception as exc:  # noqa: BLE001
+            out.append(f"  {nome}: erro {type(exc).__name__}")
+    try:
+        med = metricas.Medidor()
+        med.amostra(time.time())
+        time.sleep(1.5)
+        a = med.amostra(time.time())
+        out.append(f"  resultado: cpu {a['cpu_pct']}% | carga {a['load1']} | rx {a['rx_bps']} B/s | tx {a['tx_bps']} B/s | potência {a['power_w']} W")
+    except Exception as exc:  # noqa: BLE001
+        out.append(f"  medidor: erro {type(exc).__name__}: {str(exc)[:80]}")
+    return out
 
 
 def _tempo_ms(url: str, timeout: int = 10) -> str:
