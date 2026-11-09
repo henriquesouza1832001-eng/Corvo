@@ -15,7 +15,7 @@
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado. Reprova sintética mais recente repetiu os seis cenários; painel local agora tem 58 eventos, 102 perguntas, 0 previsões e 102 abstenções.
 - Nesta rodada, o corpus local está em 1.313 URLs; ciclo 13 trouxe 3 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 462 linhas/dia, 582 a 5×, 432/432 sob pressão crítica.
-- T6 geolocalização: nos mesmos 54 aprovados do ajuste, a cobertura por título subiu de 38/54 (70,4%) para 46/54 (85,2%). A auditoria manual dos 46 pontos retornados teve 45 correspondências claras; um caso ambíguo foi contado como erro (acerto conservador 97,8%). Os oito títulos restantes não citam lugar localizável.
+- T6 geolocalização: após o ciclo 13, a amostra dinâmica de ajuste tem 55 aprovados; a cobertura por título subiu de 39/55 (70,9%) para 47/55 (85,5%). O acerto conservador permanece 46/47 (97,9%), contando um caso ambíguo como erro. As oito manchetes sem ponto não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -570,3 +570,8 @@ Na mesma amostra dos 54 aprovados do ajuste: 38/54 títulos localizáveis antes 
 `corvo_munin_eval.py --synthetic` repetiu seis cenários sem mudança: previsor calibrado skill +0,353/ECE 0,014; exagerado +0,089/0,211; taxa-base 0; conservador +0,262/0,132; n=12 continua EXPERIMENTAL/HOLD; vazamento continua bloqueado. Todos os números são sintéticos.
 
 O ciclo 13 consultou 24 feeds sem falhas, trouxe 3 itens e nenhum preço novo. O corpus está em 1.313 URLs; o painel local mostra 59 eventos e 104 perguntas, 0 previsões e 104 abstenções; 8 resoluções locais sem forecast, 12 aguardando preço futuro e 84 aguardando instrumento. Brier, taxa-base comparável, skill e ECE de previsões reais continuam N/A; nenhum resultado de previsão foi pontuado. O freio pós-ciclo está verde em 462 linhas/dia, 582 a 5× e 432/432 na pressão crítica. Coleta do dono segue ativa, PID 13596.
+
+
+### 9.40 T6 rechecagem com aprovados do ciclo 13 (21:30 BRT)
+
+Recalculei a cobertura no conjunto de ajuste atual, excluindo todas as URLs do eval lacrado apenas pelo identificador. Agora são 55 aprovados: o geocodificador anterior localizava 39/55 (70,9%), o atual 47/55 (85,5%). A nova manchete “Rubio sees no Iran breakthrough...” foi localizada como Irã. A auditoria conservadora passa a 46/47 (97,9%): 46 claras e um caso de tropas ambíguo contado como erro. O resultado reforça que T6 continua acima dos dois limiares com a coleta; nenhuma linha do eval foi lida.
