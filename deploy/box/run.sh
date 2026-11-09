@@ -10,7 +10,7 @@ DATA="$ROOT/engine/data/corvo_corpus"; mkdir -p "$DATA"
 LOG="$DATA/caixa.log"
 INTERVALO=${CORVO_INTERVALO:-600}
 MODO="--dry-run --quiet --dump $DATA/corpus.jsonl"
-[ -n "$CORVO_API_URL" ] && [ -n "$CORVO_INGEST_TOKEN" ] && MODO=""
+[ -n "$CORVO_API_URL" ] && [ -n "$CORVO_INGEST_TOKEN" ] && [ "$CORVO_MODO" != "seco" ] && MODO=""
 echo "$(date -u +%FT%TZ) inicio modo=${MODO:-envio}" >> "$LOG"
 ULT_PRECO=0
 while :; do

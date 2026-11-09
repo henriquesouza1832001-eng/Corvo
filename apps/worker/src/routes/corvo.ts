@@ -4,12 +4,14 @@ import type { AppEnv } from "../env";
 import { engineAuthorized } from "../lib/auth";
 import { utcDay, type BudgetMode } from "../lib/budget";
 import { cacheControl } from "../lib/cache";
+import { boxRoutes } from "./corvo-box";
 
 /**
  * API do painel do CORVO. O coletor (Python, no GitHub Actions ou num servidor) EMPURRA os dados aqui com `POST /api/corvo/ingest`;
  * o painel só LÊ. O KV guarda o instantâneo do feed por alguns segundos para o painel não bater no D1 a cada visita.
  */
 export const corvo = new Hono<AppEnv>();
+corvo.route("/", boxRoutes); // centro de comando da caixa e diagnóstico (operador), tudo no banco
 
 const iso = z.iso.datetime();
 const prob = z.number().min(0).max(1);
@@ -199,86 +201,6 @@ corvo.get("/pressure", async (c) => {
 	const used = row?.rows ?? 0;
 	const limit = dailyLimit(c.env);
 	return c.json({ pressure: modeFor(used, limit), used, limit });
-});
-
-/**
- * CONTROLE DA CAIXA (coletor 24 h). A caixa só faz requisições de saída: a cada ~30 s chama `POST /box/sync` (Bearer INGEST_TOKEN),
- * informa o estado e recebe, se houver, UM comando de uma lista fechada. O operador (app no celular) manda o comando com
- * `POST /box/command` e lê o estado com `GET /box` (Bearer ADMIN_TOKEN, nunca o token de envio). Nada é executado fora da lista.
- * Estado e comando vivem no KV; o estado só é regravado quando muda ou a cada 4 min, para respeitar o limite de escritas do KV.
- */
-const BOX_STATUS_KEY = "corvo:box:status:v1";
-const BOX_CMD_KEY = "corvo:box:cmd:v1";
-const BOX_RESULT_KEY = "corvo:box:result:v1";
-const BOX_ACTIONS = ["on", "off", "restart", "update", "reboot"] as const;
-const BOX_STATUS_REFRESH_MS = 240_000;
-const BOX_ONLINE_MS = 600_000;
-const BOX_CMD_TTL_S = 600;
-
-const boxSync = z.object({
-	status: z.object({
-		running: z.boolean(),
-		mode: z.enum(["envia", "seco"]),
-		mem_kb: z.number().int().min(0).max(1_000_000_000).nullable().default(null),
-		disk: z.string().max(40).default(""),
-		last_cycle: z.string().max(300).default(""),
-		version: z.string().max(40).default(""),
-	}),
-	ack: z.object({ id: z.string().min(1).max(64), ok: z.boolean(), note: z.string().max(200).default("") }).optional(),
-});
-type BoxCmd = { id: string; action: (typeof BOX_ACTIONS)[number]; issued_at: string };
-type BoxStatus = z.infer<typeof boxSync>["status"] & { seen_at: string };
-
-corvo.post("/box/sync", async (c) => {
-	if (!engineAuthorized(c.req.header("Authorization"), c.env.INGEST_TOKEN)) return c.json({ error: "unauthorized" }, 401);
-	const kv = c.env.KV;
-	if (!kv) return c.json({ error: "kv_unavailable" }, 503);
-	const parsed = boxSync.safeParse(await c.req.json().catch(() => null));
-	if (!parsed.success) return c.json({ error: "invalid_request" }, 400);
-	const { status, ack } = parsed.data;
-	const now = Date.now();
-	const [prev, pending] = await Promise.all([kv.get<BoxStatus>(BOX_STATUS_KEY, "json"), kv.get<BoxCmd>(BOX_CMD_KEY, "json")]);
-	let cmd = pending;
-	if (ack && cmd && ack.id === cmd.id) {
-		await kv.put(BOX_RESULT_KEY, JSON.stringify({ id: cmd.id, action: cmd.action, ok: ack.ok, note: ack.note, finished_at: new Date(now).toISOString() }), { expirationTtl: 86_400 });
-		await kv.delete(BOX_CMD_KEY);
-		cmd = null;
-	}
-	const changed = !prev || prev.running !== status.running || prev.mode !== status.mode || Boolean(ack);
-	if (changed || now - Date.parse(prev.seen_at) > BOX_STATUS_REFRESH_MS) {
-		await kv.put(BOX_STATUS_KEY, JSON.stringify({ ...status, seen_at: new Date(now).toISOString() }), { expirationTtl: 604_800 });
-	}
-	return c.json({ command: cmd ? { id: cmd.id, action: cmd.action } : null });
-});
-
-function boxOperator(c: { req: { header: (n: string) => string | undefined }; env: { ADMIN_TOKEN?: string } }): 401 | 503 | null {
-	if (!c.env.ADMIN_TOKEN) return 503; // sem o segredo do operador, o controle fica fechado
-	return engineAuthorized(c.req.header("Authorization"), c.env.ADMIN_TOKEN) ? null : 401;
-}
-
-corvo.get("/box", async (c) => {
-	const denied = boxOperator(c);
-	if (denied) return c.json({ error: denied === 503 ? "admin_not_configured" : "unauthorized" }, denied);
-	const kv = c.env.KV;
-	if (!kv) return c.json({ error: "kv_unavailable" }, 503);
-	const [status, command, result] = await Promise.all([kv.get<BoxStatus>(BOX_STATUS_KEY, "json"), kv.get<BoxCmd>(BOX_CMD_KEY, "json"), kv.get(BOX_RESULT_KEY, "json")]);
-	const now = Date.now();
-	const online = status ? now - Date.parse(status.seen_at) < BOX_ONLINE_MS : false;
-	c.header("Cache-Control", "no-store");
-	return c.json({ online, status, command, result, server_time: new Date(now).toISOString() });
-});
-
-corvo.post("/box/command", async (c) => {
-	const denied = boxOperator(c);
-	if (denied) return c.json({ error: denied === 503 ? "admin_not_configured" : "unauthorized" }, denied);
-	const kv = c.env.KV;
-	if (!kv) return c.json({ error: "kv_unavailable" }, 503);
-	const body = z.object({ action: z.enum(BOX_ACTIONS) }).safeParse(await c.req.json().catch(() => null));
-	if (!body.success) return c.json({ error: "invalid_request", allowed: BOX_ACTIONS }, 400);
-	if (await kv.get(BOX_CMD_KEY)) return c.json({ error: "command_pending" }, 409); // um de cada vez; expira sozinho em 10 min
-	const cmd: BoxCmd = { id: crypto.randomUUID(), action: body.data.action, issued_at: new Date().toISOString() };
-	await kv.put(BOX_CMD_KEY, JSON.stringify(cmd), { expirationTtl: BOX_CMD_TTL_S });
-	return c.json({ ok: true, id: cmd.id, action: cmd.action }, 202);
 });
 
 /**

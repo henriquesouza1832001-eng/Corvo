@@ -168,3 +168,18 @@ footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line);
 .box-btn:disabled { opacity: .45; }
 .box-input { min-height: 48px; padding: 10px; background: var(--bg); border: 1px solid var(--line2); color: var(--text); font: inherit; }
 .box-link { align-self: center; background: none; border: 0; color: var(--mute); text-decoration: underline; min-height: 44px; }
+
+/* ===== centro de comando ===== */
+.sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sys-card { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid var(--line2); background: var(--panel); min-width: 0; }
+.sys-card h3 { font-size: 11px; letter-spacing: .1em; color: var(--mute); text-transform: uppercase; }
+.sys-card b { font-size: 16px; overflow-wrap: anywhere; }
+.sys-card.ok { border-color: rgba(57,255,136,.45); } .sys-card.ok b { color: var(--g); }
+.sys-card.warn { border-color: rgba(255,176,0,.55); } .sys-card.warn b { color: var(--a); }
+.sys-card.bad { border-color: rgba(255,77,94,.55); } .sys-card.bad b { color: var(--r); }
+.box-sub { font-size: 11px; letter-spacing: .12em; color: var(--mute); text-transform: uppercase; margin-top: 6px; }
+.box-out { border: 1px solid var(--line2); background: var(--bg); padding: 10px; }
+.box-out pre { margin: 8px 0 0; max-height: 50vh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.box-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.box-hist li { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); }
+.box-hist li.ok span:first-child { color: var(--g); } .box-hist li.bad span:first-child { color: var(--r); }
