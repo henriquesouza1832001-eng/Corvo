@@ -1,12 +1,13 @@
 """Painel do CORVO no TERMINAL: lê o feed público da API e mostra pressão do orçamento e as últimas notícias aprovadas.
 Só biblioteca padrão; pensado para a caixa (HDMI ou SSH). Não grava nada e não usa credenciais.
 
-Uso:  python -m corvo_engine.collect.painel [--api URL] [--atualiza 30] [--once]
+Uso:  python -m corvo_engine.collect.painel [--api URL] [--atualiza 30] [--once]   (Enter ou Ctrl+C para sair)
 """
 from __future__ import annotations
 
 import argparse
 import json
+import select
 import shutil
 import sys
 import time
@@ -58,6 +59,22 @@ def render(feed: dict, largura: int = 100, linhas: int = 14, agora: datetime | N
     return "\n".join(out)
 
 
+def _espera_ou_enter(segundos: int) -> bool:
+    """Dorme `segundos`; devolve True se a pessoa apertou Enter (sair). Sem terminal interativo, só dorme."""
+    if not sys.stdin.isatty():
+        time.sleep(segundos)
+        return False
+    try:
+        pronto, _, _ = select.select([sys.stdin], [], [], segundos)
+    except (OSError, ValueError):  # Windows ou entrada indisponível
+        time.sleep(segundos)
+        return False
+    if pronto:
+        sys.stdin.readline()
+        return True
+    return False
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Painel do CORVO no terminal")
     ap.add_argument("--api", default=API)
@@ -74,7 +91,8 @@ def main(argv: list[str] | None = None) -> int:
         print(("" if args.once else "\033[2J\033[H") + texto, flush=True)
         if args.once:
             return 0
-        time.sleep(espera)
+        if _espera_ou_enter(espera):
+            return 0
 
 
 if __name__ == "__main__":

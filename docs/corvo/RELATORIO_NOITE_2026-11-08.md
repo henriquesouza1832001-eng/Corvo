@@ -1,22 +1,23 @@
 # Relatório da noite — 2026-11-08
 
-> **Checkpoint nota8 ? 2026-11-08 19:30?20:00 BRT:** cadeia Munin e tarefa T9 conclu?das; a coleta externa de tr?s horas continua ativa. Detalhes e pend?ncias na se??o 9.13.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 20:50 BRT:** cadeia Munin e T9 concluídas; a coleta externa de três horas segue ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.29.
 
-**Agente:** codex-noite · **Primeira sessão:** 2026-11-08 01:19–01:39 BRT · **Retomada:** 10:53 BRT · **Atualização:** 17:42 BRT (encerrado por `PARE`) · **Commit inicial:** `4df88e6` · **Último checkpoint:** parada solicitada pelo dono
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 20:50 · **Commits desta rodada:** `b4ac7b0`, `bae075e`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
 ## 1. Resumo para o dono
 
-- T0: auditoria GET de 31 notícias salvas; 15 keep (48,4%), 14 marginais e 2 drop. A meta de 85% de keep entre gravadas não foi atingida.
+- T0 (fotografia GET mais recente): 31 notícias no bucket atual; rótulos manuais por título: 22 keep (71,0%), 8 marginais, 1 drop. A meta de 85% de keep não foi atingida; a fotografia está atrasada ~20,5 h.
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
 - Hugin permanece em H2: recall lacrado 0,800 e keep entre gravadas 0,583; o lacre tem só 15 keep e 2 HOT, então a estimativa é instável.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
-- O freio ficou verde antes e depois; a aceitação normal projetada permaneceu em 26 de 411 itens no corpus final.
-- Suíte Python exigida: 55 testes passaram. T2 e T3 precisam de uma nova avaliação lacrada e pares de deduplicação rotulados.
-- Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy nem push.
+- Nesta rodada, o corpus local está em 1.293 URLs; ciclo 9 teve 24 feeds saudáveis e 3 novos itens. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
+- Nota 8 ainda não foi declarada: o lacre atual tem 15 keeps, abaixo da exigência de 40 para a rodada; nenhuma regra foi escolhida com exemplos do lacre.
+- Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
 - Os scripts npm invocaram `wrangler types` e `wrangler deploy --dry-run` indiretamente; o dry-run terminou sem publicar. Isso contrariou a restrição explícita de não rodar Wrangler; não repeti os comandos.
 
 ## 2. Condições da noite
@@ -24,7 +25,7 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta | Sessão 01:19–01:39: 0, 19 e 2 novos; retomada 10:53–17:33: 41 ciclos e 595 novos; 24 feeds consultados |
+| Ciclos de coleta | Sessões anteriores: 01:19–01:39 e 10:53–17:33; rodada atual desde 19:30: ciclos 1–9, incluindo 24 feeds saudáveis e 3 novos no ciclo 9 |
 | Corpus da retomada / feeds | 1.500 itens únicos temporários / 24 feeds; freio verde |
 | Destino da coleta contínua | `%TEMP%\corvo-codex-noite\corpus.jsonl`, `ciclos.log` e `ciclos_continuos.log`; área separada porque `engine/data/` está reservada por `claude-hen` |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
@@ -506,3 +507,8 @@ A pergunta fechada indicava que os 30 retornos de referencia eram anteriores a p
 ### 9.29 Ciclo 9 e painel Munin (20:50 BRT)
 
 O ciclo 9 terminou com 24 feeds sem falhas, 3 itens novos e nenhum candle novo (5.220 linhas de preco). O corpus tem 1.293 URLs unicas; o freio segue verde em 460 linhas/dia, 572 a 5x e 432/432 sob pressao critica. O painel agora mostra 56 eventos, 100 perguntas, 0 previsoes, 100 abstencoes, 8 resolucoes sem forecast, 12 aguardando preco futuro e 80 aguardando instrumento. Continua sem Brier, skill ou ECE reais; seis janelas sobrepostas seguem fora da contagem e BTC/ETH ainda tem apenas um resultado independente cada.
+
+
+### 9.30 Reprova sintetica de honestidade Munin (20:53 BRT)
+
+Rodei de novo `corvo_munin_eval.py --synthetic`: calibrado n=3.000, skill +0,353 e ECE 0,014; exagerado +0,089 e ECE 0,211; taxa-base skill 0; conservador +0,262 e ECE 0,132; amostra n=12 classificada EXPERIMENTAL/HOLD; cenário com vazamento bloqueado antes da pontuação. Os seis cenários são sintéticos e não representam desempenho real.

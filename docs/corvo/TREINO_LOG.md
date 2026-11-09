@@ -79,6 +79,7 @@
 
 | 2026-11-08 20:10 | P1 fit-only event threshold 0.25 proof + refreshed Munin panel; external collection cycle 5 active | 1,278 unique items; cycle 5: 11 received, 24 feeds healthy; prices 5,220 rows | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
 
+
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
 - T3: rotular pares positivos e negativos para medir fusões erradas e economia de linhas antes de mexer na deduplicação.
@@ -105,6 +106,8 @@
 
 | 27 | 2026-11-08 | M6 sampling-key documentation alignment | The baseline key includes topic, asset, question direction and horizon; 30 non-overlapping resolved windows per key | No forecast or scoring change; Munin remains M3 | 458/day; 562 at 5x; critical 432/432; green | Clarified why opposite directions cannot share a yes/no base rate; code behavior unchanged | `b4ac7b0` |
 
-| 28 | 2026-11-08 | M6 availability-time wording and direction isolation | Question tests assert the lookback uses event availability; synthetic backtest test proves BTC up/down keys are distinct | Munin question/backtest tests pass; no resolution calculation change | 460/day; 572 at 5x; critical 432/432; green | Removed misleading publication-time wording and guarded direction-specific samples; sealed Hugin metrics and Munin real forecast scores unchanged | this checkpoint commit |
+| 28 | 2026-11-08 | M6 availability-time wording and direction isolation | Question tests assert the lookback uses event availability; synthetic backtest test proves BTC up/down keys are distinct | Munin question/backtest tests pass; no resolution calculation change | 460/day; 572 at 5x; critical 432/432; green | Removed misleading publication-time wording and guarded direction-specific samples; sealed Hugin metrics and Munin real forecast scores unchanged | `bae075e` |
 
-| 29 | 2026-11-08 | Cycle 9 + local Munin panel | 24 feeds healthy, 3 new items, prices unchanged; 56 events, 100 questions, 0 forecasts, 100 abstentions | 6 overlapping outcomes excluded; 8 local resolutions, 12 await future price, 80 await instrument | 460/day; 572 at 5x; critical 432/432; green | One more event did not produce a new independent resolved outcome; no forecast accuracy claim | this checkpoint commit |
+| 29 | 2026-11-08 | Cycle 9 + local Munin panel | 24 feeds healthy, 3 new items, prices unchanged; 56 events, 100 questions, 0 forecasts, 100 abstentions | 6 overlapping outcomes excluded; 8 local resolutions, 12 await future price, 80 await instrument | 460/day; 572 at 5x; critical 432/432; green | One more event did not produce a new independent resolved outcome; no forecast accuracy claim | `bae075e` |
+
+| 30 | 2026-11-08 | Munin synthetic honesty matrix re-run | Calibrated: skill +0.353/ECE 0.014; exaggerated: +0.089/0.211; base: 0; conservative: +0.262/0.132; n=12 remains EXPERIMENTAL/HOLD; leakage blocked | 6 scenarios; all explicitly synthetic; no real prediction scored | 460/day; 572 at 5x; critical 432/432; green | Confirms the metrics distinguish calibration from apparent skill and reject leakage/small samples | this checkpoint commit |
