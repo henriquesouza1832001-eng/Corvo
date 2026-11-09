@@ -3,6 +3,7 @@
   "appName": "CORVO",
   "webDir": "../apps/web/dist",
   "backgroundColor": "#05080a",
+  "server": { "url": "https://corvo-web.henriquesouza.workers.dev", "cleartext": false },
   "android": { "allowMixedContent": false },
   "plugins": { "CapacitorHttp": { "enabled": true } }
 }

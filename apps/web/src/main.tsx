@@ -1,11 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ControlApp, isControlPage } from "./corvo/ControlApp";
 import { CorvoApp } from "./corvo/CorvoApp";
-import { MobileApp, isMobileShell } from "./corvo/MobileApp";
 import "./corvo/corvo.css";
 
 // A UI anterior (monitor do Brasil, em src/App.tsx e src/components) continua no repositório, mas não é mais montada.
-// No app Android (ou com #celular na URL) entra a visão do celular: aba da caixa + painel. No navegador comum, só o painel.
+// O painel é sempre o mesmo. A página de controle da caixa é separada: abre com `#caixa` na URL e pede o token de operador.
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>{isMobileShell() ? <MobileApp /> : <CorvoApp />}</StrictMode>,
+	<StrictMode>{isControlPage() ? <ControlApp /> : <CorvoApp />}</StrictMode>,
 );
