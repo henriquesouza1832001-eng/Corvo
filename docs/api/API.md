@@ -69,3 +69,17 @@ Exigem `Authorization: Bearer <INGEST_TOKEN>` (fail-closed) e nunca são cachead
 | `GET /api/admin/overview` | Painel: eventos ativos, sinais nas últimas 24 h, último Corvo, e por fonte: estado, último sucesso e volume. |
 
 `GET /api/events` e `GET /api/map` só listam eventos com atividade nas últimas 24 h; o evento antigo continua acessível por `GET /api/events/:id`.
+
+## CORVO: controle da caixa (coletor 24 h)
+
+A caixa só faz requisições de saída. O operador (app no celular) manda **um comando de uma lista fechada**; a caixa o busca, executa e confirma. Estado e comando ficam no KV; o estado só é regravado quando muda ou a cada 4 min.
+
+| Rota | Quem | Corpo → resposta |
+|---|---|---|
+| `POST /api/corvo/box/sync` | caixa, `Authorization: Bearer INGEST_TOKEN` | `{status:{running,mode:"envia"\|"seco",mem_kb,disk,last_cycle,version}, ack?:{id,ok,note}}` → `{command:{id,action}\|null}` |
+| `GET /api/corvo/box` | operador, `Bearer ADMIN_TOKEN` | → `{online, status, command, result, server_time}` (`online` = contato nos últimos 10 min) |
+| `POST /api/corvo/box/command` | operador, `Bearer ADMIN_TOKEN` | `{action:"on"\|"off"\|"restart"\|"update"\|"reboot"}` → `202 {ok,id,action}`; `409 command_pending` se já há um (expira em 10 min) |
+
+- Sem `ADMIN_TOKEN` configurado, `GET /box` e `POST /box/command` respondem `503 admin_not_configured` (fechado). O token de envio **não** abre o controle.
+- Ação fora da lista: `400 invalid_request`. A caixa nunca executa texto vindo da API: só mapeia a chave para um comando fixo.
+- `reboot` exige root na caixa; sem root, a caixa confirma com `ok:false` e a razão.

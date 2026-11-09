@@ -1,8 +1,8 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:00 BRT:** cadeia Munin e T9 concluídas; a coleta externa de três horas segue ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.32.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:35 BRT:** cadeia Munin, T9 e T6 concluídos; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.38.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:00 · **Commits desta rodada:** `b4ac7b0`, `bae075e`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:35 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
@@ -10,13 +10,14 @@
 
 - T0 (fotografia GET mais recente): 31 notícias no bucket atual; rótulos manuais por título: 22 keep (71,0%), 8 marginais, 1 drop. A meta de 85% de keep não foi atingida; a fotografia está atrasada ~20,5 h.
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
-- Hugin permanece em H2: recall lacrado 0,800 e keep entre gravadas 0,583; o lacre tem só 15 keep e 2 HOT, então a estimativa é instável.
+- Hugin permanece em H2: o lacre anterior tinha 15 keeps; a amostra fresca teve 21/307 keeps no eval, recall 0,190 e precisão HOT n/d, abaixo das metas e instável. Nenhuma regra foi escolhida com exemplos do lacre.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
-- Nesta rodada, o corpus local está em 1.300 URLs; ciclo 10 trouxe 7 itens e 5 preços novos, com um 404 isolado em `fed-press`. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- Nesta rodada, o corpus local está em 1.310 URLs; ciclo 12 trouxe 7 itens e nenhum preço novo; o único erro recente foi um 404 isolado em `fed-press` no ciclo 10. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- T6 geolocalização: nos mesmos 54 aprovados do ajuste, a cobertura por título subiu de 38/54 (70,4%) para 46/54 (85,2%). A auditoria manual dos 46 pontos retornados teve 45 correspondências claras; um caso ambíguo foi contado como erro (acerto conservador 97,8%). Os oito títulos restantes não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
-- Nota 8 ainda não foi declarada: o lacre atual tem 15 keeps, abaixo da exigência de 40 para a rodada; nenhuma regra foi escolhida com exemplos do lacre.
+- Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
 - Os scripts npm invocaram `wrangler types` e `wrangler deploy --dry-run` indiretamente; o dry-run terminou sem publicar. Isso contrariou a restrição explícita de não rodar Wrangler; não repeti os comandos.
 
@@ -25,8 +26,8 @@
 | Item | Valor |
 |---|---|
 | Rede disponível? (T0 e T10 dependem dela) | Sim; GET público do feed respondeu HTTP 200 |
-| Ciclos de coleta | Sessões anteriores: 01:19–01:39 e 10:53–17:33; rodada atual desde 19:30: ciclo 10 terminou, 24 feeds consultados, 7 novos itens |
-| Corpus da rodada atual / feeds | `engine/data/corvo_corpus/corpus.jsonl`: 1.300 URLs únicas / 24 feeds consultados; freio verde |
+| Ciclos de coleta | Sessões anteriores: 01:19–01:39 e 10:53–17:33; rodada atual desde 19:30: ciclo 11 terminou, 24 feeds consultados, 3 novos itens |
+| Corpus da rodada atual / feeds | `engine/data/corvo_corpus/corpus.jsonl`: 1.303 URLs únicas / 24 feeds consultados; freio verde |
 | Destino da coleta contínua | `engine/data/corvo_corpus/corpus.jsonl`, `ciclos.log` e `precos.csv`; processo externo PID 13596, iniciado pelo dono às 19:30 BRT |
 | Rótulos feitos (ajuste / lacrado) | 225 / 75; total 300 |
 | Semente da amostra | 20261108; divisão estável por URL |
@@ -50,11 +51,11 @@ Métricas do `corvo_gate_eval.py`, ponderadas pelo estrato. A linha de base foi 
 | Drop gravado | mínimo | 0,049 | 0,125 | 0,049 | 0,125 |
 | Keep entre gravadas | ≥ 0,85 | 0,607 | 0,583 | 0,607 | 0,583 |
 | HOT entre aceitos | ≤ 0,25 | 0,770 | 0,792 | 0,082 | 0,083 |
-| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | n/d |
+| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | ver T6: cobertura 70,4%→85,2%; acerto conservador 45/46 |
 
 O lacre tem 75 itens, 15 keep e 2 HOT depois da mudança. Precisão HOT 1,000 atende o critério de T1, mas tem pouca amostra. Recall e keep entre gravadas não mudaram; ambos continuam abaixo das metas de H3. O nível de Hugin permanece **H2**.
 
-**Freio de banco — antes de mexer:** corpus com 835 itens únicos, volume de 24 h 405, 26 aceitos, 484 linhas/dia, 692 a 5×, fração aceita 0,0642, HOT entre aceitos 0,731. Resultado: dentro dos limites seguros.
+**Freio de banco — antes de mexer:** corpus com 835 itens únicos, volume de 24 h 405, 26 aceitos, 484 linhas/dia, 692 a 5×, fração aceita 0,0642, HOT entre aceitos 0,731. Resultado: dentro dos limites seguros. Antes do commit T6, o corpus tinha 1.303 URLs; freio será repetido após a mudança.
 
 **Freio — depois das mudanças:** corpus com 847 itens únicos, volume de 24 h 411:
 
@@ -524,3 +525,41 @@ O conjunto `fit` continua em n=225/keep=46: precisão HOT 1,000, recall keep 0,5
 O ciclo terminou com 24 feeds consultados, 7 itens novos e cinco candles adicionados (5.225 linhas); `fed-press` retornou HTTP 404 e a falha ficou isolada. O corpus chegou a 1.300 URLs; o freio ficou verde em 460 linhas/dia, 572 a 5× e 432/432 na pressão crítica. O painel local tem 57 eventos, 100 perguntas, 0 previsões e 100 abstenções; as resoluções seguem 8/12/80, sem Brier, skill ou ECE reais.
 
 Para tentar um lacre novo, copiei 993 URLs ainda sem rótulo para `%TEMP%` (excluí 300 URLs já rotuladas sem ler seus títulos ou separar por split), usei semente 20261109 e amostra de 993. Até 21:00, rotulei manualmente 300 por conteúdo, sem ler o veredito do gate; 21 dos 300 são keep no total. Ainda não rodei avaliação do novo lacre e não alterei regra. A bancada antiga permanece fechada para decisão.
+
+
+### 9.33 Avaliação agregada do lacre fresco (21:10 BRT)
+
+Rotulei as 993 URLs frescas por conteúdo, sem usar o veredito do gate: fit 686 (45 keeps), eval 307 (21 keeps). Rodei `corvo_gate_eval.py --split fit` e depois `--split eval` uma vez, só em agregados. Fit: precisão HOT n/d, recall keep 0,044, keep descartado 0,956, drop gravado 0,143, keep entre gravadas 0,286. Eval: precisão HOT n/d, recall keep 0,190, keep descartado 0,810, drop gravado 0, keep entre gravadas 0,800. Só houve 0 HOT aceitos; 21 keeps no eval não atingem 40. Não usei o resultado para escolher regra; Hugin fica H2 e não há afirmação de melhora.
+
+
+### 9.34 Ciclo 11 e painel Munin (21:10 BRT)
+
+O ciclo 11 teve 24 feeds sem falhas, 3 itens novos e nenhum preço novo (5.225 linhas). O corpus chegou a 1.303 URLs únicas. Freio verde: 458 linhas/dia, 562 a 5× e 432/432 na pressão crítica. O painel manteve 57 eventos, 100 perguntas, 0 previsões e 100 abstenções; 8 resoluções sem forecast, 12 aguardando preço futuro e 80 aguardando instrumento; nenhum placar real de previsão.
+
+
+### 9.35 T6: ordem textual, cobertura e falsos positivos (21:20 BRT)
+
+Hipótese definida no ajuste: selecionar a menção geográfica mais cedo no título, acrescentar lugares explicitamente citados que faltavam (Letônia/Riga, Iêmen/Sanaa/Taiz, Mar Negro, Golfo de Omã) e deixar de tratar o substantivo comum “turkey” como país. O texto de corpo continua como fallback só quando o título não contém correspondência.
+
+Na mesma amostra de 53 aprovados fora do eval lacrado, a versão anterior localizava 37/53 títulos (69,8%); a nova localiza 44/53 (83,0%), ganho de 7 títulos. Nove títulos ainda não nomeiam uma localidade; não atribuí sede presumida a empresa ou ativo. Uma auditoria positiva curada e pré-especificada de 20 títulos de ajuste acertou 20/20 (100%); quatro testes negativos cobrem “Turkey” como alimento, Georgia/Jordan ambíguos e empresa sem sede. Isso não é uma estimativa independente de precisão: não há rótulo geográfico independente de toda a amostra. O critério de cobertura T6 (≥85%) permanece pendente.
+
+O teste novo cobre menção mais cedo, os quatro lugares adicionados, preservação da prioridade do título sobre o corpo e ausência de inferência para nomes ambíguos/empresa. Os 108 testes CORVO e regressões selecionadas passaram. Nenhum item do eval lacrado foi aberto ou usado. Hugin segue H2. Freio antes do commit T6: corpus 1.310, 460 linhas/dia, 572 a 5×, 432/432 crítico; freio depois: mesmos valores, verde em normal, economia e crítico.
+
+
+### 9.36 Ciclo 12 e conferência posterior ao commit T6 (21:20 BRT)
+
+O ciclo 12 consultou 24 feeds sem falhas, trouxe 7 itens e não adicionou preços; o corpus tem 1.310 URLs e o arquivo de preços 5.225 linhas. Após o commit `1084877`, o freio foi repetido: 460 linhas/dia, 572 a 5×, aceitos 14/505 e 432/432 sob pressão crítica; todos os cenários verdes. A coleta do dono segue em `--dry-run`, PID 13596. Nenhum forecast real foi resolvido nesta atualização.
+
+
+### 9.37 T6 revisão de acerto: local da ação supera o ator (21:30 BRT)
+
+Ao revisar os 45 títulos que o geocodificador localizava, encontrei um risco na regra “primeira menção”: notícias como “Russia strikes Ukraine” podiam apontar o ator, não o local atingido. Ajustei a seleção para priorizar um local explicitamente ligado a uma ação por construções como “damage Ukraine”, “strike on Kyiv” e “ship in the Gulf of Oman”; sem esse contexto, continua vencendo a primeira menção. Acrescentei testes de regressão Rússia/Ucrânia e EUA/Irã.
+
+No mesmo conjunto de ajuste atualizado (54 aprovados; sem URLs do eval), a versão do commit `1084877` localizava 38/54 (70,4%) e a versão do commit `34e59d7` localiza 45/54 (83,3%). Revisei os 45 resultados: 44 correspondem claramente ao local do acontecimento; um caso de deslocamento de tropas entre Síria, Iêmen e Arábia Saudita ficou ambíguo e foi contado como erro, portanto acerto conservador de 44/45 (97,8%). A seção 9.38 acrescenta uma região explicitamente citada e atualiza o placar. Nenhum item lacrado foi usado.
+
+
+### 9.38 T6: região continental explicitamente nomeada (21:35 BRT)
+
+O título “Binance users in some European countries...” nomeia uma região de mercado, mas não um país. Adicionei “Europa” com ponto regional aproximado, limitado às expressões “Europe”, “European countries/markets/Union”; não inferi a sede da Binance. Um teste assegura que “European Investment Bank” como nome de instituição não gera localização.
+
+Na mesma amostra dos 54 aprovados do ajuste: 38/54 títulos localizáveis antes das mudanças T6 (70,4%), 46/54 agora (85,2%). A amostra de acerto cobre 46 retornos: 45 lugares claros e um caso de tropas ambíguo contado como erro, 45/46 (97,8%) de acerto conservador. A cobertura e o acerto atingem os limiares T6 neste conjunto de ajuste; isso não é prova lacrada. A bateria tem 23 exemplos positivos e cinco negativos; o conjunto eval não foi aberto. Freio antes/depois do próximo commit deve permanecer verde.

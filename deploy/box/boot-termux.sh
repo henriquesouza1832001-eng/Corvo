@@ -3,3 +3,4 @@
 termux-wake-lock
 cd "$HOME/Corvo" || exit 1
 nohup sh deploy/box/run.sh >/dev/null 2>&1 &
+nohup sh deploy/box/agente.sh >/dev/null 2>&1 &
