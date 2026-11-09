@@ -1,5 +1,6 @@
 """Agente da CAIXA: só faz requisições de SAÍDA. A cada ~20 s informa o estado à API e recebe, se houver, UM comando de uma lista fechada
-(ligar, desligar, reiniciar o coletor, atualizar, reiniciar a caixa, diagnóstico, log, modo seco/envio, intervalo). Nada fora da lista é
+(ligar, desligar, reiniciar o coletor, atualizar, reiniciar a caixa, diagnóstico, log, rede, falhas por fonte, ciclo agora, preços,
+limpeza, modo seco/envio, intervalo, reiniciar o agente). Nada fora da lista é
 executado, os argumentos são validados aqui de novo, e nunca há `shell=True`. Só biblioteca padrão.
 Roda sob `deploy/box/agente.sh` (que o reinicia se ele sair, por exemplo depois de `update`).
 """
@@ -30,8 +31,11 @@ ACOES: dict[str, list[str]] = {
     "update": ["sh", CORVO_SH, "atualizar"],
     "seco": ["sh", CORVO_SH, "seco"],
     "envio": ["sh", CORVO_SH, "envio"],
+    "ciclo": ["sh", CORVO_SH, "ciclo"],
+    "precos": ["sh", CORVO_SH, "precos"],
+    "limpar": ["sh", CORVO_SH, "limpar"],
 }
-LOCAIS = {"diag", "logs"}  # feitas aqui mesmo, sem chamar o shell
+LOCAIS = {"diag", "logs", "rede", "fontes", "agente"}  # feitas aqui mesmo, sem chamar o shell
 REBOOT = [["su", "-c", "reboot"], ["reboot"]]  # tenta com su; sem root, a tentativa falha e é informada
 
 Post = Callable[[str, dict], dict]
@@ -93,6 +97,17 @@ def _linhas(path: Path) -> int | None:
     return n
 
 
+def _temp_c() -> float | None:
+    """Temperatura da caixa (°C), se o sistema deixar ler; senão None."""
+    for i in range(6):
+        try:
+            v = int(Path(f"/sys/class/thermal/thermal_zone{i}/temp").read_text().strip())
+        except (OSError, ValueError):
+            continue
+        return round(v / 1000 if v > 1000 else v, 1)
+    return None
+
+
 def estado(run: Run = _run, env: dict[str, str] | None = None) -> dict:
     """O que a caixa informa: coletor ligado, modo, memória, disco, último ciclo, versão, intervalo, preço mais novo, corpus e erros recentes."""
     env = env if env is not None else ler_env()
@@ -125,6 +140,7 @@ def estado(run: Run = _run, env: dict[str, str] | None = None) -> dict:
         "running": running, "mode": modo(env), "mem_kb": mem, "disk": disk, "last_cycle": ciclos[-1][:300] if ciclos else "", "version": version,
         "interval_s": intervalo, "prices_last": _ultimo_preco(), "corpus_items": _linhas(CORPUS),
         "errors_recent": sum(1 for x in cauda if "Error" in x or "Traceback" in x),
+        "temp_c": _temp_c(),
     }
 
 
@@ -137,7 +153,7 @@ def diagnostico(run: Run, env: dict[str, str]) -> str:
     linhas = [
         f"coletor: {'LIGADO' if e['running'] else 'DESLIGADO'}   modo: {e['mode']}   intervalo: {e['interval_s']}s   versão: {e['version']}",
         f"memória livre: {round((e['mem_kb'] or 0) / 1024)} MB   disco livre: {e['disk']}   corpus: {e['corpus_items']} itens   erros recentes: {e['errors_recent']}",
-        f"preço mais novo: {e['prices_last'] or '?'}",
+        f"preço mais novo: {e['prices_last'] or '?'}   temperatura: {e['temp_c'] if e['temp_c'] is not None else '?'} °C",
         "últimos ciclos:",
     ]
     linhas += ["  " + x[:200] for x in [y for y in _tail(LOG, 200) if '"feeds"' in y][-3:]] or ["  (nenhum)"]
@@ -145,6 +161,45 @@ def diagnostico(run: Run, env: dict[str, str]) -> str:
     if t:
         linhas.append(f"uptime: {t[:150]}")
     return _cap("\n".join(linhas))
+
+
+def _tempo_ms(url: str, timeout: int = 10) -> str:
+    t0 = time.monotonic()
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 (URLs fixas)
+            r.read(2048)
+            return f"{round((time.monotonic() - t0) * 1000)} ms (HTTP {r.status})"
+    except Exception as exc:  # noqa: BLE001
+        return f"falhou ({type(exc).__name__})"
+
+
+def rede(env: dict[str, str]) -> str:
+    """Teste de rede da caixa: a API do CORVO, a internet em geral e uma fonte de notícias."""
+    api = env.get("CORVO_API_URL", "https://corvo-api.henriquesouza.workers.dev").rstrip("/")
+    alvos = [("API do CORVO", f"{api}/api/health"), ("internet (Cloudflare)", "https://www.cloudflare.com/cdn-cgi/trace"), ("fonte (Fed)", "https://www.federalreserve.gov/feeds/press_all.xml")]
+    return _cap("\n".join(f"{nome}: {_tempo_ms(url)}" for nome, url in alvos))
+
+
+def fontes_com_falha(n_ciclos: int = 100) -> str:
+    """Resume as falhas por fonte nos últimos ciclos do log (qual feed cai mais)."""
+    cont: dict[str, int] = {}
+    ciclos = 0
+    for linha in _tail(LOG, 1500):
+        if '"feeds_failed"' not in linha:
+            continue
+        try:
+            d = json.loads(linha[linha.index("{"):])
+        except (ValueError, TypeError):
+            continue
+        ciclos += 1
+        for fonte in (d.get("feeds_failed") or {}):
+            cont[fonte] = cont.get(fonte, 0) + 1
+    if ciclos == 0:
+        return "nenhum ciclo no log ainda"
+    if not cont:
+        return f"nenhuma falha de fonte nos últimos {ciclos} ciclos"
+    return _cap(f"falhas por fonte nos últimos {ciclos} ciclos:\n" + "\n".join(f"  {k}: {v}" for k, v in sorted(cont.items(), key=lambda kv: -kv[1])))
 
 
 def logs(n: int = 40) -> str:
@@ -167,6 +222,12 @@ def executar(action: str, run: Run = _run, arg: int | None = None, env: dict[str
         return True, "diagnóstico", diagnostico(run, env if env is not None else ler_env())
     if action == "logs":
         return True, "log", logs()
+    if action == "rede":
+        return True, "teste de rede", rede(env if env is not None else ler_env())
+    if action == "fontes":
+        return True, "falhas por fonte", fontes_com_falha()
+    if action == "agente":
+        return True, "reiniciando o agente", ""
     if action == "intervalo":
         if not isinstance(arg, int) or isinstance(arg, bool) or not 300 <= arg <= 3600:
             return False, "intervalo inválido (300 a 3600 s)", ""
@@ -176,7 +237,7 @@ def executar(action: str, run: Run = _run, arg: int | None = None, env: dict[str
     if args is None:
         return False, "ação desconhecida", ""
     r = run(args)
-    return r.returncode == 0, (r.stdout.strip().splitlines() or [""])[-1][:150], ""
+    return r.returncode == 0, (r.stdout.strip().splitlines() or [""])[-1][:150], _cap(r.stdout.strip())
 
 
 def ciclo(post: Post, run: Run, env: dict[str, str], ack: dict | None) -> tuple[dict | None, dict | None, bool]:
@@ -194,7 +255,7 @@ def ciclo(post: Post, run: Run, env: dict[str, str], ack: dict | None) -> tuple[
         ok, note, out = executar(action, run, env=env)
         return cmd, {"id": cid, "ok": ok, "note": note, "output": out}, False
     ok, note, out = executar(action, run, cmd.get("arg"), env)
-    return cmd, {"id": cid, "ok": ok, "note": note, "output": out}, action == "update"
+    return cmd, {"id": cid, "ok": ok, "note": note, "output": out}, action in ("update", "agente")
 
 
 def main() -> int:

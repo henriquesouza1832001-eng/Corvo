@@ -11,6 +11,9 @@
 #   envio     volta a ENVIAR à API (precisa do token, gravado uma vez por `enviar`)
 #   intervalo N  segundos entre ciclos (300 a 3600)
 #   agente    liga o agente que recebe os comandos do app no celular
+#   ciclo     roda um ciclo de coleta agora
+#   precos    atualiza os preços agora
+#   limpar    libera espaço (corpus velho, logs grandes, cache)
 #   instalar  cria o comando curto `corvo` (depois: corvo on, corvo off, corvo status, corvo painel)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
 cd "$(dirname "$0")/../.." || exit 1
@@ -57,6 +60,23 @@ case "$1" in
     case "$2" in ''|*[!0-9]*) echo "uso: corvo intervalo 300..3600"; exit 1 ;; esac
     [ "$2" -ge 300 ] && [ "$2" -le 3600 ] || { echo "intervalo fora de 300..3600"; exit 1; }
     setvar CORVO_INTERVALO "$2"; echo "intervalo $2s"; sh "$0" restart ;;
+  ciclo)
+    # roda UM ciclo de coleta agora, fora do intervalo (mesmas regras do laço: respeita modo seco e token)
+    [ -f "$ENVF" ] && set -a && . "$ENVF" && set +a
+    export PYTHONPATH="$ROOT/engine"
+    MODO="--dry-run --quiet --dump $DATA/corpus.jsonl"
+    [ -n "$CORVO_API_URL" ] && [ -n "$CORVO_INGEST_TOKEN" ] && [ "$CORVO_MODO" != "seco" ] && MODO=""
+    python -m corvo_engine.collect --once $MODO --state "$DATA/seen.sqlite" 2>&1 | tail -2 ;;
+  precos) PYTHONPATH="$ROOT/engine" python -m corvo_engine.collect.prices --out "$DATA/precos.csv" 2>&1 | tail -1 ;;
+  limpar)
+    antes=$(df -k "$DATA" | tail -1 | awk '{print $4}')
+    rm -f "$DATA/corpus.velho.jsonl" "$DATA"/*.tmp
+    for f in "$LOG" "$DATA/agente.log"; do
+      [ -f "$f" ] && [ "$(wc -c < "$f")" -gt 200000 ] && tail -c 100000 "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    done
+    apt clean 2>/dev/null
+    depois=$(df -k "$DATA" | tail -1 | awk '{print $4}')
+    echo "livre agora: $((depois / 1024)) MB (liberou $(((depois - antes) / 1024)) MB)" ;;
   atualizar) git pull -q && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,17p' "$0" ;;
+  *) sed -n '2,20p' "$0" ;;
 esac

@@ -90,6 +90,25 @@ describe("centro de comando da caixa (tudo no banco)", () => {
 		expect((await call("/api/corvo/box/sync", post(ENGINE, { status: { running: "sim" } }))).status).toBe(400);
 	});
 
+	it("aceita todos os comandos novos da lista (ciclo, precos, rede, fontes, limpar, agente)", async () => {
+		for (const action of ["ciclo", "precos", "rede", "fontes", "limpar", "agente"]) {
+			const { call } = ctx();
+			const r = await call("/api/corvo/box/command", post(ADMIN, { action }));
+			expect(r.status, action).toBe(202);
+		}
+	});
+
+	it("limpar notícias antigas: o operador pode, sem token não, e o de envio continua valendo", async () => {
+		const { call } = ctx();
+		const body = { older_than_days: 30 };
+		expect((await call("/api/corvo/purge", post({}, body))).status).toBe(401);
+		expect((await call("/api/corvo/purge", post({ Authorization: "Bearer errado" }, body))).status).toBe(401);
+		expect((await call("/api/corvo/purge", post(ADMIN, body))).status).toBe(200);
+		expect((await call("/api/corvo/purge", post(ENGINE, body))).status).toBe(200);
+		const { call: semAdmin } = ctx(false);
+		expect((await semAdmin("/api/corvo/purge", post(ADMIN, body))).status).toBe(401); // sem ADMIN_TOKEN configurado, nada de operador
+	});
+
 	it("diagnóstico do Worker: banco, orçamento e feed", async () => {
 		const { call } = ctx();
 		const d = (await (await call("/api/corvo/diag", get(ADMIN))).json()) as any;

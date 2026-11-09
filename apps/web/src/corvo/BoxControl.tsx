@@ -3,16 +3,16 @@ import { adminFetch, ago } from "./admin";
 import { TokenGate } from "./TokenGate";
 
 /** Centro de comando da caixa (coletor 24 h). Só o token de operador manda comandos; tudo é registrado no banco. */
-type Action = "on" | "off" | "restart" | "update" | "reboot" | "diag" | "logs" | "seco" | "envio" | "intervalo";
+type Action = "on" | "off" | "restart" | "update" | "reboot" | "diag" | "logs" | "seco" | "envio" | "intervalo" | "ciclo" | "precos" | "rede" | "fontes" | "limpar" | "agente";
 interface Cmd { id: string; action: Action; arg: number | null; state: "pending" | "done" | "expired"; ok: number | null; note: string | null; issued_at: string; finished_at: string | null; has_output: number }
 interface BoxState {
 	online: boolean;
-	status: { running: boolean; mode: "envia" | "seco"; mem_kb: number | null; disk: string; last_cycle: string; version: string; seen_at: string; interval_s?: number | null } | null;
+	status: { running: boolean; mode: "envia" | "seco"; mem_kb: number | null; disk: string; last_cycle: string; version: string; seen_at: string; interval_s?: number | null; temp_c?: number | null } | null;
 	pending: { id: string; action: Action; arg: number | null; issued_at: string } | null;
 	history: Cmd[];
 	server_time: string;
 }
-const LABEL: Record<Action, string> = { on: "Ligar coleta", off: "Desligar coleta", restart: "Reiniciar coleta", update: "Atualizar versão", reboot: "Reiniciar a caixa", diag: "Diagnóstico", logs: "Ver log", seco: "Modo seco", envio: "Modo envio", intervalo: "Intervalo" };
+const LABEL: Record<Action, string> = { on: "Ligar coleta", off: "Desligar coleta", restart: "Reiniciar coleta", update: "Atualizar versão", reboot: "Reiniciar a caixa", diag: "Diagnóstico", logs: "Ver log", seco: "Modo seco", envio: "Modo envio", intervalo: "Intervalo", ciclo: "Ciclo agora", precos: "Atualizar preços", rede: "Testar rede", fontes: "Falhas por fonte", limpar: "Limpar espaço", agente: "Reiniciar agente" };
 
 function Inner({ token, forget }: { token: string; forget: () => void }) {
 	const [box, setBox] = useState<BoxState | null>(null);
@@ -48,7 +48,7 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 	const now = box?.server_time ?? new Date().toISOString();
 	const n = Number(secs);
 	return (
-		<section className="box">
+		<section className="ctl">
 			<div className="box-head">
 				<h2>Caixa</h2>
 				<span className={`pill ${box?.online ? "on" : "demo"}`}>{box ? (box.online ? "ONLINE" : "SEM CONTATO") : "…"}</span>
@@ -60,6 +60,7 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 					<dt>Intervalo</dt><dd>{s.interval_s ? `${s.interval_s} s` : "?"}</dd>
 					<dt>Memória livre</dt><dd>{s.mem_kb ? `${Math.round(s.mem_kb / 1024)} MB` : "?"}</dd>
 					<dt>Disco livre</dt><dd>{s.disk || "?"}</dd>
+					<dt>Temperatura</dt><dd>{s.temp_c != null ? `${s.temp_c} °C` : "?"}</dd>
 					<dt>Versão</dt><dd>{s.version || "?"}</dd>
 					<dt>Último contato</dt><dd>há {ago(s.seen_at, now)}</dd>
 				</dl>
@@ -73,11 +74,20 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 				<button className="box-btn stop" disabled={busy} onClick={() => send("off")}>Desligar coleta</button>
 				<button className="box-btn" disabled={busy} onClick={() => send("restart")}>Reiniciar coleta</button>
 				<button className="box-btn" disabled={busy} onClick={() => send("update")}>Atualizar versão</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("ciclo")}>Rodar ciclo agora</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("precos")}>Atualizar preços</button>
 			</div>
 			<h3 className="box-sub">Verificar</h3>
 			<div className="box-actions">
 				<button className="box-btn" disabled={busy} onClick={() => send("diag")}>Diagnóstico</button>
 				<button className="box-btn" disabled={busy} onClick={() => send("logs")}>Ver log</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("rede")}>Testar rede</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("fontes")}>Falhas por fonte</button>
+			</div>
+			<h3 className="box-sub">Manutenção</h3>
+			<div className="box-actions">
+				<button className="box-btn" disabled={busy} onClick={() => send("limpar")}>Limpar espaço</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("agente")}>Reiniciar agente</button>
 			</div>
 			<h3 className="box-sub">Modo e ritmo</h3>
 			<div className="box-actions">

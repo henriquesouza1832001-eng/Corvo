@@ -12,6 +12,7 @@ def test_locate_prefers_action_location_then_earliest_explicit_mention():
         ("Russia strikes Ukraine's power network", "Ucrânia"),
         ("Russia launches a massive strike on Kyiv", "Ucrânia"),
         ("United States carried out strikes on Iran", "Irã"),
+        ("Gold Holds Decline as US Jobs Data Fan December Rate Hike Bets", "Estados Unidos"),
         ("Ukraine reports damage after Russian strikes", "Ucrânia"),
         ("Japan earthquake injures people near Tokyo", "Japão"),
         ("China weighs response to Taiwan proposal", "China"),
@@ -36,6 +37,7 @@ def test_locate_prefers_action_location_then_earliest_explicit_mention():
 
 def test_locate_ignores_common_noun_turkey():
     assert locate("Turkey sandwich prices rise before Thanksgiving") is None
+    assert locate("A decision could affect us tomorrow") is None
 
 
 def test_locate_does_not_guess_ambiguous_names_or_company_headquarters():

@@ -109,3 +109,45 @@ def test_sem_comando_nao_executa_nada():
     cmd, ack, sair = agente.ciclo(lambda p, b: {"command": None}, run, {}, None)
     assert cmd is None and ack is None and sair is False
     assert all(c[0] in ("ps", "df", "git") for c in run.calls)
+
+
+def test_rede_testa_api_internet_e_fonte(monkeypatch):
+    monkeypatch.setattr(agente, "_tempo_ms", lambda url, timeout=10: f"12 ms ({url[:20]})")
+    ok, _, out = agente.executar("rede", FakeRun(), env={"CORVO_API_URL": "https://exemplo.dev"})
+    assert ok and "API do CORVO" in out and "internet" in out and "fonte (Fed)" in out and "https://exemplo.dev"[:20] in out
+
+
+def test_fontes_resume_falhas_por_fonte(tmp_path, monkeypatch):
+    log = tmp_path / "caixa.log"
+    ciclos = ['{"feeds": 27, "feeds_failed": {"bbc": "x", "g1": "y"}, "new": 1}', '{"feeds": 27, "feeds_failed": {"bbc": "x"}, "new": 2}', '{"feeds": 27, "feeds_failed": {}, "new": 0}', "linha qualquer sem json"]
+    log.write_text("\n".join(ciclos), encoding="utf-8")
+    monkeypatch.setattr(agente, "LOG", log)
+    ok, _, out = agente.executar("fontes", FakeRun())
+    assert ok and "3 ciclos" in out and "bbc: 2" in out and "g1: 1" in out
+    log.write_text('{"feeds": 27, "feeds_failed": {}}', encoding="utf-8")
+    assert "nenhuma falha" in agente.executar("fontes", FakeRun())[2]
+    log.write_text("", encoding="utf-8")
+    assert "nenhum ciclo" in agente.executar("fontes", FakeRun())[2]
+
+
+def test_comandos_de_shell_novos_chamam_so_o_corvo_sh():
+    for acao in ("ciclo", "precos", "limpar"):
+        run = FakeRun()
+        ok, _, out = agente.executar(acao, run)
+        assert ok and run.calls == [["sh", agente.CORVO_SH, acao]] and out == "feito"
+
+
+def test_reiniciar_agente_confirma_e_pede_saida():
+    posts = []
+    def post(path, body):
+        posts.append(body)
+        return {"command": {"id": "c9", "action": "agente", "arg": None}}
+    cmd, ack, sair = agente.ciclo(post, FakeRun(), {}, None)
+    assert ack["ok"] and sair is True
+
+
+def test_temperatura_aparece_no_estado_mesmo_sem_leitura(monkeypatch):
+    monkeypatch.setattr(agente, "_temp_c", lambda: 47.5)
+    assert agente.estado(FakeRun(), {})["temp_c"] == 47.5
+    monkeypatch.setattr(agente, "_temp_c", lambda: None)
+    assert agente.estado(FakeRun(), {})["temp_c"] is None
