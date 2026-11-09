@@ -12,6 +12,7 @@ import { forecasts } from "./routes/forecasts";
 import { stats } from "./routes/stats";
 import { history } from "./routes/history";
 import { corvo } from "./routes/corvo";
+import { v1 } from "./routes/corvo-v1";
 import type { AppEnv, Bindings } from "./env";
 import { TursoDatabase } from "./lib/turso";
 import { dispatchCollection, dispatchHealthcheck, isHealthcheckSlot } from "./lib/dispatch";
@@ -50,6 +51,7 @@ app.route("/api/forecasts", forecasts);
 app.route("/api/stats", stats);
 app.route("/api/history", history);
 app.route("/api/corvo", corvo);
+app.route("/api/v1", v1); // API de leitura para consumidores (chave, plano e limite diário)
 app.route("/api/ingest", ingest);
 app.route("/api/admin", admin);
 

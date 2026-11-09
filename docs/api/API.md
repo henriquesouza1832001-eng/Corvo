@@ -89,3 +89,19 @@ Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `en
 - `reboot` exige root na caixa; sem root, a caixa confirma com `ok:false` e a razão.
 - Histórico mantido: os últimos 200 comandos.
 - `POST /api/corvo/purge` (limpar notícias e estatísticas, `{"older_than_days":N}` ou `{"all":true}`) aceita o token de envio **ou** o de operador.
+
+## CORVO: API de leitura para consumidores (`/api/v1`)
+
+Só leitura, com chave por cliente (`Authorization: Bearer cvk_...`), plano e limite diário. Descrição completa, planos e o que falta antes de cobrar: [`docs/corvo/INTEGRACAO_API.md`](../corvo/INTEGRACAO_API.md).
+
+| Rota | Retorno |
+|---|---|
+| `GET /api/v1` | versão do esquema e rotas (sem chave) |
+| `GET /api/v1/evidencias?since=<cursor>&limit=<1..200>` | `{schema_version, generated_at, count, items[], next_cursor}`; item: `id,title,url,source_id,source_reliability,published_at,received_at,kind,topics,region,lat,lon,relevance,verdict,asset_hypotheses,suspicious` |
+| `GET /api/v1/previsoes` | previsões com intervalo, evidências, método e estado (experimentais até calibrar) |
+| `GET /api/v1/uso` | uso do dia, limite e plano da chave |
+| `POST /api/corvo/admin/keys` | operador (`ADMIN_TOKEN`): `{name, plan:"interno"\|"gratis"\|"pago", daily_limit?, delay_s?}` → `201 {id,key,...}` (a chave aparece **uma vez**) |
+| `GET /api/corvo/admin/keys` | operador: lista sem a chave nem o hash, com o uso de hoje |
+| `POST /api/corvo/admin/keys/:id/revoke` | operador: revoga |
+
+Erros: `401 invalid_key`, `429 quota_exceeded` (`Retry-After`), `400 invalid_cursor`. Tabelas `corvo_api_key` e `corvo_api_usage` (migration `0010`, também criadas pelo Worker). **Mudança de contrato aditiva** (campos e rotas novos; nada existente muda).
