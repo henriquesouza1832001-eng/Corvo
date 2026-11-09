@@ -79,6 +79,8 @@
 
 | 2026-11-08 20:10 | P1 fit-only event threshold 0.25 proof + refreshed Munin panel; external collection cycle 5 active | 1,278 unique items; cycle 5: 11 received, 24 feeds healthy; prices 5,220 rows | green: normal/economy 458/day; 562 at 5x; critical 432/432 |
 
+| 2026-11-08 21:00 | Active note8 checkpoint; cycle 10 and fresh-lacre labeling underway | 1,300 unique items; cycle 10: 7 new, 5 new prices, one isolated fed-press 404; 300/993 fresh URLs manually labeled so far | green: 460/day; 572 at 5x; critical 432/432 |
+
 
 ## O que falta aprender (atualize a cada platô; o treino só para quando o dono escrever "PARE")
 - Hugin: gerar um lacre novo, sem URLs já vistas, com pelo menos 30 casos keep no lado de avaliação; revisar os falsos negativos do fit antes de experimentar T2.
@@ -111,3 +113,7 @@
 | 29 | 2026-11-08 | Cycle 9 + local Munin panel | 24 feeds healthy, 3 new items, prices unchanged; 56 events, 100 questions, 0 forecasts, 100 abstentions | 6 overlapping outcomes excluded; 8 local resolutions, 12 await future price, 80 await instrument | 460/day; 572 at 5x; critical 432/432; green | One more event did not produce a new independent resolved outcome; no forecast accuracy claim | `bae075e` |
 
 | 30 | 2026-11-08 | Munin synthetic honesty matrix re-run | Calibrated: skill +0.353/ECE 0.014; exaggerated: +0.089/0.211; base: 0; conservative: +0.262/0.132; n=12 remains EXPERIMENTAL/HOLD; leakage blocked | 6 scenarios; all explicitly synthetic; no real prediction scored | 460/day; 572 at 5x; critical 432/432; green | Confirms the metrics distinguish calibration from apparent skill and reject leakage/small samples | this checkpoint commit |
+
+| 31 | 2026-11-08 | Hugin fit-only baseline recheck; no gate adjustment | n=225/keep=46; HOT precision 1.000, keep recall 0.540, keep discarded 0.460, drop stored 0.049, keep stored 0.607, HOT among accepted 0.082 | Fit only; sealed eval not reopened; no new label or rule | 460/day; 572 at 5x; critical 432/432; green | Same fit metrics as prior checkpoint; Hugin remains H2, no improvement claimed | this checkpoint commit |
+
+| 32 | 2026-11-08 | Cycle 10 + renewed local Munin panel and fresh seal attempt | 24 feeds, 7 new items; price file 5,225 rows; panel 57 events, 100 questions, 0 forecasts, 100 abstentions | 8 local resolutions, 12 awaiting future price, 80 awaiting instrument; 300/993 fresh sample URLs labeled, no sealed score yet | 460/day; 572 at 5x; critical 432/432; green | `fed-press` HTTP 404 isolated; no rule adjusted; old seal examples remain unopened | this checkpoint commit |

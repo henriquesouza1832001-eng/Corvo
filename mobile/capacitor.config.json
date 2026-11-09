@@ -1,0 +1,8 @@
+{
+  "appId": "dev.corvo.app",
+  "appName": "CORVO",
+  "webDir": "../apps/web/dist",
+  "backgroundColor": "#05080a",
+  "android": { "allowMixedContent": false },
+  "plugins": { "CapacitorHttp": { "enabled": true } }
+}
