@@ -1,6 +1,6 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:10 BRT:** cadeia Munin e T9 concluídas; a coleta externa de três horas segue ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.34.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 21:20 BRT:** cadeia Munin, T9 e auditoria parcial T6 concluídas; coleta externa de três horas ainda ativa (PID 13596), sem reinício. Veja as atualizações nas seções 9.13–9.35.
 
 **Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 21:10 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`
 
@@ -15,6 +15,7 @@
 - Correção posterior: a primeira raspagem terminou às 01:39; foi retomada às 10:53 e concluiu 41 ciclos até 17:33, com 595 itens novos; houve um 404 isolado no ciclo 15 e nenhum feed falhou nos ciclos 16–41 (detalhes na seção 9). A coleta foi encerrada às 17:42 após o dono escrever `PARE`.
 - Munin chegou a M3: seis cenários sintéticos, guarda contra vazamento e HOLD de pesos com amostra pequena; nenhum resultado real foi avaliado.
 - Nesta rodada, o corpus local está em 1.300 URLs; ciclo 10 trouxe 7 itens e 5 preços novos, com um 404 isolado em `fed-press`. O freio está verde: 460 linhas/dia, 572 a 5×, 432/432 sob pressão crítica.
+- T6 geolocalização: em 53 aprovados do ajuste, a cobertura por título subiu de 37/53 (69,8%) para 44/53 (83,0%). Auditoria positiva curada: 20/20; testes de “Turkey” ambíguo, Georgia/Jordan e empresa sem sede inferida não produziram falso ponto. A meta T6 de cobertura ≥85% ainda não foi alcançada; nove manchetes não citam lugar localizável.
 - Suíte obrigatória: 55 testes passaram; os testes `test_corvo_*.py` passaram (48), e as suítes Munin de pergunta/backtest passaram (10). T2 ainda precisa de um novo lacre adequado; T3 precisa de pares rotulados.
 - Nota 8 ainda não foi declarada: o lacre fresco tem 21 keeps, abaixo dos 40 exigidos; o recall de eval é 0,190. Não usei o resultado para selecionar regras.
 - Nenhuma fonte foi ligada, nenhuma previsão real foi criada, e não houve deploy, POST ou push nesta rodada.
@@ -50,11 +51,11 @@ Métricas do `corvo_gate_eval.py`, ponderadas pelo estrato. A linha de base foi 
 | Drop gravado | mínimo | 0,049 | 0,125 | 0,049 | 0,125 |
 | Keep entre gravadas | ≥ 0,85 | 0,607 | 0,583 | 0,607 | 0,583 |
 | HOT entre aceitos | ≤ 0,25 | 0,770 | 0,792 | 0,082 | 0,083 |
-| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | n/d |
+| Fusões erradas / cobertura geo / acerto de `kind` | ≤ 2% / ≥ 85% / ≥ 0,80 | n/d | n/d | n/d | ver T6: 69,8%→83,0%; acerto curado 20/20 |
 
 O lacre tem 75 itens, 15 keep e 2 HOT depois da mudança. Precisão HOT 1,000 atende o critério de T1, mas tem pouca amostra. Recall e keep entre gravadas não mudaram; ambos continuam abaixo das metas de H3. O nível de Hugin permanece **H2**.
 
-**Freio de banco — antes de mexer:** corpus com 835 itens únicos, volume de 24 h 405, 26 aceitos, 484 linhas/dia, 692 a 5×, fração aceita 0,0642, HOT entre aceitos 0,731. Resultado: dentro dos limites seguros.
+**Freio de banco — antes de mexer:** corpus com 835 itens únicos, volume de 24 h 405, 26 aceitos, 484 linhas/dia, 692 a 5×, fração aceita 0,0642, HOT entre aceitos 0,731. Resultado: dentro dos limites seguros. Antes do commit T6, o corpus tinha 1.303 URLs; freio será repetido após a mudança.
 
 **Freio — depois das mudanças:** corpus com 847 itens únicos, volume de 24 h 411:
 
@@ -534,3 +535,12 @@ Rotulei as 993 URLs frescas por conteúdo, sem usar o veredito do gate: fit 686 
 ### 9.34 Ciclo 11 e painel Munin (21:10 BRT)
 
 O ciclo 11 teve 24 feeds sem falhas, 3 itens novos e nenhum preço novo (5.225 linhas). O corpus chegou a 1.303 URLs únicas. Freio verde: 458 linhas/dia, 562 a 5× e 432/432 na pressão crítica. O painel manteve 57 eventos, 100 perguntas, 0 previsões e 100 abstenções; 8 resoluções sem forecast, 12 aguardando preço futuro e 80 aguardando instrumento; nenhum placar real de previsão.
+
+
+### 9.35 T6: ordem textual, cobertura e falsos positivos (21:20 BRT)
+
+Hipótese definida no ajuste: selecionar a menção geográfica mais cedo no título, acrescentar lugares explicitamente citados que faltavam (Letônia/Riga, Iêmen/Sanaa/Taiz, Mar Negro, Golfo de Omã) e deixar de tratar o substantivo comum “turkey” como país. O texto de corpo continua como fallback só quando o título não contém correspondência.
+
+Na mesma amostra de 53 aprovados fora do eval lacrado, a versão anterior localizava 37/53 títulos (69,8%); a nova localiza 44/53 (83,0%), ganho de 7 títulos. Nove títulos ainda não nomeiam uma localidade; não atribuí sede presumida a empresa ou ativo. Uma auditoria positiva curada e pré-especificada de 20 títulos de ajuste acertou 20/20 (100%); quatro testes negativos cobrem “Turkey” como alimento, Georgia/Jordan ambíguos e empresa sem sede. Isso não é uma estimativa independente de precisão: não há rótulo geográfico independente de toda a amostra. O critério de cobertura T6 (≥85%) permanece pendente.
+
+O teste novo cobre menção mais cedo, os quatro lugares adicionados, preservação da prioridade do título sobre o corpo e ausência de inferência para nomes ambíguos/empresa. Os 108 testes CORVO e regressões selecionadas passaram. Nenhum item do eval lacrado foi aberto ou usado. Hugin segue H2; freio verde repetido antes e depois do commit será registrado no log.
