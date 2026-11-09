@@ -176,6 +176,8 @@ Ordem sugerida: E1 → E2 (aquecimento) → E3 → E4 → E5.
 
 ## 10. Registro de mudanças (acrescente no topo)
 
+- **2026-11-09** — Caixa como agregador: camadas de fontes (`tier` no catálogo: 27, 35 e 46 feeds), governador térmico (teto em 85% do limite de 80 °C), indicadores de entrada e saída (CPU, rede, energia estimada, fluxo por fonte) por hora em `corvo_box_metrics` (migration `0011`), `GET /api/corvo/box/metrics`, ações `tier` e `governador`. Documentado em `docs/api/API.md`. Contrato aditivo.
+
 - **2026-11-08** — API de leitura para consumidores `/api/v1` (`evidencias` com cursor, `previsoes`, `uso`), chaves por cliente com plano e limite diário (`interno`, `gratis`, `pago`), `received_at` e marca `suspicious`; rotas do operador em `/api/corvo/admin/keys`; migration `0010`. Documentado em `docs/api/API.md` e `docs/corvo/INTEGRACAO_API.md`. Contrato aditivo.
 
 - **2026-11-08** — Centro de comando da caixa, 100% no banco (sem KV): `POST /api/corvo/box/sync`, `GET /api/corvo/box`, `POST /api/corvo/box/command`, `GET /api/corvo/box/command/:id` e `GET /api/corvo/diag`; tabelas `corvo_box_state` e `corvo_box_cmd` (migration `0009`, também criadas pelo Worker); lista fechada de ações (on, off, restart, update, reboot, diag, logs, seco, envio, intervalo). Documentado em `docs/api/API.md`.

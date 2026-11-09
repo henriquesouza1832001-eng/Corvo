@@ -109,6 +109,38 @@ describe("centro de comando da caixa (tudo no banco)", () => {
 		expect((await semAdmin("/api/corvo/purge", post(ADMIN, body))).status).toBe(401); // sem ADMIN_TOKEN configurado, nada de operador
 	});
 
+	it("tier e governador: argumento obrigatório e dentro da faixa", async () => {
+		const { call } = ctx();
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "tier" }))).status).toBe(400);
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "tier", arg: 3 }))).status).toBe(400);
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "governador", arg: 2 }))).status).toBe(400);
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "diag", arg: 1 }))).status).toBe(400); // ação sem argumento não aceita um
+		expect((await call("/api/corvo/box/command", post(ADMIN, { action: "tier", arg: 2 }))).status).toBe(202);
+	});
+
+	it("guarda os indicadores ao vivo e o resumo por hora, devolve em ordem e respeita o limite de tamanho", async () => {
+		const { call } = ctx();
+		const live = { ...status, cpu_pct: 12.5, power_w: 2.9, rx_bytes: 1000, tx_bytes: 50, rx_bps: 10, tx_bps: 1, tier: 1, governor: 1, temp_limit_c: 80, temp_ceiling_c: 68, temp_c: 52.1 };
+		const h = (hour: string, extra = {}) => ({ hour, temp_avg: 52, energy_wh: 3.1, rx_bytes: 5000, new: 12, sources: { cnbc: [5, 1] }, ...extra });
+		await call("/api/corvo/box/sync", post(ENGINE, { status: live, metrics_hour: h("2026-11-09T02") }));
+		await call("/api/corvo/box/sync", post(ENGINE, { status: live, metrics_hour: h("2026-11-09T01") }));
+		const box = (await (await call("/api/corvo/box", get(ADMIN))).json()) as any;
+		expect(box.status).toMatchObject({ cpu_pct: 12.5, power_w: 2.9, tier: 1, temp_ceiling_c: 68, temp_c: 52.1 });
+		const m = (await (await call("/api/corvo/box/metrics?hours=168", get(ADMIN))).json()) as any;
+		expect(m.hours.map((x: any) => x.hour)).toEqual(["2026-11-09T01", "2026-11-09T02"]);
+		expect(m.hours[0].sources.cnbc).toEqual([5, 1]);
+		const grande = h("2026-11-09T03", { lixo: "x".repeat(9000) });
+		await call("/api/corvo/box/sync", post(ENGINE, { status: live, metrics_hour: grande }));
+		const m2 = (await (await call("/api/corvo/box/metrics", get(ADMIN))).json()) as any;
+		expect(JSON.stringify(m2.hours)).not.toContain("xxxx"); // resumo grande demais é ignorado, não quebra o sync
+		expect((await call("/api/corvo/box/metrics", get(ENGINE))).status).toBe(401); // o token de envio não lê as métricas
+	});
+
+	it("hora inválida no resumo é recusada", async () => {
+		const { call } = ctx();
+		expect((await call("/api/corvo/box/sync", post(ENGINE, { status, metrics_hour: { hour: "ontem" } }))).status).toBe(400);
+	});
+
 	it("diagnóstico do Worker: banco, orçamento e feed", async () => {
 		const { call } = ctx();
 		const d = (await (await call("/api/corvo/diag", get(ADMIN))).json()) as any;

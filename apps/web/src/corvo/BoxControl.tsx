@@ -3,16 +3,16 @@ import { adminFetch, ago } from "./admin";
 import { TokenGate } from "./TokenGate";
 
 /** Centro de comando da caixa (coletor 24 h). Só o token de operador manda comandos; tudo é registrado no banco. */
-type Action = "on" | "off" | "restart" | "update" | "reboot" | "diag" | "logs" | "seco" | "envio" | "intervalo" | "ciclo" | "precos" | "rede" | "fontes" | "limpar" | "agente";
+type Action = "on" | "off" | "restart" | "update" | "reboot" | "diag" | "logs" | "seco" | "envio" | "intervalo" | "ciclo" | "precos" | "rede" | "fontes" | "limpar" | "agente" | "tier" | "governador";
 interface Cmd { id: string; action: Action; arg: number | null; state: "pending" | "done" | "expired"; ok: number | null; note: string | null; issued_at: string; finished_at: string | null; has_output: number }
 interface BoxState {
 	online: boolean;
-	status: { running: boolean; mode: "envia" | "seco"; mem_kb: number | null; disk: string; last_cycle: string; version: string; seen_at: string; interval_s?: number | null; temp_c?: number | null } | null;
+	status: { running: boolean; mode: "envia" | "seco"; mem_kb: number | null; disk: string; last_cycle: string; version: string; seen_at: string; interval_s?: number | null; temp_c?: number | null; tier?: number | null; governor?: number | null; temp_limit_c?: number | null; temp_ceiling_c?: number | null } | null;
 	pending: { id: string; action: Action; arg: number | null; issued_at: string } | null;
 	history: Cmd[];
 	server_time: string;
 }
-const LABEL: Record<Action, string> = { on: "Ligar coleta", off: "Desligar coleta", restart: "Reiniciar coleta", update: "Atualizar versão", reboot: "Reiniciar a caixa", diag: "Diagnóstico", logs: "Ver log", seco: "Modo seco", envio: "Modo envio", intervalo: "Intervalo", ciclo: "Ciclo agora", precos: "Atualizar preços", rede: "Testar rede", fontes: "Falhas por fonte", limpar: "Limpar espaço", agente: "Reiniciar agente" };
+const LABEL: Record<Action, string> = { on: "Ligar coleta", off: "Desligar coleta", restart: "Reiniciar coleta", update: "Atualizar versão", reboot: "Reiniciar a caixa", diag: "Diagnóstico", logs: "Ver log", seco: "Modo seco", envio: "Modo envio", intervalo: "Intervalo", ciclo: "Ciclo agora", precos: "Atualizar preços", rede: "Testar rede", fontes: "Falhas por fonte", limpar: "Limpar espaço", agente: "Reiniciar agente", tier: "Camada de fontes", governador: "Governador térmico" };
 
 function Inner({ token, forget }: { token: string; forget: () => void }) {
 	const [box, setBox] = useState<BoxState | null>(null);
@@ -60,7 +60,8 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 					<dt>Intervalo</dt><dd>{s.interval_s ? `${s.interval_s} s` : "?"}</dd>
 					<dt>Memória livre</dt><dd>{s.mem_kb ? `${Math.round(s.mem_kb / 1024)} MB` : "?"}</dd>
 					<dt>Disco livre</dt><dd>{s.disk || "?"}</dd>
-					<dt>Temperatura</dt><dd>{s.temp_c != null ? `${s.temp_c} °C` : "?"}</dd>
+					<dt>Temperatura</dt><dd>{s.temp_c != null ? `${s.temp_c} °C` : "?"}{s.temp_ceiling_c ? ` (teto ${s.temp_ceiling_c}, limite ${s.temp_limit_c})` : ""}</dd>
+					<dt>Camada de fontes</dt><dd>{s.tier ?? "?"} de 2 · governador {s.governor ? "ligado" : "desligado"}</dd>
 					<dt>Versão</dt><dd>{s.version || "?"}</dd>
 					<dt>Último contato</dt><dd>há {ago(s.seen_at, now)}</dd>
 				</dl>
@@ -77,6 +78,15 @@ function Inner({ token, forget }: { token: string; forget: () => void }) {
 				<button className="box-btn" disabled={busy} onClick={() => send("ciclo")}>Rodar ciclo agora</button>
 				<button className="box-btn" disabled={busy} onClick={() => send("precos")}>Atualizar preços</button>
 			</div>
+			<h3 className="box-sub">Camada de fontes e governador térmico</h3>
+			<div className="box-actions">
+				<button className="box-btn" disabled={busy} onClick={() => send("tier", 0)}>Camada 0 (núcleo)</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("tier", 1)}>Camada 1 (+ oficiais)</button>
+				<button className="box-btn" disabled={busy} onClick={() => send("tier", 2)}>Camada 2 (+ imprensa e cripto)</button>
+				<button className="box-btn go" disabled={busy} onClick={() => send("governador", 1)}>Governador ligado</button>
+				<button className="box-btn stop" disabled={busy} onClick={() => send("governador", 0)}>Governador desligado</button>
+			</div>
+			<p className="muted sm">Com o governador ligado, a caixa sobe a camada sozinha enquanto a temperatura fica abaixo do teto (85% do limite) e desce se esquentar.</p>
 			<h3 className="box-sub">Verificar</h3>
 			<div className="box-actions">
 				<button className="box-btn" disabled={busy} onClick={() => send("diag")}>Diagnóstico</button>

@@ -82,7 +82,7 @@ A caixa só faz requisições de saída. O operador (app no celular) manda **um 
 | `GET /api/corvo/box/command/:id` | operador | → o comando com a `output` completa (diagnóstico, log) |
 | `GET /api/corvo/diag` | operador | → `{worker, db:{backend,ping_ms}, budget:{used,limit,percent,pressure}, feed:{news_total,news_24h,newest_ingest,newest_age_s,stats_newest}, kv_feed_cache}` |
 
-Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `envio`, `intervalo` (`arg` de 300 a 3600 s, obrigatório só nela), `ciclo` (um ciclo de coleta agora), `precos` (atualiza os preços), `rede` (latência até a API, a internet e uma fonte), `fontes` (falhas por fonte nos últimos ciclos), `limpar` (libera espaço na caixa) e `agente` (reinicia o agente).
+Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `envio`, `intervalo` (`arg` de 300 a 3600 s, obrigatório só nela), `ciclo` (um ciclo de coleta agora), `precos` (atualiza os preços), `rede` (latência até a API, a internet e uma fonte), `fontes` (falhas por fonte nos últimos ciclos), `limpar` (libera espaço na caixa) e `agente` (reinicia o agente), `tier` (`arg` 0 a 2: camada de fontes) e `governador` (`arg` 0 ou 1: governador térmico).
 
 - Sem `ADMIN_TOKEN` configurado, as rotas do operador respondem `503 admin_not_configured` (fechado). O token de envio **não** abre o controle.
 - Ação fora da lista ou `arg` inválido: `400 invalid_request`. A caixa nunca executa texto vindo da API: só mapeia a chave para um comando fixo e valida o argumento de novo.
@@ -105,3 +105,9 @@ Só leitura, com chave por cliente (`Authorization: Bearer cvk_...`), plano e li
 | `POST /api/corvo/admin/keys/:id/revoke` | operador: revoga |
 
 Erros: `401 invalid_key`, `429 quota_exceeded` (`Retry-After`), `400 invalid_cursor`. Tabelas `corvo_api_key` e `corvo_api_usage` (migration `0010`, também criadas pelo Worker). **Mudança de contrato aditiva** (campos e rotas novos; nada existente muda).
+
+### Indicadores da caixa (entrada e saída)
+- `POST /api/corvo/box/sync` aceita, além do estado, os indicadores **ao vivo** (`cpu_pct`, `load1`, `rx_bytes`, `tx_bytes`, `rx_bps`, `tx_bps`, `power_w`, `tier`, `governor`, `temp_limit_c`, `temp_ceiling_c`) e, **uma vez por hora**, o resumo da hora UTC que fechou: `metrics_hour` (`hour` no formato `AAAA-MM-DDTHH`, temperatura, CPU, energia, rede, itens lidos, enviados e escritos, aprovados e descartados, e o fluxo por fonte; no máximo 8 KB).
+- `GET /api/corvo/box/metrics?hours=24` (operador): os resumos por hora, em ordem, até 168 h. Retenção de 14 dias. Tabela `corvo_box_metrics` (migration `0011`, também criada pelo Worker). Custo: cerca de 24 linhas por dia.
+- **Energia é ESTIMADA** pela CPU (modelo linear entre uma potência ociosa e uma máxima, configuráveis); a caixa não tem medidor. Com uma tomada medidora, trocar a estimativa pela leitura real.
+- O estado agora é regravado no máximo a cada 60 s (antes, 4 min), para os indicadores ao vivo: cerca de 1.440 linhas por dia.

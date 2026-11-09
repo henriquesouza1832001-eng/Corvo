@@ -15,17 +15,22 @@ import { utcDay } from "../lib/budget";
 export const boxRoutes = new Hono<AppEnv>();
 
 /** Lista fechada. `arg` só existe em `intervalo` (segundos entre ciclos, 300 a 3600). */
-const ACTIONS = ["on", "off", "restart", "update", "reboot", "diag", "logs", "seco", "envio", "intervalo", "ciclo", "precos", "rede", "fontes", "limpar", "agente"] as const;
-const REFRESH_MS = 240_000;
+const ACTIONS = ["on", "off", "restart", "update", "reboot", "diag", "logs", "seco", "envio", "intervalo", "ciclo", "precos", "rede", "fontes", "limpar", "agente", "tier", "governador"] as const;
+/** Ação com argumento: [mínimo, máximo]. Fora desta tabela, a ação NÃO leva argumento. */
+const ARG_RULES: Record<string, [number, number]> = { intervalo: [300, 3600], tier: [0, 2], governador: [0, 1] };
+const REFRESH_MS = 60_000;
 const ONLINE_MS = 600_000;
 const PENDING_TTL_MS = 600_000;
 const KEEP_COMMANDS = 200;
 const OUTPUT_MAX = 4000;
+const KEEP_METRIC_DAYS = 14;
+const METRIC_MAX_BYTES = 8000;
 
 const DDL = [
 	"CREATE TABLE IF NOT EXISTS corvo_box_state (id INTEGER PRIMARY KEY CHECK (id = 1), status TEXT NOT NULL, seen_at TEXT NOT NULL)",
 	"CREATE TABLE IF NOT EXISTS corvo_box_cmd (id TEXT PRIMARY KEY, action TEXT NOT NULL, arg INTEGER, issued_at TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'pending', ok INTEGER, note TEXT, output TEXT, finished_at TEXT)",
 	"CREATE INDEX IF NOT EXISTS idx_corvo_box_cmd_issued ON corvo_box_cmd(issued_at)",
+	"CREATE TABLE IF NOT EXISTS corvo_box_metrics (hour TEXT PRIMARY KEY, data TEXT NOT NULL)",
 ];
 let schemaReady = false;
 async function ensureSchema(db: D1Database) {
@@ -47,7 +52,21 @@ const syncBody = z.object({
 		corpus_items: z.number().int().min(0).nullable().default(null),
 		errors_recent: z.number().int().min(0).max(100_000).nullable().default(null),
 		temp_c: z.number().min(-40).max(150).nullable().default(null),
+		// indicadores ao vivo (todos opcionais): CPU, carga, rede, energia ESTIMADA e a camada do governador térmico
+		cpu_pct: z.number().min(0).max(100).nullable().default(null),
+		load1: z.number().min(0).max(1000).nullable().default(null),
+		rx_bytes: z.number().int().min(0).nullable().default(null),
+		tx_bytes: z.number().int().min(0).nullable().default(null),
+		rx_bps: z.number().int().min(0).nullable().default(null),
+		tx_bps: z.number().int().min(0).nullable().default(null),
+		power_w: z.number().min(0).max(1000).nullable().default(null),
+		tier: z.number().int().min(0).max(9).nullable().default(null),
+		governor: z.number().int().min(0).max(1).nullable().default(null),
+		temp_limit_c: z.number().min(0).max(200).nullable().default(null),
+		temp_ceiling_c: z.number().min(0).max(200).nullable().default(null),
 	}),
+	// resumo da hora UTC que acabou de fechar (uma vez por hora): temperatura, CPU, energia, rede e o fluxo pelo portão, por fonte
+	metrics_hour: z.object({ hour: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}$/) }).catchall(z.unknown()).optional(),
 	ack: z.object({ id: z.string().min(1).max(64), ok: z.boolean(), note: z.string().max(200).default(""), output: z.string().max(OUTPUT_MAX).default("") }).optional(),
 });
 type Status = z.infer<typeof syncBody>["status"];
@@ -64,7 +83,7 @@ boxRoutes.post("/box/sync", async (c) => {
 	if (!parsed.success) return c.json({ error: "invalid_request" }, 400);
 	const db = c.env.DB;
 	await ensureSchema(db);
-	const { status, ack } = parsed.data;
+	const { status, ack, metrics_hour } = parsed.data;
 	const now = Date.now();
 	const nowIso = new Date(now).toISOString();
 
@@ -77,12 +96,21 @@ boxRoutes.post("/box/sync", async (c) => {
 	const prev = await db.prepare("SELECT status, seen_at FROM corvo_box_state WHERE id = 1").first<{ status: string; seen_at: string }>();
 	let before: Partial<Status> = {};
 	try { before = prev ? (JSON.parse(prev.status) as Partial<Status>) : {}; } catch { /* estado antigo ilegível: regrava */ }
-	const changed = !prev || before.running !== status.running || before.mode !== status.mode || before.interval_s !== status.interval_s || Boolean(ack);
+	const changed = !prev || before.running !== status.running || before.mode !== status.mode || before.interval_s !== status.interval_s || before.tier !== status.tier || Boolean(ack);
 	if (changed || now - Date.parse(prev.seen_at) > REFRESH_MS) {
 		await db
 			.prepare("INSERT INTO corvo_box_state (id, status, seen_at) VALUES (1, ?1, ?2) ON CONFLICT(id) DO UPDATE SET status = excluded.status, seen_at = excluded.seen_at")
 			.bind(JSON.stringify(status), nowIso)
 			.run();
+	}
+	if (metrics_hour) {
+		const json = JSON.stringify(metrics_hour);
+		if (json.length <= METRIC_MAX_BYTES) {
+			await db.batch([
+				db.prepare("INSERT OR REPLACE INTO corvo_box_metrics (hour, data) VALUES (?1, ?2)").bind(metrics_hour.hour, json),
+				db.prepare("DELETE FROM corvo_box_metrics WHERE hour < ?1").bind(new Date(now - KEEP_METRIC_DAYS * 86_400_000).toISOString().slice(0, 13)),
+			]);
+		}
 	}
 	const cmd = await db
 		.prepare("SELECT id, action, arg FROM corvo_box_cmd WHERE state = 'pending' AND issued_at > ?1 ORDER BY issued_at LIMIT 1")
@@ -108,6 +136,22 @@ boxRoutes.get("/box", async (c) => {
 	return c.json({ online: status ? now - Date.parse(status.seen_at) < ONLINE_MS : false, status, pending: pending ?? null, history: history.results ?? [], server_time: new Date(now).toISOString() });
 });
 
+/** Indicadores por hora (operador): temperatura, CPU, energia estimada, rede e fluxo pelo portão, por fonte. Retenção de 14 dias. */
+boxRoutes.get("/box/metrics", async (c) => {
+	const denied = operatorDenied(c);
+	if (denied) return c.json(deny(denied), denied);
+	await ensureSchema(c.env.DB);
+	const hours = Math.min(168, Math.max(1, Number(c.req.query("hours")) || 24));
+	const from = new Date(Date.now() - hours * 3_600_000).toISOString().slice(0, 13);
+	const rows = await c.env.DB.prepare("SELECT data FROM corvo_box_metrics WHERE hour >= ?1 ORDER BY hour").bind(from).all<{ data: string }>();
+	const out: unknown[] = [];
+	for (const r of rows.results ?? []) {
+		try { out.push(JSON.parse(r.data)); } catch { /* linha ilegível: ignora */ }
+	}
+	c.header("Cache-Control", "no-store");
+	return c.json({ hours: out, from });
+});
+
 boxRoutes.get("/box/command/:id", async (c) => {
 	const denied = operatorDenied(c);
 	if (denied) return c.json(deny(denied), denied);
@@ -121,8 +165,14 @@ boxRoutes.post("/box/command", async (c) => {
 	const denied = operatorDenied(c);
 	if (denied) return c.json(deny(denied), denied);
 	const body = z
-		.object({ action: z.enum(ACTIONS), arg: z.number().int().min(300).max(3600).optional() })
-		.refine((b) => (b.action === "intervalo") === (b.arg !== undefined), { message: "arg só em intervalo (300 a 3600 s) e obrigatório nele" })
+		.object({ action: z.enum(ACTIONS), arg: z.number().int().optional() })
+		.refine(
+			(b) => {
+				const rule = ARG_RULES[b.action];
+				return rule ? b.arg !== undefined && b.arg >= rule[0] && b.arg <= rule[1] : b.arg === undefined;
+			},
+			{ message: "argumento obrigatório e dentro da faixa só em intervalo (300 a 3600), tier (0 a 2) e governador (0 ou 1)" },
+		)
 		.safeParse(await c.req.json().catch(() => null));
 	if (!body.success) return c.json({ error: "invalid_request", allowed: ACTIONS }, 400);
 	const db = c.env.DB;

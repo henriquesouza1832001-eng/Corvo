@@ -14,6 +14,8 @@
 #   ciclo     roda um ciclo de coleta agora
 #   precos    atualiza os preços agora
 #   limpar    libera espaço (corpus velho, logs grandes, cache)
+#   tier N    camada de fontes (0 núcleo, 1 + oficiais, 2 + imprensa e cripto); vale no próximo ciclo
+#   governador 0|1  liga ou desliga o governador térmico (ele sobe e desce a camada conforme a temperatura)
 #   instalar  cria o comando curto `corvo` (depois: corvo on, corvo off, corvo status, corvo painel)
 #   atualizar baixa a versão nova do repositório (git pull) e reinicia
 cd "$(dirname "$0")/../.." || exit 1
@@ -62,7 +64,7 @@ case "$1" in
   intervalo)
     case "$2" in ''|*[!0-9]*) echo "uso: corvo intervalo 300..3600"; exit 1 ;; esac
     [ "$2" -ge 300 ] && [ "$2" -le 3600 ] || { echo "intervalo fora de 300..3600"; exit 1; }
-    setvar CORVO_INTERVALO "$2"; echo "intervalo $2s"; sh "$0" restart ;;
+    setvar CORVO_INTERVALO "$2"; echo "intervalo $2s (vale no próximo ciclo)" ;;
   ciclo)
     # roda UM ciclo de coleta agora, fora do intervalo (mesmas regras do laço: respeita modo seco e token)
     [ -f "$ENVF" ] && set -a && . "$ENVF" && set +a
@@ -80,6 +82,12 @@ case "$1" in
     apt clean 2>/dev/null
     depois=$(df -k "$DATA" | tail -1 | awk '{print $4}')
     echo "livre agora: $((depois / 1024)) MB (liberou $(((depois - antes) / 1024)) MB)" ;;
+  tier)
+    case "$2" in 0|1|2) ;; *) echo "uso: corvo tier 0|1|2  (camada de fontes: 0 núcleo, 1 + oficiais, 2 + imprensa e cripto)"; exit 1 ;; esac
+    setvar CORVO_TIER "$2"; echo "camada $2 (vale no próximo ciclo)" ;;
+  governador)
+    case "$2" in 0|1) ;; *) echo "uso: corvo governador 0|1  (1 liga o governador térmico, 0 desliga)"; exit 1 ;; esac
+    setvar CORVO_GOVERNADOR "$2"; echo "governador térmico: $([ "$2" = 1 ] && echo ligado || echo desligado)" ;;
   atualizar) git pull -q && { [ -d "$HOME/.termux/boot" ] && cp deploy/box/boot-termux.sh "$HOME/.termux/boot/corvo.sh" && chmod +x "$HOME/.termux/boot/corvo.sh"; true; } && echo "atualizado" && sh "$0" restart ;;
-  *) sed -n '2,20p' "$0" ;;
+  *) sed -n '2,22p' "$0" ;;
 esac

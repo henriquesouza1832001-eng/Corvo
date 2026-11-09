@@ -16,6 +16,9 @@ import urllib.request
 from pathlib import Path
 from typing import Callable
 
+from . import governador as gov
+from . import metricas
+
 ROOT = Path(__file__).resolve().parents[3]
 CORVO_SH = str(ROOT / "deploy" / "box" / "corvo.sh")
 DATA = ROOT / "engine" / "data" / "corvo_corpus"
@@ -37,6 +40,7 @@ ACOES: dict[str, list[str]] = {
     "precos": ["sh", CORVO_SH, "precos"],
     "limpar": ["sh", CORVO_SH, "limpar"],
 }
+ARG_LIMITES = {"intervalo": (300, 3600), "tier": (0, 2), "governador": (0, 1)}  # ação com argumento -> (mínimo, máximo)
 LOCAIS = {"diag", "logs", "rede", "fontes", "agente"}  # feitas aqui mesmo, sem chamar o shell
 REBOOT = [["su", "-c", "reboot"], ["reboot"]]  # tenta com su; sem root, a tentativa falha e é informada
 
@@ -99,6 +103,16 @@ def _linhas(path: Path) -> int | None:
     return n
 
 
+def _mem_kb() -> int | None:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1])
+    except OSError:
+        pass
+    return None
+
+
 def _temp_c() -> float | None:
     """Temperatura da caixa (°C), se o sistema deixar ler; senão None."""
     for i in range(6):
@@ -108,6 +122,20 @@ def _temp_c() -> float | None:
             continue
         return round(v / 1000 if v > 1000 else v, 1)
     return None
+
+
+def _tier(env: dict[str, str]) -> int:
+    try:
+        return max(0, min(2, int(env.get("CORVO_TIER", "0"))))
+    except ValueError:
+        return 0
+
+
+def _cfg_gov(env: dict[str, str]) -> gov.Cfg:
+    try:
+        return gov.Cfg(limite_c=float(env.get("CORVO_TEMP_LIMITE", "80")))
+    except ValueError:
+        return gov.Cfg()
 
 
 def estado(run: Run = _run, env: dict[str, str] | None = None) -> dict:
@@ -143,6 +171,10 @@ def estado(run: Run = _run, env: dict[str, str] | None = None) -> dict:
         "interval_s": intervalo, "prices_last": _ultimo_preco(), "corpus_items": _linhas(CORPUS),
         "errors_recent": sum(1 for x in cauda if "Error" in x or "Traceback" in x),
         "temp_c": _temp_c(),
+        "tier": _tier(env),
+        "governor": 0 if env.get("CORVO_GOVERNADOR") == "0" else 1,
+        "temp_limit_c": _cfg_gov(env).limite_c,
+        "temp_ceiling_c": _cfg_gov(env).teto_c,
     }
 
 
@@ -230,10 +262,11 @@ def executar(action: str, run: Run = _run, arg: int | None = None, env: dict[str
         return True, "falhas por fonte", fontes_com_falha()
     if action == "agente":
         return True, "reiniciando o agente", ""
-    if action == "intervalo":
-        if not isinstance(arg, int) or isinstance(arg, bool) or not 300 <= arg <= 3600:
-            return False, "intervalo inválido (300 a 3600 s)", ""
-        r = run(["sh", CORVO_SH, "intervalo", str(arg)])
+    if action in ARG_LIMITES:
+        lo, hi = ARG_LIMITES[action]
+        if not isinstance(arg, int) or isinstance(arg, bool) or not lo <= arg <= hi:
+            return False, f"{action} inválido ({lo} a {hi})", ""
+        r = run(["sh", CORVO_SH, action, str(arg)])
         return r.returncode == 0, (r.stdout.strip().splitlines() or [""])[-1][:150], ""
     args = ACOES.get(action)
     if args is None:
@@ -242,9 +275,14 @@ def executar(action: str, run: Run = _run, arg: int | None = None, env: dict[str
     return r.returncode == 0, (r.stdout.strip().splitlines() or [""])[-1][:150], _cap(r.stdout.strip())
 
 
-def ciclo(post: Post, run: Run, env: dict[str, str], ack: dict | None) -> tuple[dict | None, dict | None, bool]:
-    """Um sync. Devolve (comando recebido, próximo ack, sair?). `sair` pede ao supervisor para reiniciar o agente (ex.: depois de `update`)."""
+def ciclo(post: Post, run: Run, env: dict[str, str], ack: dict | None, live: dict | None = None, hora: dict | None = None) -> tuple[dict | None, dict | None, bool]:
+    """Um sync. Devolve (comando recebido, próximo ack, sair?). `sair` pede ao supervisor para reiniciar o agente (ex.: depois de `update`).
+    `live` são os indicadores de agora (CPU, rede, energia estimada) e `hora` o resumo da hora UTC que acabou de fechar (vai uma vez)."""
     body: dict = {"status": estado(run, env)}
+    if live:
+        body["status"].update({k: v for k, v in live.items() if v is not None})
+    if hora:
+        body["metrics_hour"] = hora
     if ack:
         body["ack"] = ack
     resp = post("/api/corvo/box/sync", body)
@@ -312,10 +350,32 @@ def main() -> int:
 
     ack: dict | None = None
     memoria: dict = {}
+    medidor, acum, gest = metricas.Medidor(), metricas.Acumulador(), gov.Estado(tier=_tier(env))
+    pendente_hora: dict | None = None  # resumo da hora que fechou e ainda não foi entregue à API
     while True:
         try:
-            env = ler_env()  # relê: `seco`, `envio` e `intervalo` mudam o arquivo
-            _, ack, sair = ciclo(post, _run, env, ack)
+            env = ler_env()  # relê: `seco`, `envio`, `intervalo`, `tier` e `governador` mudam o arquivo
+            agora = time.time()
+            live = medidor.amostra(agora)
+            temp, mem = _temp_c(), _mem_kb()
+            fechada = acum.registrar(agora, live, temp, mem)
+            if fechada:
+                fechada.update(metricas.fluxo_da_hora(fechada["hour"], LOG, CORPUS))
+                fechada["tier"] = _tier(env)
+                pendente_hora = fechada
+            if env.get("CORVO_GOVERNADOR") != "0":
+                gest.tier = _tier(env)  # o dono pode ter mudado a camada à mão
+                d = gov.decidir(gest, temp, mem, agora, _cfg_gov(env))
+                if d.parar:
+                    _run(["sh", CORVO_SH, "off"])
+                    print(f"agente: {d.motivo}", file=sys.stderr)
+                elif d.motivo and d.tier != gest.tier:
+                    _run(["sh", CORVO_SH, "tier", str(d.tier)])
+                    gest.tier, gest.ultima_mudanca = d.tier, agora
+                    print(f"agente: governador: {d.motivo}", file=sys.stderr)
+            live = {**live, "temp_c": temp}
+            _, ack, sair = ciclo(post, _run, env, ack, live, pendente_hora)
+            pendente_hora = None  # entregue (se o envio falhou, a exceção abaixo mantém o resumo para a próxima volta)
             for acao in guardas(_run, memoria):
                 print(f"agente: {acao}", file=sys.stderr)
             if sair:  # envia a confirmação pendente e deixa o supervisor subir a versão nova

@@ -205,3 +205,37 @@ def test_disco_quase_cheio_desliga_o_coletor(monkeypatch, tmp_path):
     feitas = agente.guardas(run, {}, livre_mb=80, agora=1.0)
     assert any("desligado por segurança" in f for f in feitas) and ["sh", agente.CORVO_SH, "off"] in run.calls
     assert agente.guardas(FakeRun(), {}, livre_mb=2000) == []  # disco folgado: nada a fazer
+
+
+def test_ciclo_leva_os_indicadores_ao_vivo_e_o_resumo_da_hora_uma_vez():
+    corpos = []
+    def post(path, body):
+        corpos.append(body)
+        return {"command": None}
+    live = {"cpu_pct": 12.5, "power_w": 2.9, "rx_bytes": 1000, "tx_bytes": 50, "rx_bps": None}
+    hora = {"hour": "2026-11-09T02", "energy_wh": 3.1}
+    agente.ciclo(post, FakeRun(), {}, None, live, hora)
+    assert corpos[0]["status"]["cpu_pct"] == 12.5 and corpos[0]["status"]["power_w"] == 2.9
+    assert "rx_bps" not in corpos[0]["status"]  # campo sem leitura não vai
+    assert corpos[0]["metrics_hour"] == hora
+    agente.ciclo(post, FakeRun(), {}, None, live, None)
+    assert "metrics_hour" not in corpos[1]
+
+
+def test_tier_e_governador_validam_o_argumento_de_novo_na_caixa():
+    for acao in ("tier", "governador"):
+        for ruim in (None, -1, 3 if acao == "tier" else 2, "1", True):
+            ok, note, _ = agente.executar(acao, FakeRun(), ruim)
+            assert not ok and "inválido" in note, (acao, ruim)
+    run = FakeRun()
+    ok, _, _ = agente.executar("tier", run, 2)
+    assert ok and run.calls[-1] == ["sh", agente.CORVO_SH, "tier", "2"]
+    ok, _, _ = agente.executar("governador", run, 0)
+    assert ok and run.calls[-1] == ["sh", agente.CORVO_SH, "governador", "0"]
+
+
+def test_estado_informa_camada_governador_e_teto_termico():
+    s = agente.estado(FakeRun(), {"CORVO_TIER": "1", "CORVO_TEMP_LIMITE": "70"})
+    assert s["tier"] == 1 and s["governor"] == 1 and s["temp_limit_c"] == 70.0 and s["temp_ceiling_c"] == 59.5
+    s = agente.estado(FakeRun(), {"CORVO_GOVERNADOR": "0", "CORVO_TIER": "9"})
+    assert s["governor"] == 0 and s["tier"] == 2 and s["temp_limit_c"] == 80.0

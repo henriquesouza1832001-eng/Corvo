@@ -3,6 +3,7 @@ descompressão, recusa de ENTITY, no máximo 2 conexões simultâneas por servid
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Callable
@@ -16,9 +17,16 @@ CATALOG_PATH = Path(__file__).with_name("catalog.json")
 _KEYWORDS: KeywordEngine | None = None
 
 
-def load_catalog(path: Path | None = None) -> list[dict]:
+def load_catalog(path: Path | None = None, tier: int | None = None) -> list[dict]:
+    """Feeds habilitados até a CAMADA pedida. Camada 0 (padrão, sem `tier` no catálogo) é o núcleo; 1 e 2 são fontes extras que o
+    governador térmico da caixa liga aos poucos (`CORVO_TIER`). Sem a variável, tudo continua como antes: só a camada 0."""
+    if tier is None:
+        try:
+            tier = int(os.environ.get("CORVO_TIER", "0"))
+        except ValueError:
+            tier = 0
     data = json.loads((path or CATALOG_PATH).read_text(encoding="utf-8"))
-    return [f for f in data["feeds"] if f.get("enabled", True)]
+    return [f for f in data["feeds"] if f.get("enabled", True) and int(f.get("tier", 0)) <= tier]
 
 
 def fetch_feed(feed: dict, fetcher: Callable[[str], bytes] = http_fetch, now: Callable[[], float] = time.time) -> list[NewsItem]:
