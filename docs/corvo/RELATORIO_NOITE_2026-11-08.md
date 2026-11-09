@@ -1,14 +1,14 @@
 # Relatório da noite — 2026-11-08
 
-> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:00 BRT:** cadeia Munin e T9 concluídos; T6 foi reavaliado e está abaixo do limiar atual; censo T5 e auditoria T4 registrados. Ciclo 16 encerrou e coleta externa segue ativa (PID 13596), sem reinício. Veja as seções 9.13–9.48.
+> **Rodada nota8 em andamento desde 19:30 BRT; checkpoint 22:07 BRT:** cadeia Munin e T9 concluídos; T6 foi reavaliado e está abaixo do limiar atual; censo T5 e auditoria T4 registrados. Ciclo 16 encerrou e coleta externa segue ativa (PID 13596), sem reinício. Veja as seções 9.13–9.49.
 
-**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:00 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`
+**Agente:** codex-noite · **Sessões anteriores:** 01:19–01:39, 10:53–17:42 e retomadas curtas às 18:10 e 18:31 BRT; cada uma encerrou após `PARE` · **Rodada atual:** autorizada às 19:30 BRT, ativa às 22:07 · **Commits desta rodada:** `b4ac7b0`, `bae075e`, `12d17bb`, `e62deec`, `1084877`, `4dd7b9d`, `34e59d7`, `b28fcf3`, `4c7838f`, `0c29e4a`, `5f2aef8`, `3dd2a7a`, `d488527`, `76a6dca`, `87afb7e`, `97d75d9`, `e78f72e`, `999a166`, `e54b865`, `eca0410`
 
 > **Correção de cronologia:** a versão anterior dizia que a coleta seguiria até 07:19. O log confirma que a primeira sessão terminou após o ciclo das 01:39; não houve coleta contínua até 07:19. A coleta foi retomada às 10:53 BRT e permaneceu ativa até o dono solicitar parada às 17:42.
 
 ## 1. Resumo para o dono
 
-- T0 (fotografia GET mais recente): 31 notícias no bucket atual; rótulos manuais por título: 22 keep (71,0%), 8 marginais, 1 drop. A meta de 85% de keep não foi atingida; a fotografia está atrasada ~20,5 h.
+- T0 (GET público às 22:07 BRT): 37 notícias apresentadas; rótulos manuais por título: 30 keep (81,1%), 6 marginais, 1 drop. A meta de 85% não foi atingida. Estatística do bucket mais recente: 85 recebidas, 1 HOT, 1 BUFFER e 83 DROP; orçamento 28/300.000 linhas.
 - T1: corte HOT normal subiu de 0,75 para 0,91. No lacre, precisão HOT foi de 0,632 para 1,000 e HOT entre aceitos de 0,792 para 0,083.
 - Hugin permanece em H2: o lacre anterior tinha 15 keeps; a amostra fresca teve 21/307 keeps no eval, recall 0,190 e precisão HOT n/d, abaixo das metas e instável. Nenhuma regra foi escolhida com exemplos do lacre.
 - T8: projeções por 24 h e 5× passaram em normal (484/692), economia (480/672) e crítico (432/432) linhas/dia.
@@ -646,3 +646,8 @@ No conjunto de ajuste, filtrado contra o eval apenas por identificador, há 57 a
 ### 9.48 T5 censo móvel pós-ciclo 16 (22:00 BRT)
 
 Na janela móvel de 24 horas, excluídas as URLs de eval por ID, contei 1.103 registros únicos em 26 IDs de fonte e 57 aceitos. G1 tem 213 registros e nenhum aceito; `bea-releases` 48/0, `bloomberg-markets` 20/2 e `ft-home` 9/0. Não mudei confiabilidade ou ativação de fonte porque não há rótulos de falsos negativos que justifiquem essa ação. O freio posterior ao commit será registrado na próxima atualização do relatório.
+
+
+### 9.49 T0: fotografia GET publica e rotulo manual por titulo (22:07 BRT)
+
+Fiz uma unica leitura GET do feed publico; nao houve escrita. O endpoint informa orcamento em 28/300.000 linhas e o bucket mais recente (01:00Z) recebeu 85 itens: 1 HOT, 1 BUFFER e 83 DROP. A resposta apresentou 37 noticias; classifiquei os titulos manualmente como 30 keep, 6 marginais e 1 drop (81,1% keep), abaixo do alvo de 85%. A classificacao mede plausibilidade de efeito em mercado, nao confirma os fatos; as marginais incluem manchetes de sancoes/politica e conflitos sem mecanismo de preco claro. Nao alterei regras a partir desta fotografia.
