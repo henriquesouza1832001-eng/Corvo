@@ -2,6 +2,8 @@
 
 > **Resumo.** O CORVO já tem caminhos preditivos em estados diferentes, mas ainda falta histórico real suficiente para demonstrar acerto. A cadeia de mercado Hugin→eventos→hipóteses→taxa-base→resolução está implementada como bancada local do Munin; ela ainda não publica previsões no Worker. O previsor público V1 continua sendo o nowcast de pulso/volume. Nada aqui depende de agente ou modelo grande: só se adiciona complexidade depois de superar a taxa-base em validação temporal.
 
+Para o encaixe dentro do MNEME — campos que ele já consome, timestamps, persistência e limites do CORVO — consulte [INTEGRACAO_MNEME.md](INTEGRACAO_MNEME.md). A leitura confirmou que o MNEME já coleta RSS e gera atributos `n_*`; o próximo passo é enriquecer esse fluxo de forma aditiva, sem criar coletor concorrente.
+
 ## Onde cada preditor roda hoje
 
 | Caminho | O que faz | Situação no fluxo |
