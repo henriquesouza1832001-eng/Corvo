@@ -136,10 +136,12 @@ def resolve_question(question: ClosedQuestion, event_time: str, rows: Iterable[d
     if not math.isfinite(sigma) or sigma <= 0:
         return Resolution(question.question_id, "insufficient_history", reason="pre-event volatility is not measurable")
 
-    start = _first_at_or_after(prices, t0, max_gap)
+    # A forecast created at t0 cannot use a price close that arrives after t0.
+    # Anchor the realized return to the last close already known at event time.
+    start = _last_at_or_before(prices, t0, max_gap)
     end = _first_at_or_after(prices, t0 + horizon, max_gap)
     if start is None:
-        return Resolution(question.question_id, "insufficient_history", reason="no close at event start")
+        return Resolution(question.question_id, "insufficient_history", reason="no price close known at event time")
     if end is None:
         return Resolution(
             question.question_id,

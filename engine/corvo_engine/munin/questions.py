@@ -10,7 +10,7 @@ from .impact import Hypothesis, candidates
 
 MIN_VOLATILITY_RETURNS = 30
 SIGMA_THRESHOLD = 1.0
-PRICE_RULE_VERSION = "local-close-abnormal-return-v1"
+PRICE_RULE_VERSION = "local-close-abnormal-return-v2"
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class ClosedQuestion:
     sigma_threshold: float = SIGMA_THRESHOLD
     min_prior_returns: int = MIN_VOLATILITY_RETURNS
     instrument_available: bool = False
-    resolution_rule: str = "close at or after horizon; abnormal log return versus 30 prior same-horizon returns"
+    resolution_rule: str = "last known close at/before event to first close at/after horizon; abnormal return versus 30 prior same-horizon returns"
     annulment_rule: str = "cancel if the instrument's known market calendar is closed during the forecast window"
 
 

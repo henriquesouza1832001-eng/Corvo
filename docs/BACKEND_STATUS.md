@@ -176,6 +176,8 @@ Ordem sugerida: E1 → E2 (aquecimento) → E3 → E4 → E5.
 
 ## 10. Registro de mudanças (acrescente no topo)
 - **2026-11-11** — Munin: questões agora preservam o tema na chave de deduplicação. Um mesmo evento com dois temas pode gerar hipóteses de mesma direção/ativo/horizonte para cada taxa-base temática; uma evidência deixa de desaparecer por ordenação lexical. Nenhum limiar, probabilidade ou regra de resolução foi alterado. Validação Python pendente: Python 3.12 não está instalado neste ambiente.
+- **2026-11-11** — Munin: resolução agora inicia no último preço conhecido em `available_at`, nunca no primeiro preço futuro; o fechamento final segue sendo o primeiro no/após o horizonte. Teste de regressão cobre eventos entre candles. Testes Python pendentes por ausência de Python 3.12; resoluções históricas precisam ser refeitas com a regra versionada antes de comparar métricas.
+- **2026-11-11** — Preços de resolução: EIA WTI foi documentada como candidata oficial e gratuita, ainda não integrada porque a série é diária e exige adaptar timestamp/publicação, gaps e calendário. S&P 500/FRED exige permissão escrita para reprodução; benchmark LBMA exige licença. Nenhuma dessas séries foi coletada.
 
 - **2026-11-11** — Painel do CORVO ganha endpoint público `/api/corvo/markets` com variação 24h de cinco criptoativos (Binance) e janela diária de cinco pares USD (Frankfurter/ECB), cache de 5 min e falha parcial isolada; Web exibe preço, janela e fonte, sem transformar cotação em previsão. Removidas probabilidades de demonstração quando não há feed real. Catálogo global recebe WTO e Eurostat no tier 2; Eurostat ainda requer smoke test antes de habilitar esse tier. Ver ADR 0008.
 

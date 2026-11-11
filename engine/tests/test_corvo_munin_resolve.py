@@ -52,6 +52,15 @@ def test_resolves_only_after_30_pre_event_horizon_returns_and_future_close():
     assert result.end_at == (T0 + timedelta(hours=6)).isoformat().replace("+00:00", "Z")
 
 
+def test_resolution_start_never_uses_a_close_after_the_forecast_time():
+    event_time = T0 + timedelta(minutes=30)
+    result = resolve_question(question(), event_time.isoformat(), synthetic_prices())
+
+    assert result.status == "resolved"
+    assert result.start_at == T0.isoformat().replace("+00:00", "Z")
+    assert datetime.fromisoformat(result.start_at.replace("Z", "+00:00")) <= event_time
+
+
 def test_missing_price_and_missing_future_close_are_not_guessed():
     no_series = resolve_question(question(asset="SP500"), T0.isoformat(), synthetic_prices())
     no_future = resolve_question(question(), T0.isoformat(), synthetic_prices(end_index=253))
