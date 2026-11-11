@@ -51,8 +51,12 @@ Seis noticias sobre o mesmo fato sao **uma amostra, nao seis**: contar todas inf
 ### 4.2 Hipóteses de impacto (Munin, etapa 3)
 Uma tabela **editável e auditável** (nada de modelo de linguagem decidindo): `banco central (decisão) → USD, BTC, ouro, índices`; `energia (corte de produção) → petróleo`; `conflito em região-chave → petróleo, ouro`; `cripto (hack de exchange) → token afetado, BTC`; `comércio (tarifa) → pares de câmbio afetados`. A **direção é hipótese**: só vira peso depois que Munin medir, com amostra mínima, que ela se sustenta. A proposta inicial está em `engine/corvo_engine/munin/impact.py`.
 
+Um evento pode ter mais de um tema. Cada hipótese fica registrada por `(tema, ativo, direção, horizonte)`, pois são taxas-base distintas; deduplicar a mesma pergunta entre temas apagaria evidência de uma das chaves. Ao comparar desempenho geral, não some essas chaves como se fossem eventos independentes: o evento continua sendo a unidade de amostra dentro de cada chave.
+
 ### 4.3 Preços (resolução, etapa 5)
 Para conferir, é preciso o **preço real** no horizonte. Fonte pública e gratuita, a registrar antes em `docs/sources/SOURCES.md` (acesso, termos, limite, retenção): candles públicos de cripto e cotações de referência de câmbio. **Sem essa fonte registrada, nada é resolvido** e as previsões ficam abertas. Regras de resolução: janela contada a partir do horário do evento, retorno **anormal** (acima de k desvios da volatilidade recente, não acima de zero), mercado fechado = previsão anulada, nunca "não".
+
+**Cobertura atual do coletor local:** BTC, ETH, SOL, BNB, XRP e cinco pares USD/FX (USDBRL, USDEUR, USDJPY, USDGBP, USDCNY). As hipóteses `USD`, `OURO`, `PETROLEO` e `SP500` não têm série exata disponível; `USD` também não define qual par cambial medir. Essas perguntas ficam sem resolução e não entram em acurácia. Antes de expandir o modelo, adicionar instrumentos com fontes e regras registradas; não mapear `USD` para um par por conveniência.
 
 ### 4.4 Quanto tempo leva ter amostra
 Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos por dia. Para **30 casos independentes por (tema, ativo, direção, horizonte)** são **semanas**, não horas. Por isso a primeira versão mira **poucos pares** (3 temas × 3 ativos × 2 direções × 2 horizontes) e deixa o resto em "dados insuficientes".

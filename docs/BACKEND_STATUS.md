@@ -1,6 +1,6 @@
 # CORVO — Estado do backend (documento vivo)
 
-> **Última atualização:** 2026-10-03 · **Responsável pelo backend:** @henriquesouza1832001-eng (branch `hen`)
+> **Última atualização:** 2026-11-11 · **Responsável pelo backend:** @henriquesouza1832001-eng (branch `hen`)
 > Este arquivo é o ponto de entrada de quem entra no backend. **Quem muda algo relevante atualiza este arquivo no mesmo PR** (seções 2, 6, 7 e o registro da seção 10).
 
 ## 1. O que é o CORVO (em 30 segundos)
@@ -175,6 +175,7 @@ Ordem sugerida: E1 → E2 (aquecimento) → E3 → E4 → E5.
 `docs/decisions/0001` (monorepo React + Worker + Python) · `0002` (o CORVO prevê qualquer tema, como probabilidade calibrada) · `0003` (Reddit/X como sensores sociais temáticos, nunca confirmação) · `0004` (eventos separados por UF; avisos do INMET). Decisão nova relevante? Crie `docs/decisions/NNNN-titulo.md` e cite aqui. · `0005` (filtro de importância e fontes abertas GDELT/Mastodon/USGS) · `0006` (fontes em escala, frescor por categoria e qualidade de eventos) · `0007` (piso de alerta oficial, leitura estrita do Worker e sinalizadores de fonte).
 
 ## 10. Registro de mudanças (acrescente no topo)
+- **2026-11-11** — Munin: questões agora preservam o tema na chave de deduplicação. Um mesmo evento com dois temas pode gerar hipóteses de mesma direção/ativo/horizonte para cada taxa-base temática; uma evidência deixa de desaparecer por ordenação lexical. Nenhum limiar, probabilidade ou regra de resolução foi alterado. Validação Python pendente: Python 3.12 não está instalado neste ambiente.
 
 - **2026-11-11** — Painel do CORVO ganha endpoint público `/api/corvo/markets` com variação 24h de cinco criptoativos (Binance) e janela diária de cinco pares USD (Frankfurter/ECB), cache de 5 min e falha parcial isolada; Web exibe preço, janela e fonte, sem transformar cotação em previsão. Removidas probabilidades de demonstração quando não há feed real. Catálogo global recebe WTO e Eurostat no tier 2; Eurostat ainda requer smoke test antes de habilitar esse tier. Ver ADR 0008.
 

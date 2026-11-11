@@ -94,10 +94,10 @@ def questions_for_event(
     out: list[ClosedQuestion] = []
     for topic in topics:
         out.extend(_question(event_id, topic, hypothesis, available) for hypothesis in candidates([topic]))
-    # A single event can carry overlapping topics; identical asset/direction/
-    # horizon questions are kept once, with the lexically first topic as key.
-    unique: dict[tuple[str, str, int], ClosedQuestion] = {}
+    # Keep one question per topic: the baseline key is topic-specific, so
+    # collapsing equal hypotheses across topics would silently discard evidence.
+    unique: dict[tuple[str, str, str, int], ClosedQuestion] = {}
     for question in out:
-        key = (question.asset, question.direction, question.horizon_hours)
+        key = (question.topic, question.asset, question.direction, question.horizon_hours)
         unique.setdefault(key, question)
     return list(unique.values())

@@ -36,9 +36,10 @@ def test_questions_do_not_guess_fx_pair_or_claim_missing_asset_price():
 
     usd = next(q for q in questions if q.asset == "USD")
     assert usd.instrument_available is False  # USD is not silently mapped to a particular FX pair.
+    assert {q.topic for q in questions if q.asset == "USD"} == {"banco_central", "dados_macro"}
     assert any(q.asset == "OURO" and not q.instrument_available for q in questions)
     assert "calendar unknown" in usd.annulment_rule
-    assert len({(q.asset, q.direction, q.horizon_hours) for q in questions}) == len(questions)
+    assert len({(q.topic, q.asset, q.direction, q.horizon_hours) for q in questions}) == len(questions)
 
 
 def test_missing_event_identity_or_topics_produces_no_questions():
