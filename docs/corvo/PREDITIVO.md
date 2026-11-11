@@ -1,6 +1,24 @@
 # Como Hugin e Munin viram o preditivo
 
-> **Resumo.** Hoje o CORVO lê e filtra (Hugin). Para prever, falta uma cadeia de cinco etapas em que Hugin entrega **eventos limpos** e Munin os transforma em **perguntas com resposta verificável**, estima uma probabilidade honesta, confere o resultado e ajusta a confiança. Nada disso depende de modelo grande: começa pela **frequência histórica** e só ganha complexidade se **provar** no conjunto lacrado que bate essa régua.
+> **Resumo.** O CORVO já tem caminhos preditivos em estados diferentes, mas ainda falta histórico real suficiente para demonstrar acerto. A cadeia de mercado Hugin→eventos→hipóteses→taxa-base→resolução está implementada como bancada local do Munin; ela ainda não publica previsões no Worker. O previsor público V1 continua sendo o nowcast de pulso/volume. Nada aqui depende de agente ou modelo grande: só se adiciona complexidade depois de superar a taxa-base em validação temporal.
+
+## Onde cada preditor roda hoje
+
+| Caminho | O que faz | Situação no fluxo |
+|---|---|---|
+| Forecast V1 (`forecast.py`, `forecast_surge.py`) | Nowcast do pulso do CORVO e do volume de sinais | Criado pelo `pipeline.py`, enviado ao Worker e exibido pela API conforme o contrato vigente; experimental até acumular resolução suficiente. |
+| Forecast V2 (`forecast_v2.py`) | Compara o nowcast com pares históricos da mesma hora local | O `pipeline.py` pode anexar a previsão V2 à evidência V1 atrás de `FORECAST_V2_SHADOW`; a flag está OFF por padrão e não muda o que aparece ao usuário. |
+| Forecast V2 de features (`forecast_v2_features.py`, `forecast_v2_model.py`) | Snapshot temporal e probabilidade heurística com cobertura, incerteza e abstenção | Módulos testados isoladamente no repo; a busca estática não encontrou chamada no `pipeline.py`. Ainda não alimenta Worker, painel ou V1. Bloqueio estático antes de integrar: o `fit_until` do calibrador é armazenado, mas não é comparado a `Snapshot.data_cutoff` no caminho de previsão. |
+| Munin de mercado (`munin/`) | Agrupa notícias globais em eventos, cria hipóteses tema→ativo e resolve com preços locais | Acessado pelo benchmark `corvo_munin_backtest.py --dry-run`; registro local, sem chamada de produção. Falta cobertura de preços para várias hipóteses e histórico para calibrar. |
+
+`forecast_v2.py` e `forecast_v2_model.py` são caminhos distintos apesar do nome parecido. A mudança de resolução `local-close-abnormal-return-v2` afeta somente o Munin de mercado; não altera V1 nem os dois módulos V2 de pulso.
+
+### Saídas e contratos atuais
+
+- O cartão “MUNIN · PREVISÕES” no painel lê `GET /api/corvo/feed`, que devolve a tabela `corvo_forecasts`. O coletor local do Munin ainda não envia registros para essa rota.
+- O contrato compacto `corvo_forecasts` guarda pergunta, probabilidade, intervalo, contagem de evidências/fontes, método, horizonte e status. Não guarda desfecho, preço inicial/final, `event_id`, ativo, direção nem versão da regra; assim não basta para pontuar e reproduzir o backtest.
+- `GET /api/forecasts` usa outra tabela e outro contrato, voltado a NOWCAST/EVENT/QUANTITY/OPEN, com resolução e Brier. Não tratar as duas tabelas como uma só nem encaixar a hipótese de mercado num `threshold` de nowcast sem definir semântica.
+- A conexão de Munin à persistência precisa preservar o snapshot e a resolução verificável de cada hipótese. Até isso existir, o benchmark local é a única saída confiável do Munin de mercado.
 
 ## 1. O que "prever" significa aqui
 
@@ -57,6 +75,14 @@ Um evento pode ter mais de um tema. Cada hipótese fica registrada por `(tema, a
 Para conferir, é preciso o **preço real** no horizonte. As fontes de cripto e câmbio estão registradas em `docs/sources/SOURCES.md`; a EIA está registrada como candidata diária para WTI, mas ainda não integrada. **Sem preço compatível com o horizonte, nada é resolvido** e as previsões ficam abertas. Regras de resolução: o preço inicial é o último fechamento conhecido até `available_at`; o final é o primeiro fechamento no ou após o horizonte. Assim o alvo não usa um preço futuro para iniciar a medição. Em séries horárias, o intervalo medido pode exceder o horizonte por menos de uma hora; os instantes exatos ficam registrados. Mercado fechado = previsão anulada, nunca "não".
 
 **Cobertura atual do coletor local:** BTC, ETH, SOL, BNB, XRP e cinco pares USD/FX (USDBRL, USDEUR, USDJPY, USDGBP, USDCNY). As hipóteses `USD`, `OURO`, `PETROLEO` e `SP500` não têm série exata disponível; `USD` também não define qual par cambial medir. Essas perguntas ficam sem resolução e não entram em acurácia. Antes de expandir o modelo, adicionar instrumentos com fontes e regras registradas; não mapear `USD` para um par por conveniência.
+
+### 4.4 Registro mínimo para integrar o Munin
+
+Este é um **contrato de desenho**, não uma rota implementada. Uma previsão de mercado precisa preservar, antes do resultado: `forecast_id`, `event_id`, `event_available_at`, `topic`, `asset`, `direction`, `horizon_hours`, texto da pergunta, `probability`, intervalo, chave da taxa-base e amostra anterior, fontes do evento, método/versão e `price_rule_version`. A instrumentação também registra qual série e fornecedor resolvem aquele ativo.
+
+O snapshot inicial é imutável. A resolução vem em registro separado, ligado por `forecast_id`, com `outcome`, retorno observado/anormal, limiar, `start_at`, `end_at`, série de preço, horários dos pontos usados e motivo de anulação/pendência. Corrigir dados gera nova versão auditável; nunca reescreve em silêncio a probabilidade que já foi vista.
+
+Não enviar previsão sem série compatível, evidência e pelo menos 30 eventos resolvidos anteriores na chave `(topic, asset, direction, horizon)`. Resultados e métricas continuam agrupados por chave; eventos correlacionados e janelas sobrepostas não viram amostras independentes. O transporte/persistência precisa separar modo local, shadow e publicação experimental, sem ligar nenhum modo automaticamente.
 
 ### 4.4 Quanto tempo leva ter amostra
 Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos por dia. Para **30 casos independentes por (tema, ativo, direção, horizonte)** são **semanas**, não horas. Por isso a primeira versão mira **poucos pares** (3 temas × 3 ativos × 2 direções × 2 horizontes) e deixa o resto em "dados insuficientes".
