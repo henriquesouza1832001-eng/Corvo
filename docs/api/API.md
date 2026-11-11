@@ -81,6 +81,7 @@ A caixa só faz requisições de saída. O operador (app no celular) manda **um 
 | `POST /api/corvo/box/command` | operador | `{action, arg?}` → `202 {ok,id,action}`; `409 command_pending` se já há um (expira em 10 min) |
 | `GET /api/corvo/box/command/:id` | operador | → o comando com a `output` completa (diagnóstico, log) |
 | `GET /api/corvo/diag` | operador | → `{worker, db:{backend,ping_ms}, budget:{used,limit,percent,pressure}, feed:{news_total,news_24h,newest_ingest,newest_age_s,stats_newest}, kv_feed_cache}` |
+| `GET /api/corvo/markets` | público | → `{generated_at,coverage,markets:[{symbol,label,price,change_pct,period,observed_at,source,source_url}],note}`; cotações de referência via Binance (cripto 24h) e Frankfurter/ECB (câmbio diário), cache KV de 5 min; falha parcial não remove a outra classe. Não são previsões nem índices acionários. |
 
 Ações: `on`, `off`, `restart`, `update`, `reboot`, `diag`, `logs`, `seco`, `envio`, `intervalo` (`arg` de 300 a 3600 s, obrigatório só nela), `ciclo` (um ciclo de coleta agora), `precos` (atualiza os preços), `rede` (latência até a API, a internet e uma fonte), `fontes` (falhas por fonte nos últimos ciclos), `limpar` (libera espaço na caixa) e `agente` (reinicia o agente), `tier` (`arg` 0 a 2: camada de fontes) e `governador` (`arg` 0 ou 1: governador térmico).
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { DEMO_BUDGET, DEMO_FORECASTS, DEMO_NEWS, DEMO_SOURCES } from "./demo";
-import { useLiveFeed } from "./feed";
+import { DEMO_BUDGET, DEMO_NEWS, DEMO_SOURCES } from "./demo";
+import { useLiveFeed, useMarketSnapshot } from "./feed";
+import { MarketsBoard } from "./MarketsBoard";
 import { WorldMap } from "./WorldMap";
 import {
 	ANCHORS,
@@ -67,7 +68,9 @@ export function CorvoApp() {
 	const [topicFilter, setTopicFilter] = useState<string>("all");
 	const pressure: Pressure = live ? live.pressure : simulated;
 	const budget = live ? live.budget : DEMO_BUDGET;
-	const forecasts: ForecastCard[] = live ? live.forecasts : DEMO_FORECASTS;
+	const marketSnapshot = useMarketSnapshot();
+	// Números de previsão de demonstração já foram removidos: sem resultado real, não publicar odds fictícias.
+	const forecasts: ForecastCard[] = live ? live.forecasts : [];
 
 	const rows = useMemo(
 		() => (live ? live.items.map((n) => ({ n: n as NewsItem, verdict: n.verdict as Verdict, reason: n.reason })) : DEMO_NEWS.map((n) => ({ n, ...(({ verdict, reason }) => ({ verdict, reason }))(decide(n, pressure)) }))),
@@ -173,6 +176,7 @@ export function CorvoApp() {
 			</section>
 
 			<div className="grid">
+				<MarketsBoard data={marketSnapshot} />
 				<section className="box map-box" aria-labelledby="t-map">
 					<h2 id="t-map">MAPA-MÚNDI <small>{located} notícias localizadas · losangos = pontos de observação (coleta em preparação)</small></h2>
 					<WorldMap items={rows.map((r) => ({ n: r.n, verdict: r.verdict }))} selected={selected} onSelect={setSelected} />
@@ -260,7 +264,7 @@ export function CorvoApp() {
 
 				<section className="box fc-box" aria-labelledby="t-fc">
 					<h2 id="t-fc">PREVISÕES <small>probabilidade · incerteza · evidências · método</small></h2>
-					{forecasts.length === 0 && <p className="muted">Nenhuma previsão publicada ainda.</p>}
+					{forecasts.length === 0 && <p className="muted">Nenhuma previsão real publicada. O painel mostra variações observadas acima; o Munin só publicará probabilidade após conectar as séries históricas, validar a amostra e registrar o método.</p>}
 					{forecasts.map((f) => <Forecast key={f.id} f={f} />)}
 					<h2 className="sub">PONTOS DE OBSERVAÇÃO</h2>
 					<p className="muted">Lugares onde decisões acontecem. A coleta de cada um ainda está em preparação.</p>

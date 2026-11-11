@@ -6,12 +6,14 @@ import { utcDay, type BudgetMode } from "../lib/budget";
 import { cacheControl } from "../lib/cache";
 import { boxRoutes } from "./corvo-box";
 import { keyAdmin } from "./corvo-v1";
+import { corvoMarkets } from "./corvo-markets";
 
 /**
  * API do painel do CORVO. O coletor (Python, no GitHub Actions ou num servidor) EMPURRA os dados aqui com `POST /api/corvo/ingest`;
  * o painel só LÊ. O KV guarda o instantâneo do feed por alguns segundos para o painel não bater no D1 a cada visita.
  */
 export const corvo = new Hono<AppEnv>();
+corvo.route("/", corvoMarkets); // cotações públicas com cache curto; nenhuma credencial de mercado
 corvo.route("/", keyAdmin); // chaves de consumidores (operador)
 corvo.route("/", boxRoutes); // centro de comando da caixa e diagnóstico (operador), tudo no banco
 
