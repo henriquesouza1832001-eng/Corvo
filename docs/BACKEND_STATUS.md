@@ -176,6 +176,8 @@ Ordem sugerida: E1 → E2 (aquecimento) → E3 → E4 → E5.
 
 ## 10. Registro de mudanças (acrescente no topo)
 
+- **2026-11-11** — Painel do CORVO ganha endpoint público `/api/corvo/markets` com variação 24h de cinco criptoativos (Binance) e janela diária de cinco pares USD (Frankfurter/ECB), cache de 5 min e falha parcial isolada; Web exibe preço, janela e fonte, sem transformar cotação em previsão. Removidas probabilidades de demonstração quando não há feed real. Catálogo global recebe WTO e Eurostat no tier 2; Eurostat ainda requer smoke test antes de habilitar esse tier. Ver ADR 0008.
+
 - **2026-11-09** — Caixa como agregador: camadas de fontes (`tier` no catálogo: 27, 35 e 46 feeds), governador térmico (teto em 85% do limite de 80 °C), indicadores de entrada e saída (CPU, rede, energia estimada, fluxo por fonte) por hora em `corvo_box_metrics` (migration `0011`), `GET /api/corvo/box/metrics`, ações `tier` e `governador`. Documentado em `docs/api/API.md`. Contrato aditivo.
 
 - **2026-11-08** — API de leitura para consumidores `/api/v1` (`evidencias` com cursor, `previsoes`, `uso`), chaves por cliente com plano e limite diário (`interno`, `gratis`, `pago`), `received_at` e marca `suspicious`; rotas do operador em `/api/corvo/admin/keys`; migration `0010`. Documentado em `docs/api/API.md` e `docs/corvo/INTEGRACAO_API.md`. Contrato aditivo.

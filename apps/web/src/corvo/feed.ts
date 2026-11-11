@@ -30,6 +30,48 @@ export interface LiveView {
 	generatedAt: string;
 }
 
+export interface MarketPoint {
+	symbol: string;
+	label: string;
+	price: number;
+	change_pct: number;
+	period: string;
+	observed_at: string;
+	source: string;
+	source_url: string;
+}
+
+export interface MarketSnapshot {
+	generated_at: string;
+	markets: MarketPoint[];
+	note: string;
+	coverage: { crypto: boolean; fx: boolean };
+}
+
+/** Cotação contextual: dados de referência públicos, sem alimentar previsão até a validação do Munin. */
+export function useMarketSnapshot(): MarketSnapshot | null {
+	const [snapshot, setSnapshot] = useState<MarketSnapshot | null>(null);
+	useEffect(() => {
+		let alive = true;
+		const load = async () => {
+			try {
+				const r = await fetch(`${API_URL}/api/corvo/markets`);
+				if (!r.ok) throw new Error(String(r.status));
+				const data = await r.json() as MarketSnapshot;
+				if (alive) setSnapshot(data);
+			} catch {
+				if (alive) setSnapshot(null);
+			}
+		};
+		void load();
+		const id = setInterval(() => { if (!document.hidden) void load(); }, 300_000);
+		const onVis = () => { if (!document.hidden) void load(); };
+		document.addEventListener("visibilitychange", onVis);
+		return () => { alive = false; clearInterval(id); document.removeEventListener("visibilitychange", onVis); };
+	}, []);
+	return snapshot;
+}
+
 export function toView(f: ApiFeed): LiveView {
 	const now = Date.now();
 	const totals = { received: 0, hot: 0, buffer: 0, dropped: 0, reasons: {} as Record<string, number> };

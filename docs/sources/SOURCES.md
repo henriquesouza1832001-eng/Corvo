@@ -19,6 +19,10 @@ Cada integração documenta aqui: fonte, API, limites, credenciais, dados coleta
 | **Defesa Civil Nacional** (alertas oficiais IDAP/CAP) | OFFICIAL | feed Atom/CAP aberto (`idap_cap`) | ✅ ativa, revisão de termos pendente (ver ficha) |
 | **InfoDengue** (Fiocruz/FGV): alerta de dengue nas 27 capitais | OFFICIAL | API aberta (`infodengue`) | ✅ ativa, revisão de termos pendente (ver ficha) |
 | **Catálogo RSS** (imprensa nacional, regional, internacional e órgãos oficiais) | NEWS_HIGH / NEWS_REGIONAL / OFFICIAL | RSS/Atom/RDF (`rss`) | ✅ ativos, `revisão pendente`: ver [CATALOGO_FONTES.md](CATALOGO_FONTES.md) |
+| Organização Mundial do Comércio (WTO) | PRICE/MACRO NEWS | RSS oficial | 🧪 cadastrada no tier 2; requer smoke test do coletor antes de habilitar o tier |
+| Eurostat — releases econômicos | OFFICIAL / MACRO | RSS Atom oficial por tema | 🧪 cadastrada no tier 2; requer smoke test do coletor antes de habilitar o tier |
+| Binance Spot Market Data | PRICE_REFERENCE | API pública de ticker 24h | ✅ ativa no endpoint de contexto do painel; sem chave |
+| Banco Central Europeu via Frankfurter | PRICE_REFERENCE | API pública de referência diária | ✅ ativa no endpoint de contexto do painel; sem chave |
 | Trânsito, câmeras públicas | — | — | ver [CAMERAS.md](CAMERAS.md) |
 
 ## Modelo de ficha
@@ -32,6 +36,61 @@ Frequência:
 Fallback se cair:
 Termos relevantes (link):
 Exibição pública permitida:
+```
+
+## Preços de referência no painel do CORVO
+
+**Binance Spot Market Data**
+```
+Fonte / URL: https://data-api.binance.vision/api/v3/ticker/24hr
+Tipo de acesso: API pública, endpoints de Market Data; sem chave nem conta
+Dados coletados: último preço e variação percentual móvel de 24 h para BTC, ETH, SOL, BNB e XRP contra USDT
+Frequência: consulta sob demanda ao endpoint do Worker; resposta cacheada por 5 min no KV
+Limites e custo: gratuito; respeitar os limites publicados da API Spot; lote único por chamada
+Termos: https://github.com/binance/binance-spot-api-docs/blob/master/faqs/market_data_only.md
+Retenção: não persistido pelo CORVO; resposta mantida temporariamente no cache
+Exibição pública: referência atribuída à Binance; não é preço de execução nem recomendação
+```
+
+**Frankfurter / taxas de referência do BCE**
+```
+Fonte / URL: https://api.frankfurter.dev/
+Tipo de acesso: API pública de taxas de referência históricas do BCE; sem chave
+Dados coletados: duas últimas taxas diárias disponíveis, USD contra EUR, BRL, JPY, GBP e CNY; variação entre dias úteis
+Frequência: consulta sob demanda ao endpoint do Worker; resposta cacheada por 5 min no KV
+Limites e custo: gratuita e sem chave; fonte declara uso da API do BCE e não promete taxa intradiária
+Termos/documentação: https://www.frankfurter.dev/
+Retenção: não persistido pelo CORVO; resposta mantida temporariamente no cache
+Exibição pública: taxas de referência atribuídas ao BCE via Frankfurter; não são cotações negociáveis
+```
+
+Essas duas séries cobrem **cripto e câmbio**, não representam índices acionários globais. Os valores são contexto observado no front-end; ainda não alimentam as previsões do Munin. A série de preço usada para resolver previsões históricas continua sendo coletada separadamente pelo Engine.
+
+## Fontes globais adicionadas ao tier 2
+
+**WTO — notícias institucionais**
+```
+Fonte / URL: https://www.wto.org/library/rss/latest_news_e.xml
+Tipo de acesso: RSS público publicado pela própria WTO
+Autenticação e secrets: nenhum
+Limites e custo: sem custo; limite numérico não publicado, respeitar a cadência conservadora do tier
+Dados: título, data, link e resumo curto para eventos de comércio e política comercial
+Frequência: tier 2; padrão do coletor (10 min) quando esse tier for ativado
+Termos: https://www.wto.org/english/res_e/webcas_e/rss_e.htm — a WTO autoriza disseminar as notícias com atribuição “WTO news”; não usar o logotipo nem sugerir outra origem
+Retenção/exibição: seguir protocolo do RSS; apenas metadados e crédito com link
+Nota de qualidade: fonte primária para atos/comunicados da WTO, não confirmação independente de fatos citados sobre países ou empresas
+```
+
+**Eurostat — releases de economia e finanças**
+```
+Fonte / URL: feed Atom oficial para releases de Economy and finance, gerado pelo serviço de busca/alertas do Eurostat
+Tipo de acesso: Atom público; sem conta ou chave
+URL: https://ec.europa.eu/eurostat/en/search?_estatsearchportlet_WAR_estatsearchportlet_collection=CAT_PREREL&_estatsearchportlet_WAR_estatsearchportlet_theme=PER_ECOFIN&p_p_id=estatsearchportlet_WAR_estatsearchportlet&p_p_lifecycle=2&p_p_mode=view&p_p_resource_id=atom&p_p_state=maximized
+Limites e custo: sem custo; não há limite numérico publicado; frequência conservadora do tier 2
+Dados: títulos, datas, links e resumos de releases estatísticos de economia e finanças da UE
+Termos/documentação: https://ec.europa.eu/eurostat/en/web/rss/ — RSS entrega manchetes na publicação; feeds por tema são gerados pelo mecanismo de alertas
+Retenção/exibição: metadados e link para o próprio Eurostat
+Status: cadastrado, mas smoke test com o parser real ainda pendente; ficará fora do tier padrão até validação operacional
 ```
 
 ## Agência Senado — ATIVA
