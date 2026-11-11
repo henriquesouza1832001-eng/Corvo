@@ -31,6 +31,24 @@ O MNEME já contém `noticias.py` (RSS, parsing, classificação inicial e atrib
 4. **Escopo atual estreito:** o coletor de notícias do MNEME tem dez feeds definidos; o protocolo/fontes do CORVO contém mais fontes e metadados. Incorporar fonte exige idempotência, termos/licença, categoria, frescor, limites e avaliação de falsos positivos/negativos; não basta copiar URLs.
 5. **Coleta e previsão já têm donos:** `inteligencia.py` coleta e armazena; `previsor.py` consome as notícias via `com_noticias()`. O CORVO não deve produzir direção/ordem nem fazer o caminho em tempo real esperar LLM/RAG. Ele pode produzir evidência curada e atributos assíncronos point-in-time para ML quantitativo validar.
 
+## Inventário inicial de fontes para o fluxo global
+
+Comparação documental dos registros em `robo/mneme/noticias.py` e `docs/sources/SOURCES.md`/`CATALOGO_FONTES.md` do CORVO. “Disponível” significa status descrito no repositório, não revalidado nesta rodada.
+
+| Fonte/família | MNEME hoje | CORVO hoje | O que acrescenta ao MNEME | Decisão inicial |
+|---|---|---|---|---|
+| Fed, ECB, BEA | RSS de releases/comunicados | RSS Fed e feeds/candidatos do catálogo | Fato institucional sobre política e dados macro; publicações/revisões e hora de divulgação | Reusar um único conector por feed e preservar release vs opinião; não contar duas cópias como confirmação |
+| Bloomberg, FT, CNBC | RSS configurado | Catálogo RSS inclui imprensa, status/termos por fonte | Contexto e rapidez de cobertura; fonte secundária | Não duplicar feed sem ganho de cobertura/latência medido; separar notícia original de republicação |
+| CoinDesk, The Block, Decrypt, Cointelegraph | Quatro RSS cripto | Catálogo RSS tem fontes cripto adicionais/candidatas | Eventos de protocolo, exchanges, ETF e incidentes de cripto | Comparar itens únicos, sindicância e termos; manter tipo `reportagem` até confirmação |
+| Eurostat, WTO | Não aparecem no conjunto inicial de notícias | Candidatas tier 2; Eurostat precisa smoke test, WTO tem feed oficial | Dados/release estatístico europeu e avisos de comércio internacional | Bons candidatos globais após teste do parser, direito de uso e cadência; ficam desligados até aprovação |
+| GDELT | Não listado como coletor principal | API registrada, desligada por 429 persistente/resultado vazio | Descoberta ampla de cobertura jornalística global, sem substituir fonte primária | Não ativar no estado atual; só reavaliar com teste permitido e orçamento de chamadas |
+| USGS | Não listado | Feed sísmico significativo ativo; código atual limita coordenadas ao Brasil | Evento físico objetivo fora dos temas macro/cripto, com magnitude/local/hora | Para MNEME, primeiro rever escopo internacional e coordenadas antes de reutilizar; não é fonte de impacto financeiro por si só |
+| BCB PTAX, Frankfurter, Binance | MNEME tem macro e preços próprios; notícias não substituem séries | PTAX/Binance/Frankfurter aparecem como contexto do painel; CORVO também tem arquivos locais de resolução | Cross-check de preço/referência; calendários/séries oficiais são mais adequados para ML | Não tratar snapshot de 24 h ou câmbio diário como preço de resolução intradiária; manter preço no pipeline de market data |
+| Reddit, X, Mastodon, Bluesky, Google Trends | X existe atrás de credencial e teto de gasto | Reddit/X desativados; Mastodon desligado por baixa atividade; Bluesky sem conta validada; Trends com termos pendentes | Atenção social e detecção precoce, com risco alto de spam, concentração e manipulação | Não incluir no primeiro lote. Cada rede exige autorização/termos, custo, remoções, dedup de repost e atributo de concentração |
+| Senado, Câmara, INMET, INPE, Defesa Civil, InfoDengue, ONS | Não aparecem no coletor de notícias global | Fontes nacionais oficiais/objetivas, várias ativas no CORVO | Contexto brasileiro de políticas, clima, fogo, saúde e infraestrutura | Só entram no MNEME quando evento/região tiver vínculo explícito com mercado/ativo; evitar inundar o modelo global com sinais sem relação demonstrada |
+
+O inventário mostra dois grupos distintos: fontes que complementam o contexto financeiro internacional e fontes de inteligência situacional brasileira. “Mais fontes” não significa “mais independência”: antes de medir confirmação, normalizar domínio/autor, identificar sindicação e comparar horário de primeira publicação com `recebido_em`.
+
 ## Saída aditiva proposta para o CORVO
 
 Uma evidência por artigo e um registro separado por evento, ligados sem confundir as duas identidades:
