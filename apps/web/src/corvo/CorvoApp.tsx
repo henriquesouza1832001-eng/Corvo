@@ -25,15 +25,6 @@ const PRESSURES: { id: Pressure; label: string; hint: string }[] = [
 ];
 const VERDICT_LABEL: Record<Verdict, string> = { hot: "GRAVA", buffer: "FILA", drop: "DESCARTA" };
 
-/** Do dado à previsão: o que já funciona e o que ainda está sendo construído (honesto; ver docs/corvo/PREDITIVO.md). */
-const STAGES: { who: "HUGIN" | "MUNIN"; name: string; text: string; state: "pronto" | "em construção" | "planejado" }[] = [
-	{ who: "HUGIN", name: "Lê e filtra", text: "Coleta feeds do mundo, descarta o que não mexe em mercado e classifica o resto.", state: "pronto" },
-	{ who: "HUGIN", name: "Junta em eventos", text: "O mesmo fato em várias fontes vira um evento só, com o número de confirmações.", state: "planejado" },
-	{ who: "MUNIN", name: "Levanta hipóteses", text: "Liga o tema a ativos candidatos, com direção e horizonte, numa tabela auditável.", state: "em construção" },
-	{ who: "MUNIN", name: "Prevê com a taxa-base", text: "Começa pela frequência histórica de cada tipo de evento e diz “dados insuficientes” sem amostra.", state: "em construção" },
-	{ who: "MUNIN", name: "Confere e calibra", text: "Compara com o preço real, mede o erro contra a taxa-base e só então ganha confiança.", state: "em construção" },
-];
-
 function HourlyBars({ data }: { data: { bucket: string; received: number; hot: number; buffer: number; dropped: number }[] }) {
 	const max = Math.max(1, ...data.map((d) => d.received));
 	return (
@@ -95,9 +86,6 @@ export function CorvoApp() {
 			(q === "" || `${r.n.title} ${r.n.source} ${r.n.region ?? ""}`.toLowerCase().includes(q)),
 	);
 	const presentTopics = Array.from(new Set(rows.filter((r) => r.verdict !== "drop").flatMap((r) => r.n.topics)));
-	const ticker = rows.filter((r) => r.verdict === "hot").slice(0, 20);
-	// velocidade constante (~45 px/s): a duração cresce com o tamanho do texto, em vez de correr mais rápido quando há mais manchetes
-	const tickerSecs = Math.max(90, Math.round(ticker.reduce((n, r) => n + r.n.title.length + 24, 0) * 0.17));
 	const usedPct = Math.min(100, (budget.used / budget.limit) * 100);
 	const sources = live ? live.sources : DEMO_SOURCES;
 	const sourceList = Object.entries(sources).sort((x, y) => y[1] - x[1]);
@@ -108,7 +96,7 @@ export function CorvoApp() {
 		<div className="console">
 			<header className="bar">
 				<div className="logo">
-					<span className="logo-mark" aria-hidden="true">▌</span>CORVO<span className="dim"> // HUGIN LÊ · MUNIN LEMBRA</span>
+					<span className="logo-mark" aria-hidden="true">▌</span>CORVO<span className="dim"> // RADAR GLOBAL</span>
 				</div>
 				<div className="status">
 					<Clock />
@@ -119,77 +107,24 @@ export function CorvoApp() {
 				</div>
 			</header>
 
-			{ticker.length > 0 && (
-				<div className="ticker" aria-label="Últimas notícias gravadas">
-					<div className="ticker-track" style={{ animationDuration: `${tickerSecs}s` }}>
-						{[...ticker, ...ticker].map(({ n }, i) => (
-							<span key={`${n.id}-${i}`} aria-hidden={i >= ticker.length}>
-								<b style={{ color: TOPIC_COLOR[n.topics[0]] ?? "var(--g)" }}>[{(n.topics[0] ? TOPIC_LABEL[n.topics[0]] : "geral").toUpperCase()}]</b> {n.title}
-							</span>
-						))}
-					</div>
-				</div>
-			)}
-
-			<section className="ravens" aria-labelledby="t-ravens">
-				<h2 id="t-ravens" className="vh">Como o Corvo funciona</h2>
-				<article className="raven-card">
-					<h3>HUGIN <small>pensamento · lê o mundo</small></h3>
-					<p>
-						Na mitologia nórdica, Hugin e Munin são os dois corvos de Odin: saem todo dia para sobrevoar os nove reinos e voltam ao amanhecer para contar o que viram.
-						Hugin é o pensamento. Aqui ele lê as fontes, tira o ruído e entende o que cada notícia significa.
-					</p>
-					<ol className="flow">
-						<li><b>Lê</b> {sourceList.length} fontes: agências, bancos centrais e imprensa de todos os continentes.</li>
-						<li><b>Filtra</b> o que já viu, o que é velho, repetido ou fora do assunto. Sobra {total > 0 ? pct(1 - counts.c.drop / total) : "pouco"} do que chegou.</li>
-						<li><b>Classifica</b> fato, reportagem, rumor ou opinião. Na dúvida, é só reportagem.</li>
-						<li><b>Localiza</b> no mapa e liga o fato aos ativos que ele pode mexer.</li>
-					</ol>
-				</article>
-				<article className="raven-card">
-					<h3>MUNIN <small>memória · lembra e aprende</small></h3>
-					<p>
-						Munin é a memória. Ele guarda o que importa, registra cada previsão antes do resultado e depois compara com o que aconteceu, para saber em quais tipos de previsão o Corvo acerta e em quais não.
-					</p>
-					<ol className="flow">
-						<li><b>Guarda</b> só as notícias aprovadas. Descartada vira apenas um contador e um código curto da URL, por 48 horas.</li>
-						<li><b>Registra</b> cada previsão com probabilidade, incerteza, evidências e método.</li>
-						<li><b>Confere</b> o resultado e calcula o acerto (hoje: {forecasts.filter((f) => f.status === "calibrando").length} em calibração, sem histórico suficiente).</li>
-						<li><b>Esquece</b> com prazo: notícias com 30 dias e estatísticas com 14 dias são apagadas.</li>
-					</ol>
-				</article>
+			<section className="summary" aria-label="Resumo da coleta">
+				<Metric label={live ? "ITENS · 24H" : "ITENS DEMO"} value={live ? live.totals.received.toLocaleString("pt-BR") : total.toLocaleString("pt-BR")} />
+				<Metric label="FONTES COM DADOS" value={sourceList.length.toLocaleString("pt-BR")} />
+				<Metric label="ACEITOS" value={(counts.c.hot + counts.c.buffer).toLocaleString("pt-BR")} />
+				<Metric label="DESCARTADOS" value={counts.c.drop.toLocaleString("pt-BR")} />
+				<Metric label="PREVISÕES REAIS" value={forecasts.length.toLocaleString("pt-BR")} />
 			</section>
 
-			<section className="path" aria-labelledby="t-path">
-				<h2 id="t-path">DO DADO À PREVISÃO <small>como Hugin e Munin viram o preditivo, etapa por etapa</small></h2>
-				<ol className="stages">
-					{STAGES.map((s, i) => (
-						<li key={s.name} className={`stage ${s.who === "HUGIN" ? "h" : "m"}`}>
-							<span className="st-n">{i + 1}</span>
-							<b>{s.name}</b>
-							<small className="st-who">{s.who}</small>
-							<p>{s.text}</p>
-							<span className={`st-state s-${s.state.replace(" ", "-")}`}>{s.state}</span>
-						</li>
-					))}
-				</ol>
-			</section>
+			<details className="about">
+				<summary>ESCOPO E REGRAS DO MOTOR</summary>
+				<p>Hugin coleta e filtra notícias. Munin testa hipóteses contra preços históricos; só publica previsão com amostra, intervalo, evidências e método suficientes.</p>
+				<p>Ativos disponíveis nesta tela: cripto e câmbio de referência. Índices acionários e previsão de impacto por notícia ainda não estão ligados ao painel.</p>
+			</details>
 
 			<div className="grid">
 				<MarketsBoard data={marketSnapshot} />
-				<section className="box map-box" aria-labelledby="t-map">
-					<h2 id="t-map">MAPA-MÚNDI <small>{located} notícias localizadas · losangos = pontos de observação (coleta em preparação)</small></h2>
-					<WorldMap items={rows.map((r) => ({ n: r.n, verdict: r.verdict }))} selected={selected} onSelect={setSelected} />
-					<ul className="key" aria-label="Legenda de temas">
-						{(presentTopics.length ? presentTopics : (Object.keys(TOPIC_LABEL) as (keyof typeof TOPIC_LABEL)[])).map((t) => (
-							<li key={t}><i style={{ background: TOPIC_COLOR[t] }} /> {TOPIC_LABEL[t]}</li>
-						))}
-					</ul>
-				</section>
-
 				<section className="box gate-box" aria-labelledby="t-gate">
-					<h2 id="t-gate">PORTÃO DE ADMISSÃO</h2>
-					<p className="muted">O robô avalia cada notícia ANTES de gravar qualquer coisa: frescor, URL repetida, quase-duplicata, relevância, cota da fonte e pressão do banco.</p>
+					<h2 id="t-gate">COLETA <small>{total.toLocaleString("pt-BR")} itens</small></h2>
 					<div className="meter" role="img" aria-label={`${budget.used} de ${budget.limit} linhas gravadas hoje`}>
 						<div style={{ width: `${usedPct}%` }} className={`fill p-${pressure}`} />
 					</div>
@@ -211,17 +146,20 @@ export function CorvoApp() {
 						<li><i className="dot hot" /> grava {counts.c.hot}</li>
 						<li><i className="dot buffer" /> fila {counts.c.buffer}</li>
 						<li><i className="dot drop" /> descarta {counts.c.drop}</li>
-						</ul>
-						{live && live.hourly.length > 1 && (
-							<>
-								<h2 className="sub">ATIVIDADE POR HORA <small>lidas · fila · grava</small></h2>
-								<HourlyBars data={live.hourly} />
-							</>
-						)}
+					</ul>
+					{live && live.hourly.length > 1 && (
+						<details className="hourly-details">
+							<summary>VOLUME POR HORA</summary>
+							<HourlyBars data={live.hourly} />
+						</details>
+					)}
 					{Object.keys(counts.reasons).length > 0 && (
-						<ul className="log" aria-label="Motivos dos descartes">
-							{Object.entries(counts.reasons).map(([r, n]) => <li key={r}><span>{n}×</span> {REASON_LABEL[r] ?? r}</li>)}
-						</ul>
+						<details className="drop-reasons">
+							<summary>MOTIVOS DO DESCARTE</summary>
+							<ul className="log" aria-label="Motivos dos descartes">
+								{Object.entries(counts.reasons).map(([r, n]) => <li key={r}><span>{n}×</span> {REASON_LABEL[r] ?? r}</li>)}
+							</ul>
+						</details>
 					)}
 				</section>
 
@@ -243,7 +181,7 @@ export function CorvoApp() {
 								{presentTopics.map((t) => <option key={t} value={t}>{TOPIC_LABEL[t]}</option>)}
 							</select>
 						</div>
-						<p className="muted sm">{shown.length} de {rows.length} · títulos no idioma original da fonte · clique numa notícia para ver o motivo e os ativos</p>
+						<p className="muted sm">{shown.length}/{rows.length} itens · selecione um para ver origem e sinais</p>
 						{shown.length === 0 && <p className="muted">Nada por aqui com esse filtro.</p>}
 					<ul className="feed">
 						{shown.map(({ n, verdict, reason }) => (
@@ -255,7 +193,7 @@ export function CorvoApp() {
 				<section className="box src-box" aria-labelledby="t-src">
 					<h2 id="t-src">FONTES ATIVAS <small>{sourceList.length} fontes · {read24h.toLocaleString("pt-BR")} notícias lidas em 24 h</small></h2>
 					<ul className="sources">
-						{sourceList.slice(0, 12).map(([id, n]) => (
+						{sourceList.slice(0, 16).map(([id, n]) => (
 							<li key={id}><span className="sname">{id}</span><span className="sbar"><i style={{ width: `${(n / (sourceList[0]?.[1] || 1)) * 100}%` }} /></span><span className="mono">{n.toLocaleString("pt-BR")}</span></li>
 						))}
 					</ul>
@@ -263,20 +201,31 @@ export function CorvoApp() {
 				</section>
 
 				<section className="box fc-box" aria-labelledby="t-fc">
-					<h2 id="t-fc">PREVISÕES <small>probabilidade · incerteza · evidências · método</small></h2>
-					{forecasts.length === 0 && <p className="muted">Nenhuma previsão real publicada. O painel mostra variações observadas acima; o Munin só publicará probabilidade após conectar as séries históricas, validar a amostra e registrar o método.</p>}
+					<h2 id="t-fc">MUNIN · PREVISÕES <small>{forecasts.length ? `${forecasts.length} abertas` : "aguardando amostra"}</small></h2>
+					{forecasts.length === 0 && <p className="muted">Sem previsões publicadas · mínimo: 30 resultados históricos por hipótese.</p>}
 					{forecasts.map((f) => <Forecast key={f.id} f={f} />)}
-					<h2 className="sub">PONTOS DE OBSERVAÇÃO</h2>
-					<p className="muted">Lugares onde decisões acontecem. A coleta de cada um ainda está em preparação.</p>
-					<ul className="anchors">{ANCHORS.map((a) => <li key={a.id}>◇ {a.label}</li>)}</ul>
+					<details className="anchors-details">
+						<summary>PONTOS DE OBSERVAÇÃO</summary>
+						<ul className="anchors">{ANCHORS.map((a) => <li key={a.id}>◇ {a.label}</li>)}</ul>
+					</details>
+				</section>
+
+				<section className="box map-box" aria-labelledby="t-map">
+					<h2 id="t-map">MAPA <small>{located} localizadas</small></h2>
+					<WorldMap items={rows.map((r) => ({ n: r.n, verdict: r.verdict }))} selected={selected} onSelect={setSelected} />
+					<ul className="key" aria-label="Temas presentes">
+						{presentTopics.map((t) => <li key={t}><i style={{ background: TOPIC_COLOR[t] }} /> {TOPIC_LABEL[t]}</li>)}
+					</ul>
 				</section>
 			</div>
 
-			<footer>
-				O CORVO só coleta, analisa e prevê. Não envia ordens e não é recomendação de investimento. Toda previsão mostra probabilidade, incerteza, evidências e método, e fica marcada como “calibrando” enquanto não tiver histórico de acertos.
-			</footer>
+			<footer>Referências de mercado não são previsões. O Munin exige amostra histórica e calibração.</footer>
 		</div>
 	);
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+	return <article className="metric"><small>{label}</small><b>{value}</b></article>;
 }
 
 function NewsRow({ n, verdict, reason, selected, onSelect }: { n: NewsItem; verdict: Verdict; reason: string; selected: boolean; onSelect: () => void }) {
