@@ -84,7 +84,7 @@ O snapshot inicial é imutável. A resolução vem em registro separado, ligado 
 
 Não enviar previsão sem série compatível, evidência e pelo menos 30 eventos resolvidos anteriores na chave `(topic, asset, direction, horizon)`. Resultados e métricas continuam agrupados por chave; eventos correlacionados e janelas sobrepostas não viram amostras independentes. O transporte/persistência precisa separar modo local, shadow e publicação experimental, sem ligar nenhum modo automaticamente.
 
-### 4.4 Quanto tempo leva ter amostra
+### 4.5 Quanto tempo leva ter amostra
 Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos por dia. Para **30 casos independentes por (tema, ativo, direção, horizonte)** são **semanas**, não horas. Por isso a primeira versão mira **poucos pares** (3 temas × 3 ativos × 2 direções × 2 horizontes) e deixa o resto em "dados insuficientes".
 
 ## 5. Como evitar enganar a si mesmo
@@ -104,10 +104,10 @@ Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos
 | Nível | Nome | Critério | Estado |
 |---|---|---|---|
 | **P0** | Lê e filtra | portão calibrado, só o que mexe em mercado | ✅ |
-| **P1** | Eventos | mesmo fato agrupado, com fontes independentes e confirmação | ⬜ |
-| **P2** | Hipóteses testáveis | tabela tema → ativos, perguntas fechadas, regras de resolução | 🟡 |
-| **P3** | Previsão pela taxa-base | probabilidade com intervalo, abstenção sem dados, registro validado | 🟡 (módulo pronto; falta dado) |
-| **P4** | Conferida com preço real | resolução automática, Brier e skill contra a taxa-base | ⬜ precisa da fonte de preço |
+| **P1** | Eventos | mesmo fato agrupado, com fontes independentes e confirmação | 🟡 (`events.py` existe; qualidade de fusão ainda sem amostra lacrada recente) |
+| **P2** | Hipóteses testáveis | tabela tema → ativos, perguntas fechadas, regras de resolução | 🟡 (tabela e regras existem; ativos/direções ainda sem validação empírica) |
+| **P3** | Previsão pela taxa-base | probabilidade com intervalo, abstenção sem dados, registro validado | 🟡 (mecânica existe; histórico real por chave insuficiente) |
+| **P4** | Conferida com preço real | resolução automática, Brier e skill contra a taxa-base | 🟡 (resolução v2 existe para séries locais; não há previsões reais resolvidas nem score de skill) |
 | **P5** | Calibrada e confiável | ≥ 100 resolvidas, ECE ≤ 0,05, só então publica como confiável e ajusta pesos | ⬜ precisa de tempo |
 
 > **Regra de subida:** um nível só conta com evidência numérica no conjunto lacrado e com o freio de banco verde.
@@ -116,8 +116,8 @@ Com ~50 notícias aprovadas por dia e ~10 temas, cada tema recebe poucos eventos
 Não envia ordens, não recomenda investimento, não publica previsão sem método e não apresenta previsão como fato. A saída é sempre **probabilidade com incerteza**, e a confiança vem do **histórico de acertos**, não da narrativa.
 
 ## 8. Próximos passos concretos
-1. **P1:** agrupar notícias em eventos (`munin/events.py`), com identificador estável e contagem de fontes independentes; medir fusões erradas.
-2. **P2:** revisar a tabela de hipóteses (`munin/impact.py`) com dados reais do corpus e escrever as regras de resolução.
-3. **P4:** registrar uma fonte de preços em `docs/sources/SOURCES.md`, buscar o histórico local e rodar a resolução sobre os eventos já gravados.
-4. **P3:** alimentar o modelo de taxa-base com os eventos resolvidos e publicar as primeiras previsões **como experimentais**.
-5. Medir tudo na bancada (`engine/benchmarks/corvo_munin_eval.py`) e registrar no [diário de treino](TREINO_LOG.md).
+1. **Sem Python (agora):** manter fechado o mapa de fontes/licenças e o contrato do snapshot/resolução; não ligar coleta nem publicar forecast de mercado.
+2. **Com Python:** validar as regressões pendentes da regra de preço v2 e refazer as resoluções locais, pois a âncora inicial mudou.
+3. **Com corpus e preços locais:** medir agrupamento, atrasos de chegada, disponibilidade por instrumento e resultados independentes por chave; não avaliar pelos títulos do conjunto lacrado usados no ajuste.
+4. **Só depois de séries compatíveis:** rodar o backtest walk-forward, comparar taxa-base e modelo em corte temporal; publicar apenas como experimental depois de persistir snapshot e resultado sem sobrescrever previsão.
+5. **Antes de integração com painel/Worker:** implementar o contrato de mercado separado e validar resolução, idempotência, retenção e orçamento; não reutilizar silenciosamente o contrato do nowcast.
