@@ -1,5 +1,6 @@
 """Synthetic fixtures for deterministic Munin event grouping."""
 from corvo_engine.munin.events import build_events, title_similarity
+from corvo_engine.munin.mneme_export import exportar_para_mneme
 
 
 def article(source, title, url, published, topics=("conflito_chave",)):
@@ -100,3 +101,73 @@ def test_invalid_time_and_empty_titles_are_not_grouped():
     events = build_events([invalid, missing, empty])
     assert len(events) == 1
     assert events[0].source_ids == ("b",)
+
+
+def test_export_mneme_preserva_pit_e_nao_confunde_publicacao_oficial_com_fato():
+    momento = "2026-11-01T12:00:00Z"
+    titulo = "Central bank raises rates after inflation report"
+    decisoes = [
+        {"source_id": "central-bank", "source_is_official": True, "source_reliability": 0.9, "url": "https://bank.test/rate",
+         "title": titulo, "published_at": momento, "cycle_at": "2026-11-01T12:05:00Z", "kind": "fato", "verdict": "hot",
+         "reason": "relevant", "relevance": 0.98, "topics": ["banco_central"]},
+        {"source_id": "market-desk", "source_is_official": False, "source_reliability": 0.7, "url": "https://desk.test/rate",
+         "title": titulo, "published_at": "2026-11-01T12:01:00Z", "cycle_at": "2026-11-01T12:10:00Z", "kind": "reportagem", "verdict": "buffer",
+         "reason": "batch_later", "relevance": 0.72, "topics": ["banco_central"]},
+        {"source_id": "market-desk", "url": "https://desk.test/noise", "title": "Sports result", "published_at": momento,
+         "cycle_at": "2026-11-01T12:10:00Z", "verdict": "drop", "reason": "irrelevant", "topics": []},
+    ]
+
+    export = exportar_para_mneme(decisoes)
+
+    assert export["preview_version"] == "corvo-mneme-preview-v0"
+    assert len(export["articles"]) == 2
+    official = export["articles"][0]
+    assert official["tipo_evidencia"] == "publicacao_institucional"
+    assert official["estado_alegacao"] == "nao_confirmada_independentemente"
+    assert official["confiabilidade_fonte_inicial"] == 0.9
+    assert official["recebido_em"] == "2026-11-01T12:05:00Z"
+    assert official["suspeito"] is None and official["verificacao_injecao"] == "pendente_no_destino"
+    assert official["texto_externo_nao_confiavel"] is True
+    assert len(export["events"]) == 1
+    event = export["events"][0]
+    assert event["available_at"] == "2026-11-01T12:10:00Z"
+    assert event["source_independence"] == "unverified"
+    assert event["state"] == "candidate"
+
+
+def test_export_mneme_nao_inventa_hora_de_chegada_ausente():
+    export = exportar_para_mneme([{
+        "source_id": "market-desk", "source_is_official": False, "url": "https://desk.test/item",
+        "title": "Exchange halts trading after outage", "published_at": "2026-11-01T12:00:00Z",
+        "verdict": "hot", "reason": "relevant", "relevance": 0.95, "topics": ["mercado"],
+    }])
+
+    assert len(export["articles"]) == 1
+    assert export["articles"][0]["recebido_em"] is None
+    assert len(export["events"]) == 1
+    assert export["events"][0]["available_at"] is None
+    assert export["events"][0]["observation_time_basis"] == "missing_cycle_at"
+
+
+def test_export_mneme_nao_assume_fuso_para_timestamp_sem_timezone():
+    export = exportar_para_mneme([{
+        "source_id": "market-desk", "url": "https://desk.test/item", "title": "Exchange halts trading after outage",
+        "published_at": "2026-11-01T12:00:00", "cycle_at": "2026-11-01T12:02:00", "verdict": "hot",
+        "reason": "relevant", "relevance": 0.95, "topics": ["mercado"],
+    }])
+
+    assert export["articles"][0]["publicado_em"] is None
+    assert export["articles"][0]["recebido_em"] is None
+    assert export["events"] == []
+
+
+def test_export_mneme_deduplica_url_canonica():
+    base = {"source_id": "market-desk", "url": "https://desk.test/item", "title": "Exchange halts trading after outage",
+            "published_at": "2026-11-01T12:00:00Z", "cycle_at": "2026-11-01T12:02:00Z", "verdict": "hot",
+            "reason": "relevant", "relevance": 0.95, "topics": "mercado"}
+    duplicada = {**base, "url": "https://desk.test/item?utm_campaign=copy"}
+
+    export = exportar_para_mneme([base, duplicada])
+
+    assert len(export["articles"]) == 1
+    assert len(export["events"]) == 1

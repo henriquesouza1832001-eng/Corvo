@@ -1,6 +1,6 @@
 # Integração do CORVO ao MNEME: contrato de dados
 
-**Estado:** análise estática dos repositórios em 11/11/2026. Esta proposta não implementa transporte, não grava no MNEME e não habilita coletores.
+**Estado:** análise estática em 11/11/2026; protótipo local em memória testado em 12/11/2026. Não implementa transporte, não grava no MNEME e não habilita coletores.
 
 ## Decisão de arquitetura
 
@@ -67,14 +67,22 @@ evento: event_id, artigo_ids[], first_received_at, available_at,
 
 Depois de um evento, o módulo de estudo pode propor hipóteses (tema, ativo, alvo, horizonte e regra de preço), sem emitir sinal operacional. A resolução usa somente séries compatíveis e dados disponíveis no instante; saída registrada como snapshot imutável mais resolução separada. O modelo do MNEME decide se atributos agregados têm valor em walk-forward, com comparação contra baseline e custo. RAG ajuda a formular/explicar hipóteses; não é rótulo de treino nem fonte de verdade para retorno.
 
-## Etapas sem Python
+## Protótipo local no CORVO
+
+`engine/corvo_engine/munin/mneme_export.py` traduz apenas decisões `HOT`/`BUFFER` para um preview em memória, versão `corvo-mneme-preview-v0`; isso não é um contrato de produção aprovado. O registro de artigo preserva `publicado_em` e `recebido_em` (`cycle_at`) separadamente; `ocorrido_em` fica nulo porque o CORVO não conhece necessariamente a hora do fato. O hash atual cobre o título normalizado, não o corpo integral do artigo. A confiabilidade continua identificada como uma estimativa inicial da fonte.
+
+O agrupador produz eventos candidatos com `available_at` igual à chegada mais tardia dos artigos que compõem o grupo. Fonte oficial vira `publicacao_institucional`, nunca confirmação automática da alegação. `source_independence` permanece `unverified`; o agrupador reconhece cobertura por IDs de fonte, mas ainda não detecta republicação. Conteúdo permanece marcado como externo e não confiável; a revisão de injeção no destino fica pendente.
+
+`engine/benchmarks/corvo_mneme_preview.py --dry-run` lê somente um corpus CORVO local existente, não consulta feeds, não lê rótulos de avaliação, não grava arquivos e imprime contagens agregadas. Na amostra atual (1.428 decisões), o protótipo formou 70 artigos aceitos e 61 eventos candidatos; não faltou `cycle_at` nos artigos aceitos. São contagens de integração, não métricas de acerto, independência ou previsão. O transporte e a retenção ampliada continuam desligados.
+
+## Etapas de integração
 
 1. Manter a coleta e publicação desligadas; não alterar Worker ou banco MNEME.
 2. Aprovar os significados de `publicado_em`, `recebido_em`, `ocorrido_em`, `available_at`, `event_id` e da independência de fonte.
 3. Fazer inventário comparativo de fontes MNEME/CORVO com termos, endpoint, cobertura, cadência, limite e campo único que cada uma entrega.
 4. Definir tabela de quarentena/rejeição e motivos auditáveis: duplicada, sem data confiável, irrelevante, suspeita/injeção, fonte não licenciada, conteúdo incompleto.
 5. Planejar migração aditiva de esquema e feature flags OFF por padrão; preservar atributos atuais e caminho rápido.
-6. Só com Python disponível: implementar adaptador integrado a `Inteligencia.ciclo()`, testes de idempotência/PIT/clusterização, simular coleta sem envio e validar corpus rotulado separado no tempo.
+6. Protótipo local do contrato CORVO testado com fixtures sintéticas e corpus existente. Próximo passo: implementar o adaptador integrado a `Inteligencia.ciclo()` com idempotência/PIT/clusterização, depois simular coleta sem envio; o protótipo atual não grava nem envia registros.
 7. Só após inspeção da saída e aprovação do dono, ligar armazenamento ampliado; manter qualquer influência preditiva em shadow até medir contra a baseline.
 
 ## Referências MNEME lidas

@@ -87,6 +87,9 @@ class OraclePublisher:
             place_d = locate(item.title, item.text)
             self.last_decisions.append({
                 "source_id": item.source_id, "url": item.url, "title": item.title, "published_at": _iso(item.published_at),
+                "cycle_at": _iso(now), "source_reliability": round(item.source_reliability, 3),
+                "source_is_official": item.source_id in official_sources,
+                "kind": classify_kind(item.title, item.source_id in official_sources),
                 "verdict": v.decision.value, "reason": v.reason, "relevance": v.relevance, "topics": list(v.topics),
                 "region": place_d[0] if place_d else None, "pressure": pressure.value,
             })
